@@ -1,0 +1,12 @@
+{
+  "cliVersion": "0.112.1",
+  "generatorName": "fernapi/fern-python-sdk",
+  "generatorVersion": "4.34.1",
+  "generatorConfig": {
+    "package_name": "newscatcher_catchall",
+    "client": {
+      "class_name": "CatchAllApi",
+      "filename": "client.py"
+    }
+  }
+}
