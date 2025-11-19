@@ -7,7 +7,12 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class Citation(UniversalBaseModel):
+class MonitorCitation(UniversalBaseModel):
+    """
+    Citation with monitor-specific metadata. Used in monitor results and webhook payloads.
+    Extends base citation with tracking information for job_id and timestamps.
+    """
+
     title: str = pydantic.Field()
     """
     Article title
@@ -21,6 +26,16 @@ class Citation(UniversalBaseModel):
     published_date: dt.datetime = pydantic.Field()
     """
     Article publication date in ISO 8601 format with UTC timezone.
+    """
+
+    job_id: str = pydantic.Field()
+    """
+    Job ID that found this citation.
+    """
+
+    added_on: dt.datetime = pydantic.Field()
+    """
+    The date when the citation was added to the record in ISO 8601 format with UTC timezone.
     """
 
     if IS_PYDANTIC_V2:

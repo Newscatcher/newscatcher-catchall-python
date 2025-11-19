@@ -50,17 +50,17 @@ class PullJobResponseDto(UniversalBaseModel):
     """
 
     date_range: typing.Optional[PullJobResponseDtoDateRange] = None
-    page: int = pydantic.Field()
+    page: typing.Optional[int] = pydantic.Field(default=None)
     """
     The current page number.
     """
 
-    total_pages: int = pydantic.Field()
+    total_pages: typing.Optional[int] = pydantic.Field(default=None)
     """
     The total number of pages available.
     """
 
-    page_size: int = pydantic.Field()
+    page_size: typing.Optional[int] = pydantic.Field(default=None)
     """
     The number of records per page.
     """

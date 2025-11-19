@@ -9,10 +9,14 @@ if typing.TYPE_CHECKING:
     from .disable_monitor_response import DisableMonitorResponse
     from .enable_monitor_response import EnableMonitorResponse
     from .list_monitor_jobs_request_sort import ListMonitorJobsRequestSort
+    from .list_monitor_jobs_response import ListMonitorJobsResponse
+    from .list_monitor_jobs_response_sort_order import ListMonitorJobsResponseSortOrder
 _dynamic_imports: typing.Dict[str, str] = {
     "DisableMonitorResponse": ".disable_monitor_response",
     "EnableMonitorResponse": ".enable_monitor_response",
     "ListMonitorJobsRequestSort": ".list_monitor_jobs_request_sort",
+    "ListMonitorJobsResponse": ".list_monitor_jobs_response",
+    "ListMonitorJobsResponseSortOrder": ".list_monitor_jobs_response_sort_order",
 }
 
 
@@ -37,4 +41,10 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["DisableMonitorResponse", "EnableMonitorResponse", "ListMonitorJobsRequestSort"]
+__all__ = [
+    "DisableMonitorResponse",
+    "EnableMonitorResponse",
+    "ListMonitorJobsRequestSort",
+    "ListMonitorJobsResponse",
+    "ListMonitorJobsResponseSortOrder",
+]

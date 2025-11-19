@@ -7,7 +7,20 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
 class EnableMonitorResponse(UniversalBaseModel):
-    status: typing.Optional[str] = None
+    success: bool = pydantic.Field()
+    """
+    Whether the operation succeeded.
+    """
+
+    message: str = pydantic.Field()
+    """
+    Human-readable success message.
+    """
+
+    monitor_id: str = pydantic.Field()
+    """
+    ID of the enabled monitor.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

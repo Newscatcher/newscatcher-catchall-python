@@ -8,28 +8,19 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
 class MonitorJobItem(UniversalBaseModel):
-    """
-    Information about a single job execution within a monitor.
-    """
-
-    job_id: typing.Optional[str] = pydantic.Field(default=None)
+    job_id: str = pydantic.Field()
     """
     Unique identifier for this job execution.
     """
 
-    start_date: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    start_date: dt.datetime = pydantic.Field()
     """
-    When the job started processing.
-    """
-
-    end_date: typing.Optional[dt.datetime] = pydantic.Field(default=None)
-    """
-    When the job completed (null if still running).
+    Start of the data collection time window for this job execution (based on monitor schedule) in ISO 8601 format with UTC timezone.
     """
 
-    status: typing.Optional[str] = pydantic.Field(default=None)
+    end_date: dt.datetime = pydantic.Field()
     """
-    Job status.
+    End of the data collection time window for this job execution (based on monitor schedule) in ISO 8601 format with UTC timezone.
     """
 
     if IS_PYDANTIC_V2:

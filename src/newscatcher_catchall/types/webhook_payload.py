@@ -5,34 +5,62 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .monitor_record import MonitorRecord
 
 
 class WebhookPayload(UniversalBaseModel):
     """
     Payload sent to webhook URL when a monitor job completes.
     Content-Type: application/json
+
+    Note: Citations in webhook payloads include an additional 'id' field
+    (string, internal identifier) not present in API GET responses.
     """
 
-    monitor_id: typing.Optional[str] = None
-    reference_job_id: typing.Optional[str] = None
+    monitor_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Monitor identifier.
+    """
+
+    reference_job_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Reference job used as template for this monitor.
+    """
+
     latest_job_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Job ID of the most recent execution
+    Job ID of the most recent execution.
     """
 
     records_count: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Number of records from latest job
+    Number of new records from latest job (after deduplication).
     """
 
     jobs_processed: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Total number of jobs run by this monitor
+    Total number of jobs executed by this monitor.
     """
 
-    updated_at: typing.Optional[dt.datetime] = None
-    cron_expression: typing.Optional[str] = None
-    timezone: typing.Optional[str] = None
+    updated_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
+    """
+    The date when the webhook was triggered in ISO 8601 format with UTC timezone.
+    """
+
+    cron_expression: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Cron expression defining the monitor schedule.
+    """
+
+    timezone: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Timezone for schedule execution.
+    """
+
+    records: typing.Optional[typing.List[MonitorRecord]] = pydantic.Field(default=None)
+    """
+    Array of new records from the latest job execution (includes monitor-specific fields like added_on, updated_on).
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

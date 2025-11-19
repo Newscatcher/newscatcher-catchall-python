@@ -7,7 +7,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class MonitorListItem(UniversalBaseModel):
+class MonitorListItemDto(UniversalBaseModel):
     monitor_id: str = pydantic.Field()
     """
     Monitor identifier.
@@ -30,7 +30,7 @@ class MonitorListItem(UniversalBaseModel):
 
     schedule: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Natural language schedule description.
+    Cron expression for monitor schedule.
     """
 
     timezone: typing.Optional[str] = pydantic.Field(default=None)
@@ -40,7 +40,7 @@ class MonitorListItem(UniversalBaseModel):
 
     created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
-    When the monitor was created.
+    The date when the monitor was created.
     """
 
     if IS_PYDANTIC_V2:

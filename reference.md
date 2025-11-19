@@ -252,8 +252,6 @@ client = CatchAllApi(
 )
 client.jobs.get_job_results(
     job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
-    page=1,
-    page_size=1,
 )
 
 ```
@@ -439,7 +437,6 @@ client = CatchAllApi(
 )
 client.monitors.list_monitor_jobs(
     monitor_id="monitor_id",
-    sort="asc",
 )
 
 ```

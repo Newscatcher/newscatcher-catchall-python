@@ -177,8 +177,6 @@ class JobsClient:
         )
         client.jobs.get_job_results(
             job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
-            page=1,
-            page_size=1,
         )
         """
         _response = self._raw_client.get_job_results(
@@ -376,8 +374,6 @@ class AsyncJobsClient:
         async def main() -> None:
             await client.jobs.get_job_results(
                 job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
-                page=1,
-                page_size=1,
             )
 
 
