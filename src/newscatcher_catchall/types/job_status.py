@@ -3,19 +3,5 @@
 import typing
 
 JobStatus = typing.Union[
-    typing.Literal[
-        "pending",
-        "analysis_started",
-        "analysis_keywords_extracted",
-        "analysis_enrichments_extracted",
-        "analysis_queries_extracted",
-        "retrieval_dispatched",
-        "data_fetched",
-        "clustering_dispatched",
-        "data_grouped",
-        "enrichment_dispatched",
-        "data_enriched",
-        "job_completed",
-    ],
-    typing.Any,
+    typing.Literal["submitted", "analyzing", "fetching", "clustering", "enriching", "completed", "failed"], typing.Any
 ]

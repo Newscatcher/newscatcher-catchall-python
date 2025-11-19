@@ -6,13 +6,13 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.create_monitor_response_dto import CreateMonitorResponseDto
 from ..types.list_monitors_response_dto import ListMonitorsResponseDto
-from ..types.monitor_job_item import MonitorJobItem
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.webhook_dto import WebhookDto
 from .raw_client import AsyncRawMonitorsClient, RawMonitorsClient
 from .types.disable_monitor_response import DisableMonitorResponse
 from .types.enable_monitor_response import EnableMonitorResponse
 from .types.list_monitor_jobs_request_sort import ListMonitorJobsRequestSort
+from .types.list_monitor_jobs_response import ListMonitorJobsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -94,7 +94,7 @@ class MonitorsClient:
         *,
         sort: typing.Optional[ListMonitorJobsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.List[MonitorJobItem]:
+    ) -> ListMonitorJobsResponse:
         """
         Returns all jobs associated with a monitor, sorted by start_date.
         Each job includes job_id, start_date, and end_date.
@@ -112,7 +112,7 @@ class MonitorsClient:
 
         Returns
         -------
-        typing.List[MonitorJobItem]
+        ListMonitorJobsResponse
             List of monitor jobs
 
         Examples
@@ -124,7 +124,6 @@ class MonitorsClient:
         )
         client.monitors.list_monitor_jobs(
             monitor_id="monitor_id",
-            sort="asc",
         )
         """
         _response = self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
@@ -343,7 +342,7 @@ class AsyncMonitorsClient:
         *,
         sort: typing.Optional[ListMonitorJobsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.List[MonitorJobItem]:
+    ) -> ListMonitorJobsResponse:
         """
         Returns all jobs associated with a monitor, sorted by start_date.
         Each job includes job_id, start_date, and end_date.
@@ -361,7 +360,7 @@ class AsyncMonitorsClient:
 
         Returns
         -------
-        typing.List[MonitorJobItem]
+        ListMonitorJobsResponse
             List of monitor jobs
 
         Examples
@@ -378,7 +377,6 @@ class AsyncMonitorsClient:
         async def main() -> None:
             await client.monitors.list_monitor_jobs(
                 monitor_id="monitor_id",
-                sort="asc",
             )
 
 

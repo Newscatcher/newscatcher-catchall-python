@@ -23,7 +23,7 @@ class WebhookDto(UniversalBaseModel):
     HTTP headers to include in request.
     """
 
-    params: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = pydantic.Field(default=None)
+    params: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
     Query string parameters.
     """

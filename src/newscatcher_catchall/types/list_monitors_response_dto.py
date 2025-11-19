@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .monitor_list_item import MonitorListItem
+from .monitor_list_item_dto import MonitorListItemDto
 
 
 class ListMonitorsResponseDto(UniversalBaseModel):
@@ -13,7 +13,7 @@ class ListMonitorsResponseDto(UniversalBaseModel):
     Total number of monitors for this user.
     """
 
-    monitors: typing.List[MonitorListItem] = pydantic.Field()
+    monitors: typing.List[MonitorListItemDto] = pydantic.Field()
     """
     Array of monitor summaries.
     """

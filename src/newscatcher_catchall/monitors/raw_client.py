@@ -16,13 +16,13 @@ from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.create_monitor_response_dto import CreateMonitorResponseDto
 from ..types.error import Error
 from ..types.list_monitors_response_dto import ListMonitorsResponseDto
-from ..types.monitor_job_item import MonitorJobItem
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
 from ..types.webhook_dto import WebhookDto
 from .types.disable_monitor_response import DisableMonitorResponse
 from .types.enable_monitor_response import EnableMonitorResponse
 from .types.list_monitor_jobs_request_sort import ListMonitorJobsRequestSort
+from .types.list_monitor_jobs_response import ListMonitorJobsResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -118,7 +118,7 @@ class RawMonitorsClient:
         *,
         sort: typing.Optional[ListMonitorJobsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[typing.List[MonitorJobItem]]:
+    ) -> HttpResponse[ListMonitorJobsResponse]:
         """
         Returns all jobs associated with a monitor, sorted by start_date.
         Each job includes job_id, start_date, and end_date.
@@ -136,7 +136,7 @@ class RawMonitorsClient:
 
         Returns
         -------
-        HttpResponse[typing.List[MonitorJobItem]]
+        HttpResponse[ListMonitorJobsResponse]
             List of monitor jobs
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -150,9 +150,9 @@ class RawMonitorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[MonitorJobItem],
+                    ListMonitorJobsResponse,
                     parse_obj_as(
-                        type_=typing.List[MonitorJobItem],  # type: ignore
+                        type_=ListMonitorJobsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -541,7 +541,7 @@ class AsyncRawMonitorsClient:
         *,
         sort: typing.Optional[ListMonitorJobsRequestSort] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[typing.List[MonitorJobItem]]:
+    ) -> AsyncHttpResponse[ListMonitorJobsResponse]:
         """
         Returns all jobs associated with a monitor, sorted by start_date.
         Each job includes job_id, start_date, and end_date.
@@ -559,7 +559,7 @@ class AsyncRawMonitorsClient:
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[MonitorJobItem]]
+        AsyncHttpResponse[ListMonitorJobsResponse]
             List of monitor jobs
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -573,9 +573,9 @@ class AsyncRawMonitorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[MonitorJobItem],
+                    ListMonitorJobsResponse,
                     parse_obj_as(
-                        type_=typing.List[MonitorJobItem],  # type: ignore
+                        type_=ListMonitorJobsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

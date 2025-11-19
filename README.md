@@ -33,19 +33,31 @@ job = client.jobs.create_job(
     context="Focus on revenue and profit margins",
     schema="Company [NAME] earned [REVENUE] in [QUARTER]",
 )
+print(f"Job created: {job.job_id}")
 
-# Poll for completion
+# Poll for completion with progress updates
 while True:
     status = client.jobs.get_job_status(job.job_id)
-    if status.status == "job_completed":
+
+    # Check if completed
+    completed = any(s.status == "completed" and s.completed for s in status.steps)
+    if completed:
+        print("Job completed!")
         break
+
+    # Show current processing step
+    current_step = next((s for s in status.steps if not s.completed), None)
+    if current_step:
+        print(f"Processing: {current_step.status} (step {current_step.order}/7)")
+
     time.sleep(60)
 
 # Retrieve results
 results = client.jobs.get_job_results(job.job_id)
+print(f"Found {results.valid_records} valid records from {results.candidate_records} candidates")
+
 for record in results.all_records:
     print(record.record_title)
-    print(record.enrichment)
 ```
 
 Jobs process asynchronously and typically complete in 10-15 minutes. To learn more, see the [Quickstart](https://www.newscatcherapi.com/docs/v3/catch-all/overview/quickstart).
@@ -69,12 +81,15 @@ monitor = client.monitors.create_monitor(
         "headers": {"Authorization": "Bearer YOUR_TOKEN"},
     },
 )
+print(f"Monitor created: {monitor.monitor_id}")
 
 # List all monitors
 monitors = client.monitors.list_monitors()
+print(f"Total monitors: {monitors.total_monitors}")
 
 # Get aggregated results
 results = client.monitors.pull_monitor_results(monitor.monitor_id)
+print(f"Collected {results.records} records")
 ```
 
 Monitors run jobs on your schedule and send webhook notifications when complete. See the [Monitors documentation](https://www.newscatcherapi.com/docs/v3/catch-all/overview/monitors) for setup and configuration.
@@ -84,11 +99,6 @@ Monitors run jobs on your schedule and send webhook notifications when complete.
 Use the async client for non-blocking API calls:
 
 ```python
-import asyncio
-from newscatcher_catchall import AsyncCatchAllApi
-
-client = AsyncCatchAllApi(api_key="YOUR_API_KEY")
-
 async def main() -> None:
     job = await client.jobs.create_job(
         query="Tech company earnings this quarter",
@@ -96,7 +106,20 @@ async def main() -> None:
     )
     print(f"Job created: {job.job_id}")
 
-asyncio.run(main())
+    # Wait for completion
+    while True:
+        status = await client.jobs.get_job_status(job.job_id)
+
+        completed = any(s.status == "completed" and s.completed for s in status.steps)
+        if completed:
+            print("Job completed!")
+            break
+
+        current_step = next((s for s in status.steps if not s.completed), None)
+        if current_step:
+            print(f"Processing: {current_step.status} (step {current_step.order}/7)")
+
+        await asyncio.sleep(60)
 ```
 
 ## Exception handling
@@ -120,11 +143,26 @@ except ApiError as e:
 Retrieve large result sets with pagination:
 
 ```python
-results = client.jobs.get_job_results(
-    job_id="...",
-    page=1,
-    page_size=100,  # Default: 100, Max: 1000
-)
+# Retrieve large result sets with pagination
+page = 1
+while True:
+    results = client.jobs.get_job_results(
+        job_id="...",
+        page=page,
+        page_size=100,
+    )
+    
+    print(f"Page {results.page}/{results.total_pages}: {len(results.all_records)} records")
+    
+    for record in results.all_records:
+        # Process each record
+        print(f"  - {record.record_title}")
+    
+    if results.page >= results.total_pages:
+        break
+    page += 1
+
+print(f"Processed {results.valid_records} total records")
 ```
 
 ### Access raw response data

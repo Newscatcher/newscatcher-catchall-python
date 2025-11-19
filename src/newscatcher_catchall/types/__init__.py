@@ -11,17 +11,20 @@ if typing.TYPE_CHECKING:
     from .create_monitor_response_dto import CreateMonitorResponseDto
     from .error import Error
     from .job_status import JobStatus
+    from .job_step import JobStep
     from .list_monitors_response_dto import ListMonitorsResponseDto
     from .list_user_jobs_response_dto import ListUserJobsResponseDto
+    from .monitor_citation import MonitorCitation
     from .monitor_job_item import MonitorJobItem
-    from .monitor_list_item import MonitorListItem
+    from .monitor_list_item_dto import MonitorListItemDto
+    from .monitor_record import MonitorRecord
     from .pull_job_response_dto import PullJobResponseDto
     from .pull_job_response_dto_date_range import PullJobResponseDtoDateRange
     from .pull_monitor_response_dto import PullMonitorResponseDto
-    from .pull_monitor_response_dto_date_range import PullMonitorResponseDtoDateRange
-    from .pull_monitor_response_dto_reference_job import PullMonitorResponseDtoReferenceJob
+    from .pull_monitor_response_dto_run_info import PullMonitorResponseDtoRunInfo
     from .query import Query
     from .record import Record
+    from .reference_job import ReferenceJob
     from .schema import Schema
     from .status_response_dto import StatusResponseDto
     from .submit_response_body import SubmitResponseBody
@@ -37,17 +40,20 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateMonitorResponseDto": ".create_monitor_response_dto",
     "Error": ".error",
     "JobStatus": ".job_status",
+    "JobStep": ".job_step",
     "ListMonitorsResponseDto": ".list_monitors_response_dto",
     "ListUserJobsResponseDto": ".list_user_jobs_response_dto",
+    "MonitorCitation": ".monitor_citation",
     "MonitorJobItem": ".monitor_job_item",
-    "MonitorListItem": ".monitor_list_item",
+    "MonitorListItemDto": ".monitor_list_item_dto",
+    "MonitorRecord": ".monitor_record",
     "PullJobResponseDto": ".pull_job_response_dto",
     "PullJobResponseDtoDateRange": ".pull_job_response_dto_date_range",
     "PullMonitorResponseDto": ".pull_monitor_response_dto",
-    "PullMonitorResponseDtoDateRange": ".pull_monitor_response_dto_date_range",
-    "PullMonitorResponseDtoReferenceJob": ".pull_monitor_response_dto_reference_job",
+    "PullMonitorResponseDtoRunInfo": ".pull_monitor_response_dto_run_info",
     "Query": ".query",
     "Record": ".record",
+    "ReferenceJob": ".reference_job",
     "Schema": ".schema",
     "StatusResponseDto": ".status_response_dto",
     "SubmitResponseBody": ".submit_response_body",
@@ -87,17 +93,20 @@ __all__ = [
     "CreateMonitorResponseDto",
     "Error",
     "JobStatus",
+    "JobStep",
     "ListMonitorsResponseDto",
     "ListUserJobsResponseDto",
+    "MonitorCitation",
     "MonitorJobItem",
-    "MonitorListItem",
+    "MonitorListItemDto",
+    "MonitorRecord",
     "PullJobResponseDto",
     "PullJobResponseDtoDateRange",
     "PullMonitorResponseDto",
-    "PullMonitorResponseDtoDateRange",
-    "PullMonitorResponseDtoReferenceJob",
+    "PullMonitorResponseDtoRunInfo",
     "Query",
     "Record",
+    "ReferenceJob",
     "Schema",
     "StatusResponseDto",
     "SubmitResponseBody",

@@ -6,11 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class PullMonitorResponseDtoReferenceJob(UniversalBaseModel):
-    """
-    Configuration from the job used as template for this monitor.
-    """
-
+class ReferenceJob(UniversalBaseModel):
     query: typing.Optional[str] = pydantic.Field(default=None)
     """
     Natural language query from the reference job.
