@@ -33,9 +33,8 @@ client = CatchAllApi(
     api_key="YOUR_API_KEY",
 )
 client.jobs.create_job(
-    query="Tech company earnings this quarter",
-    schema="Company [NAME] earned [REVENUE] in [QUARTER]",
-    context="Focus on revenue and profit margins",
+    query="AI company acquisitions",
+    context="Focus on deal size and acquiring company details",
 )
 
 ```
@@ -319,8 +318,14 @@ client.jobs.get_job_results(
 
 Create a monitor that runs jobs based on a reference job with a specified schedule.
 
-**Warning**: Schedule validation is limited. Invalid schedules may be parsed incorrectly. 
-Always test schedules before production use.
+**Schedule requirements:**
+- Minimum 24-hour interval between executions
+- Natural language format (e.g., "every day at 12 PM UTC", "every 48 hours")
+
+**Validation:**
+- Schedules below minimum frequency return error with descriptive message.
+- Invalid job IDs return 400 Bad Request.
+- Duplicate monitors (same job already monitored) return error.
 </dd>
 </dl>
 </dd>
@@ -369,12 +374,9 @@ client.monitors.create_monitor(
 
 **schedule:** `str` 
 
-Natural language schedule description. Examples:
-- "every day at 12 PM UTC"
-- "every Monday at 9 AM EST"
-- "every 6 hours"
+Natural language schedule (e.g. 'every day at 12 AM EST').
 
-**Warning**: Schedule validation is limited. Test carefully before production.
+**Minimum frequency:** Monitors must be scheduled at least 24 hours apart.
     
 </dd>
 </dl>
