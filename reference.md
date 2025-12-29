@@ -1,6 +1,6 @@
 # Reference
 ## Jobs
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">create_job</a>(...)</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">create_job</a>(...) -> AsyncHttpResponse[SubmitResponseBody]</code></summary>
 <dl>
 <dd>
 
@@ -87,7 +87,7 @@ client.jobs.create_job(
 </dl>
 </details>
 
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_status</a>(...)</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_status</a>(...) -> AsyncHttpResponse[StatusResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -157,7 +157,7 @@ client.jobs.get_job_status(
 </dl>
 </details>
 
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_user_jobs</a>()</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_user_jobs</a>() -> AsyncHttpResponse[typing.List[ListUserJobsResponseDto]]</code></summary>
 <dl>
 <dd>
 
@@ -217,7 +217,7 @@ client.jobs.get_user_jobs()
 </dl>
 </details>
 
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_results</a>(...)</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_results</a>(...) -> AsyncHttpResponse[PullJobResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -304,7 +304,7 @@ client.jobs.get_job_results(
 </details>
 
 ## Monitors
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">create_monitor</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">create_monitor</a>(...) -> AsyncHttpResponse[CreateMonitorResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -404,7 +404,7 @@ Natural language schedule (e.g. 'every day at 12 AM EST').
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitor_jobs</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitor_jobs</a>(...) -> AsyncHttpResponse[ListMonitorJobsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -483,7 +483,7 @@ client.monitors.list_monitor_jobs(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results</a>(...) -> AsyncHttpResponse[PullMonitorResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -554,7 +554,7 @@ client.monitors.pull_monitor_results(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">disable_monitor</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">disable_monitor</a>(...) -> AsyncHttpResponse[DisableMonitorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -625,7 +625,7 @@ client.monitors.disable_monitor(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">enable_monitor</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">enable_monitor</a>(...) -> AsyncHttpResponse[EnableMonitorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -696,7 +696,7 @@ client.monitors.enable_monitor(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitors</a>()</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitors</a>() -> AsyncHttpResponse[ListMonitorsResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -757,7 +757,7 @@ client.monitors.list_monitors()
 </details>
 
 ## Meta
-<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">health_check</a>()</code></summary>
+<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">health_check</a>() -> AsyncHttpResponse[HealthCheckResponse]</code></summary>
 <dl>
 <dd>
 
@@ -817,7 +817,7 @@ client.meta.health_check()
 </dl>
 </details>
 
-<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">get_version</a>()</code></summary>
+<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">get_version</a>() -> AsyncHttpResponse[GetVersionResponse]</code></summary>
 <dl>
 <dd>
 
