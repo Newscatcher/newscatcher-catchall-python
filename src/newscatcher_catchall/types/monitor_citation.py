@@ -13,6 +13,11 @@ class MonitorCitation(UniversalBaseModel):
     Extends base citation with tracking information for job_id and timestamps.
     """
 
+    id: str = pydantic.Field()
+    """
+    Article identifier from News API v3
+    """
+
     title: str = pydantic.Field()
     """
     Article title

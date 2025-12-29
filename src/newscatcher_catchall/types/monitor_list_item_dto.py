@@ -5,6 +5,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .webhook_dto import WebhookDto
 
 
 class MonitorListItemDto(UniversalBaseModel):
@@ -33,6 +34,11 @@ class MonitorListItemDto(UniversalBaseModel):
     Cron expression for monitor schedule.
     """
 
+    schedule_human_readable: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Natural language description of the monitor schedule.
+    """
+
     timezone: typing.Optional[str] = pydantic.Field(default=None)
     """
     Timezone for schedule execution.
@@ -41,6 +47,11 @@ class MonitorListItemDto(UniversalBaseModel):
     created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
     The date when the monitor was created.
+    """
+
+    webhook: typing.Optional[WebhookDto] = pydantic.Field(default=None)
+    """
+    Webhook configuration for this monitor (if set).
     """
 
     if IS_PYDANTIC_V2:
