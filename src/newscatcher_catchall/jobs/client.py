@@ -67,9 +67,8 @@ class JobsClient:
             api_key="YOUR_API_KEY",
         )
         client.jobs.create_job(
-            query="Tech company earnings this quarter",
-            schema="Company [NAME] earned [REVENUE] in [QUARTER]",
-            context="Focus on revenue and profit margins",
+            query="AI company acquisitions",
+            context="Focus on deal size and acquiring company details",
         )
         """
         _response = self._raw_client.create_job(
@@ -240,9 +239,8 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.jobs.create_job(
-                query="Tech company earnings this quarter",
-                schema="Company [NAME] earned [REVENUE] in [QUARTER]",
-                context="Focus on revenue and profit margins",
+                query="AI company acquisitions",
+                context="Focus on deal size and acquiring company details",
             )
 
 
