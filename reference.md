@@ -1,6 +1,6 @@
 # Reference
 ## Jobs
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">create_job</a>(...)</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">create_job</a>(...) -&gt; AsyncHttpResponse[SubmitResponseBody]</code></summary>
 <dl>
 <dd>
 
@@ -75,6 +75,18 @@ client.jobs.create_job(
 <dl>
 <dd>
 
+**limit:** `typing.Optional[int]` 
+
+Maximum number of records to return. If not specified, defaults to your plan limit.
+
+Use /catchAll/continue to extend the limit after job completion without reprocessing.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -87,7 +99,86 @@ client.jobs.create_job(
 </dl>
 </details>
 
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_status</a>(...)</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">continue_job</a>(...) -&gt; AsyncHttpResponse[ContinueResponseDto]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Continue an existing job to process more records beyond the initial limit.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+
+client = CatchAllApi(
+    api_key="YOUR_API_KEY",
+)
+client.jobs.continue_job(
+    job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+    new_limit=100,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**job_id:** `str` — Job identifier of the completed job to continue.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**new_limit:** `int` — New record limit for continued processing. Must be greater than the previous limit.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_status</a>(...) -&gt; AsyncHttpResponse[StatusResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -157,7 +248,7 @@ client.jobs.get_job_status(
 </dl>
 </details>
 
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_user_jobs</a>()</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_user_jobs</a>() -&gt; AsyncHttpResponse[typing.List[ListUserJobsResponseDto]]</code></summary>
 <dl>
 <dd>
 
@@ -217,7 +308,7 @@ client.jobs.get_user_jobs()
 </dl>
 </details>
 
-<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_results</a>(...)</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_results</a>(...) -&gt; AsyncHttpResponse[PullJobResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -304,7 +395,7 @@ client.jobs.get_job_results(
 </details>
 
 ## Monitors
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">create_monitor</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">create_monitor</a>(...) -&gt; AsyncHttpResponse[CreateMonitorResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -404,7 +495,98 @@ Natural language schedule (e.g. 'every day at 12 AM EST').
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitor_jobs</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">update_monitor</a>(...) -&gt; AsyncHttpResponse[UpdateMonitorResponseDto]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Update webhook configuration for an existing monitor without recreating it.
+
+**Supported updates:**
+- Webhook URL
+- HTTP method (POST/PUT)
+- Headers and authentication
+- Query parameters
+
+**Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi, WebhookDto
+
+client = CatchAllApi(
+    api_key="YOUR_API_KEY",
+)
+client.monitors.update_monitor(
+    monitor_id="monitor_id",
+    webhook=WebhookDto(
+        url="https://new-endpoint.com/webhook",
+        method="POST",
+        headers={"Authorization": "Bearer new_token_xyz"},
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**monitor_id:** `str` — Monitor identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**webhook:** `typing.Optional[WebhookDto]` — Updated webhook configuration.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitor_jobs</a>(...) -&gt; AsyncHttpResponse[ListMonitorJobsResponse]</code></summary>
 <dl>
 <dd>
 
@@ -483,7 +665,7 @@ client.monitors.list_monitor_jobs(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results</a>(...) -&gt; AsyncHttpResponse[PullMonitorResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -554,7 +736,7 @@ client.monitors.pull_monitor_results(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">disable_monitor</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">disable_monitor</a>(...) -&gt; AsyncHttpResponse[DisableMonitorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -625,7 +807,7 @@ client.monitors.disable_monitor(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">enable_monitor</a>(...)</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">enable_monitor</a>(...) -&gt; AsyncHttpResponse[EnableMonitorResponse]</code></summary>
 <dl>
 <dd>
 
@@ -696,7 +878,7 @@ client.monitors.enable_monitor(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitors</a>()</code></summary>
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitors</a>() -&gt; AsyncHttpResponse[ListMonitorsResponseDto]</code></summary>
 <dl>
 <dd>
 
@@ -757,7 +939,7 @@ client.monitors.list_monitors()
 </details>
 
 ## Meta
-<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">health_check</a>()</code></summary>
+<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">health_check</a>() -&gt; AsyncHttpResponse[HealthCheckResponse]</code></summary>
 <dl>
 <dd>
 
@@ -817,7 +999,7 @@ client.meta.health_check()
 </dl>
 </details>
 
-<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">get_version</a>()</code></summary>
+<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">get_version</a>() -&gt; AsyncHttpResponse[GetVersionResponse]</code></summary>
 <dl>
 <dd>
 

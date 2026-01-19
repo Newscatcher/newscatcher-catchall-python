@@ -17,6 +17,7 @@ from ..types.create_monitor_response_dto import CreateMonitorResponseDto
 from ..types.error import Error
 from ..types.list_monitors_response_dto import ListMonitorsResponseDto
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
+from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
 from ..types.webhook_dto import WebhookDto
 from .types.disable_monitor_response import DisableMonitorResponse
@@ -99,6 +100,102 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def update_monitor(
+        self,
+        monitor_id: str,
+        *,
+        webhook: typing.Optional[WebhookDto] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[UpdateMonitorResponseDto]:
+        """
+        Update webhook configuration for an existing monitor without recreating it.
+
+        **Supported updates:**
+        - Webhook URL
+        - HTTP method (POST/PUT)
+        - Headers and authentication
+        - Query parameters
+
+        **Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        webhook : typing.Optional[WebhookDto]
+            Updated webhook configuration.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[UpdateMonitorResponseDto]
+            Monitor updated successfully
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{jsonable_encoder(monitor_id)}",
+            method="PATCH",
+            json={
+                "webhook": convert_and_respect_annotation_metadata(
+                    object_=webhook, annotation=WebhookDto, direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateMonitorResponseDto,
+                    parse_obj_as(
+                        type_=UpdateMonitorResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     headers=dict(_response.headers),
@@ -525,6 +622,102 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def update_monitor(
+        self,
+        monitor_id: str,
+        *,
+        webhook: typing.Optional[WebhookDto] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UpdateMonitorResponseDto]:
+        """
+        Update webhook configuration for an existing monitor without recreating it.
+
+        **Supported updates:**
+        - Webhook URL
+        - HTTP method (POST/PUT)
+        - Headers and authentication
+        - Query parameters
+
+        **Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        webhook : typing.Optional[WebhookDto]
+            Updated webhook configuration.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UpdateMonitorResponseDto]
+            Monitor updated successfully
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{jsonable_encoder(monitor_id)}",
+            method="PATCH",
+            json={
+                "webhook": convert_and_respect_annotation_metadata(
+                    object_=webhook, annotation=WebhookDto, direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateMonitorResponseDto,
+                    parse_obj_as(
+                        type_=UpdateMonitorResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     headers=dict(_response.headers),

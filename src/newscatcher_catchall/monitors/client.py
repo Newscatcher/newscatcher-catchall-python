@@ -7,6 +7,7 @@ from ..core.request_options import RequestOptions
 from ..types.create_monitor_response_dto import CreateMonitorResponseDto
 from ..types.list_monitors_response_dto import ListMonitorsResponseDto
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
+from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
 from ..types.webhook_dto import WebhookDto
 from .raw_client import AsyncRawMonitorsClient, RawMonitorsClient
 from .types.disable_monitor_response import DisableMonitorResponse
@@ -89,6 +90,59 @@ class MonitorsClient:
         _response = self._raw_client.create_monitor(
             reference_job_id=reference_job_id, schedule=schedule, webhook=webhook, request_options=request_options
         )
+        return _response.data
+
+    def update_monitor(
+        self,
+        monitor_id: str,
+        *,
+        webhook: typing.Optional[WebhookDto] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdateMonitorResponseDto:
+        """
+        Update webhook configuration for an existing monitor without recreating it.
+
+        **Supported updates:**
+        - Webhook URL
+        - HTTP method (POST/PUT)
+        - Headers and authentication
+        - Query parameters
+
+        **Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        webhook : typing.Optional[WebhookDto]
+            Updated webhook configuration.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateMonitorResponseDto
+            Monitor updated successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi, WebhookDto
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.update_monitor(
+            monitor_id="monitor_id",
+            webhook=WebhookDto(
+                url="https://new-endpoint.com/webhook",
+                method="POST",
+                headers={"Authorization": "Bearer new_token_xyz"},
+            ),
+        )
+        """
+        _response = self._raw_client.update_monitor(monitor_id, webhook=webhook, request_options=request_options)
         return _response.data
 
     def list_monitor_jobs(
@@ -340,6 +394,67 @@ class AsyncMonitorsClient:
         _response = await self._raw_client.create_monitor(
             reference_job_id=reference_job_id, schedule=schedule, webhook=webhook, request_options=request_options
         )
+        return _response.data
+
+    async def update_monitor(
+        self,
+        monitor_id: str,
+        *,
+        webhook: typing.Optional[WebhookDto] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UpdateMonitorResponseDto:
+        """
+        Update webhook configuration for an existing monitor without recreating it.
+
+        **Supported updates:**
+        - Webhook URL
+        - HTTP method (POST/PUT)
+        - Headers and authentication
+        - Query parameters
+
+        **Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        webhook : typing.Optional[WebhookDto]
+            Updated webhook configuration.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UpdateMonitorResponseDto
+            Monitor updated successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi, WebhookDto
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.update_monitor(
+                monitor_id="monitor_id",
+                webhook=WebhookDto(
+                    url="https://new-endpoint.com/webhook",
+                    method="POST",
+                    headers={"Authorization": "Bearer new_token_xyz"},
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update_monitor(monitor_id, webhook=webhook, request_options=request_options)
         return _response.data
 
     async def list_monitor_jobs(

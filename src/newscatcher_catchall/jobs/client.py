@@ -5,6 +5,7 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.context import Context
+from ..types.continue_response_dto import ContinueResponseDto
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.pull_job_response_dto import PullJobResponseDto
 from ..types.query import Query
@@ -38,6 +39,7 @@ class JobsClient:
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
+        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseBody:
         """
@@ -50,6 +52,11 @@ class JobsClient:
         schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
+
+        limit : typing.Optional[int]
+            Maximum number of records to return. If not specified, defaults to your plan limit.
+
+            Use /catchAll/continue to extend the limit after job completion without reprocessing.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -72,8 +79,45 @@ class JobsClient:
         )
         """
         _response = self._raw_client.create_job(
-            query=query, schema=schema, context=context, request_options=request_options
+            query=query, schema=schema, context=context, limit=limit, request_options=request_options
         )
+        return _response.data
+
+    def continue_job(
+        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> ContinueResponseDto:
+        """
+        Continue an existing job to process more records beyond the initial limit.
+
+        Parameters
+        ----------
+        job_id : str
+            Job identifier of the completed job to continue.
+
+        new_limit : int
+            New record limit for continued processing. Must be greater than the previous limit.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ContinueResponseDto
+            Job continuation accepted
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.continue_job(
+            job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+            new_limit=100,
+        )
+        """
+        _response = self._raw_client.continue_job(job_id=job_id, new_limit=new_limit, request_options=request_options)
         return _response.data
 
     def get_job_status(
@@ -205,6 +249,7 @@ class AsyncJobsClient:
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
+        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseBody:
         """
@@ -217,6 +262,11 @@ class AsyncJobsClient:
         schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
+
+        limit : typing.Optional[int]
+            Maximum number of records to return. If not specified, defaults to your plan limit.
+
+            Use /catchAll/continue to extend the limit after job completion without reprocessing.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -247,7 +297,54 @@ class AsyncJobsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create_job(
-            query=query, schema=schema, context=context, request_options=request_options
+            query=query, schema=schema, context=context, limit=limit, request_options=request_options
+        )
+        return _response.data
+
+    async def continue_job(
+        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> ContinueResponseDto:
+        """
+        Continue an existing job to process more records beyond the initial limit.
+
+        Parameters
+        ----------
+        job_id : str
+            Job identifier of the completed job to continue.
+
+        new_limit : int
+            New record limit for continued processing. Must be greater than the previous limit.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ContinueResponseDto
+            Job continuation accepted
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.jobs.continue_job(
+                job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+                new_limit=100,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.continue_job(
+            job_id=job_id, new_limit=new_limit, request_options=request_options
         )
         return _response.data
 
