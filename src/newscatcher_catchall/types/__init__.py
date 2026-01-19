@@ -8,6 +8,7 @@ from importlib import import_module
 if typing.TYPE_CHECKING:
     from .citation import Citation
     from .context import Context
+    from .continue_response_dto import ContinueResponseDto
     from .create_monitor_response_dto import CreateMonitorResponseDto
     from .error import Error
     from .job_status import JobStatus
@@ -28,6 +29,7 @@ if typing.TYPE_CHECKING:
     from .schema import Schema
     from .status_response_dto import StatusResponseDto
     from .submit_response_body import SubmitResponseBody
+    from .update_monitor_response_dto import UpdateMonitorResponseDto
     from .validation_error_detail import ValidationErrorDetail
     from .validation_error_detail_loc_item import ValidationErrorDetailLocItem
     from .validation_error_response import ValidationErrorResponse
@@ -37,6 +39,7 @@ if typing.TYPE_CHECKING:
 _dynamic_imports: typing.Dict[str, str] = {
     "Citation": ".citation",
     "Context": ".context",
+    "ContinueResponseDto": ".continue_response_dto",
     "CreateMonitorResponseDto": ".create_monitor_response_dto",
     "Error": ".error",
     "JobStatus": ".job_status",
@@ -57,6 +60,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Schema": ".schema",
     "StatusResponseDto": ".status_response_dto",
     "SubmitResponseBody": ".submit_response_body",
+    "UpdateMonitorResponseDto": ".update_monitor_response_dto",
     "ValidationErrorDetail": ".validation_error_detail",
     "ValidationErrorDetailLocItem": ".validation_error_detail_loc_item",
     "ValidationErrorResponse": ".validation_error_response",
@@ -90,6 +94,7 @@ def __dir__():
 __all__ = [
     "Citation",
     "Context",
+    "ContinueResponseDto",
     "CreateMonitorResponseDto",
     "Error",
     "JobStatus",
@@ -110,6 +115,7 @@ __all__ = [
     "Schema",
     "StatusResponseDto",
     "SubmitResponseBody",
+    "UpdateMonitorResponseDto",
     "ValidationErrorDetail",
     "ValidationErrorDetailLocItem",
     "ValidationErrorResponse",

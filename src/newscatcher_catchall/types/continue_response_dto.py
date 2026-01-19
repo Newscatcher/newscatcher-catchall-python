@@ -4,24 +4,27 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .job_status import JobStatus
-from .job_step import JobStep
 
 
-class StatusResponseDto(UniversalBaseModel):
+class ContinueResponseDto(UniversalBaseModel):
     job_id: str = pydantic.Field()
     """
-    Job identifier.
+    Job identifier for the continued job.
     """
 
-    status: typing.Optional[JobStatus] = pydantic.Field(default=None)
+    previous_limit: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Current job processing status.
+    Previous record limit before continuation.
     """
 
-    steps: typing.List[JobStep] = pydantic.Field()
+    new_limit: int = pydantic.Field()
     """
-    Detailed progress tracking for each processing stage. Steps progress sequentially from order 1 (submitted) through 5 (enriching), ending at order 6 (completed) or 7 (failed).
+    New record limit after continuation.
+    """
+
+    status: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Confirmation that the continuation request was accepted.
     """
 
     if IS_PYDANTIC_V2:
