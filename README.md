@@ -27,11 +27,11 @@ import time
 
 client = CatchAllApi(api_key="YOUR_API_KEY")
 
-# Create a job
+# Create a job with optional limit for testing
 job = client.jobs.create_job(
     query="Tech company earnings this quarter",
     context="Focus on revenue and profit margins",
-    schema="Company [NAME] earned [REVENUE] in [QUARTER]",
+    limit=10,  # Start with 10 records for quick testing
 )
 print(f"Job created: {job.job_id}")
 
@@ -39,10 +39,10 @@ print(f"Job created: {job.job_id}")
 while True:
     status = client.jobs.get_job_status(job.job_id)
 
-    # Check if completed
-    completed = any(s.status == "completed" and s.completed for s in status.steps)
-    if completed:
-        print("Job completed!")
+    # Check if completed or enriching (early access)
+    current_status = status.status
+    if current_status in ["completed", "enriching"]:
+        print(f"Job {current_status}!")
         break
 
     # Show current processing step
@@ -52,12 +52,29 @@ while True:
 
     time.sleep(60)
 
-# Retrieve results
+# Retrieve initial results (available during enriching stage)
 results = client.jobs.get_job_results(job.job_id)
-print(f"Found {results.valid_records} valid records from {results.candidate_records} candidates")
+print(f"Found {results.valid_records} valid records")
+print(f"Progress: {results.progress_validated}/{results.candidate_records} validated")
 
-for record in results.all_records:
-    print(record.record_title)
+# Continue job to process more records
+if results.valid_records >= 10:
+    continued = client.jobs.continue_job(
+        job_id=job.job_id,
+        new_limit=50,  # Increase to 50 records
+    )
+    print(f"Job continued: {continued.job_id}")
+    
+    # Wait for completion
+    while True:
+        status = client.jobs.get_job_status(job.job_id)
+        if status.status == "completed":
+            break
+        time.sleep(60)
+    
+    # Get final results
+    results = client.jobs.get_job_results(job.job_id)
+    print(f"Final: {results.valid_records} records")
 ```
 
 Jobs process asynchronously and typically complete in 10-15 minutes. To learn more, see the [Quickstart](https://www.newscatcherapi.com/docs/v3/catch-all/overview/quickstart).
@@ -83,13 +100,36 @@ monitor = client.monitors.create_monitor(
 )
 print(f"Monitor created: {monitor.monitor_id}")
 
-# List all monitors
-monitors = client.monitors.list_monitors()
-print(f"Total monitors: {monitors.total_monitors}")
+# Update webhook configuration without recreating monitor
+updated = client.monitors.update_monitor(
+    monitor_id=monitor.monitor_id,
+    webhook={
+        "url": "https://new-endpoint.com/webhook",
+        "method": "POST",
+        "headers": {"Authorization": "Bearer NEW_TOKEN"},
+    },
+)
+
+# Pause monitor execution
+client.monitors.disable_monitor(monitor.monitor_id)
+print("Monitor paused")
+
+# Resume monitor execution
+client.monitors.enable_monitor(monitor.monitor_id)
+print("Monitor resumed")
+
+# List monitor execution history
+jobs = client.monitors.list_monitor_jobs(
+    monitor_id=monitor.monitor_id,
+    sort="desc",  # Most recent first
+)
+print(f"Monitor has executed {jobs.total_jobs} jobs")
+for job in jobs.jobs:
+    print(f"  Job {job.job_id}: {job.start_date} to {job.end_date}")
 
 # Get aggregated results
 results = client.monitors.pull_monitor_results(monitor.monitor_id)
-print(f"Collected {results.records} records")
+print(f"Collected {results.records} records across all executions")
 ```
 
 Monitors run jobs on your schedule and send webhook notifications when complete. See the [Monitors documentation](https://www.newscatcherapi.com/docs/v3/catch-all/overview/monitors) for setup and configuration.

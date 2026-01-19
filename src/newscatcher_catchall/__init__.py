@@ -9,6 +9,7 @@ if typing.TYPE_CHECKING:
     from .types import (
         Citation,
         Context,
+        ContinueResponseDto,
         CreateMonitorResponseDto,
         Error,
         JobStatus,
@@ -29,6 +30,7 @@ if typing.TYPE_CHECKING:
         Schema,
         StatusResponseDto,
         SubmitResponseBody,
+        UpdateMonitorResponseDto,
         ValidationErrorDetail,
         ValidationErrorDetailLocItem,
         ValidationErrorResponse,
@@ -36,7 +38,7 @@ if typing.TYPE_CHECKING:
         WebhookDtoMethod,
         WebhookPayload,
     )
-    from .errors import ForbiddenError, NotFoundError, UnprocessableEntityError
+    from .errors import BadRequestError, ForbiddenError, NotFoundError, UnprocessableEntityError
     from . import jobs, meta, monitors
     from .client import AsyncCatchAllApi, CatchAllApi
     from .environment import CatchAllApiEnvironment
@@ -51,10 +53,12 @@ if typing.TYPE_CHECKING:
     from .version import __version__
 _dynamic_imports: typing.Dict[str, str] = {
     "AsyncCatchAllApi": ".client",
+    "BadRequestError": ".errors",
     "CatchAllApi": ".client",
     "CatchAllApiEnvironment": ".environment",
     "Citation": ".types",
     "Context": ".types",
+    "ContinueResponseDto": ".types",
     "CreateMonitorResponseDto": ".types",
     "DisableMonitorResponse": ".monitors",
     "EnableMonitorResponse": ".monitors",
@@ -85,6 +89,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "StatusResponseDto": ".types",
     "SubmitResponseBody": ".types",
     "UnprocessableEntityError": ".errors",
+    "UpdateMonitorResponseDto": ".types",
     "ValidationErrorDetail": ".types",
     "ValidationErrorDetailLocItem": ".types",
     "ValidationErrorResponse": ".types",
@@ -121,10 +126,12 @@ def __dir__():
 
 __all__ = [
     "AsyncCatchAllApi",
+    "BadRequestError",
     "CatchAllApi",
     "CatchAllApiEnvironment",
     "Citation",
     "Context",
+    "ContinueResponseDto",
     "CreateMonitorResponseDto",
     "DisableMonitorResponse",
     "EnableMonitorResponse",
@@ -155,6 +162,7 @@ __all__ = [
     "StatusResponseDto",
     "SubmitResponseBody",
     "UnprocessableEntityError",
+    "UpdateMonitorResponseDto",
     "ValidationErrorDetail",
     "ValidationErrorDetailLocItem",
     "ValidationErrorResponse",

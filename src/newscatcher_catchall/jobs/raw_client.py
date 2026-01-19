@@ -9,10 +9,12 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.context import Context
+from ..types.continue_response_dto import ContinueResponseDto
 from ..types.error import Error
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.pull_job_response_dto import PullJobResponseDto
@@ -36,6 +38,7 @@ class RawJobsClient:
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
+        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SubmitResponseBody]:
         """
@@ -48,6 +51,11 @@ class RawJobsClient:
         schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
+
+        limit : typing.Optional[int]
+            Maximum number of records to return. If not specified, defaults to your plan limit.
+
+            Use /catchAll/continue to extend the limit after job completion without reprocessing.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -64,6 +72,7 @@ class RawJobsClient:
                 "query": query,
                 "schema": schema,
                 "context": context,
+                "limit": limit,
             },
             headers={
                 "content-type": "application/json",
@@ -81,6 +90,89 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def continue_job(
+        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[ContinueResponseDto]:
+        """
+        Continue an existing job to process more records beyond the initial limit.
+
+        Parameters
+        ----------
+        job_id : str
+            Job identifier of the completed job to continue.
+
+        new_limit : int
+            New record limit for continued processing. Must be greater than the previous limit.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ContinueResponseDto]
+            Job continuation accepted
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "catchAll/continue",
+            method="POST",
+            json={
+                "job_id": job_id,
+                "new_limit": new_limit,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ContinueResponseDto,
+                    parse_obj_as(
+                        type_=ContinueResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -292,6 +384,7 @@ class AsyncRawJobsClient:
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
+        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SubmitResponseBody]:
         """
@@ -304,6 +397,11 @@ class AsyncRawJobsClient:
         schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
+
+        limit : typing.Optional[int]
+            Maximum number of records to return. If not specified, defaults to your plan limit.
+
+            Use /catchAll/continue to extend the limit after job completion without reprocessing.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -320,6 +418,7 @@ class AsyncRawJobsClient:
                 "query": query,
                 "schema": schema,
                 "context": context,
+                "limit": limit,
             },
             headers={
                 "content-type": "application/json",
@@ -337,6 +436,89 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def continue_job(
+        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[ContinueResponseDto]:
+        """
+        Continue an existing job to process more records beyond the initial limit.
+
+        Parameters
+        ----------
+        job_id : str
+            Job identifier of the completed job to continue.
+
+        new_limit : int
+            New record limit for continued processing. Must be greater than the previous limit.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ContinueResponseDto]
+            Job continuation accepted
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "catchAll/continue",
+            method="POST",
+            json={
+                "job_id": job_id,
+                "new_limit": new_limit,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ContinueResponseDto,
+                    parse_obj_as(
+                        type_=ContinueResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),

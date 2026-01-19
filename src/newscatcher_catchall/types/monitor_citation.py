@@ -15,7 +15,7 @@ class MonitorCitation(UniversalBaseModel):
 
     id: str = pydantic.Field()
     """
-    Article identifier from News API v3
+    Article identifier from News API
     """
 
     title: str = pydantic.Field()
