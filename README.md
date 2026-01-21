@@ -1,9 +1,30 @@
-# Newscatcher CatchAll Python Library
+# Newscatcher Python Library
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FNewscatcher%2Fnewscatcher-catchall-python)
 [![pypi](https://img.shields.io/pypi/v/newscatcher-catchall-sdk)](https://pypi.python.org/pypi/newscatcher-catchall-sdk)
 
-The Newscatcher CatchAll Python library provides access to the [CatchAll API](https://www.newscatcherapi.com/docs/v3/catch-all/overview/introduction), which transforms natural language queries into structured data extracted from web sources.
+The Newscatcher Python library provides convenient access to the Newscatcher APIs from Python.
+
+## Table of Contents
+
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Reference](#reference)
+- [Usage](#usage)
+- [Async Client](#async-client)
+- [Exception Handling](#exception-handling)
+- [Advanced](#advanced)
+  - [Access Raw Response Data](#access-raw-response-data)
+  - [Retries](#retries)
+  - [Timeouts](#timeouts)
+  - [Custom Client](#custom-client)
+- [Beta Status](#beta-status)
+- [Contributing](#contributing)
+- [Support](#support)
+
+## Documentation
+
+API reference documentation is available [here](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job).
 
 ## Installation
 
@@ -13,246 +34,134 @@ pip install newscatcher-catchall-sdk
 
 ## Reference
 
-A full reference for this library is available [here](./reference.md).
+A full reference for this library is available [here](https://github.com/Newscatcher/newscatcher-catchall-python/blob/HEAD/./reference.md).
 
 ## Usage
 
-### Jobs
-
-Submit a query and retrieve structured results:
-
-```python
-from newscatcher_catchall import CatchAllApi
-import time
-
-client = CatchAllApi(api_key="YOUR_API_KEY")
-
-# Create a job with optional limit for testing
-job = client.jobs.create_job(
-    query="Tech company earnings this quarter",
-    context="Focus on revenue and profit margins",
-    limit=10,  # Start with 10 records for quick testing
-)
-print(f"Job created: {job.job_id}")
-
-# Poll for completion with progress updates
-while True:
-    status = client.jobs.get_job_status(job.job_id)
-
-    # Check if completed or enriching (early access)
-    current_status = status.status
-    if current_status in ["completed", "enriching"]:
-        print(f"Job {current_status}!")
-        break
-
-    # Show current processing step
-    current_step = next((s for s in status.steps if not s.completed), None)
-    if current_step:
-        print(f"Processing: {current_step.status} (step {current_step.order}/7)")
-
-    time.sleep(60)
-
-# Retrieve initial results (available during enriching stage)
-results = client.jobs.get_job_results(job.job_id)
-print(f"Found {results.valid_records} valid records")
-print(f"Progress: {results.progress_validated}/{results.candidate_records} validated")
-
-# Continue job to process more records
-if results.valid_records >= 10:
-    continued = client.jobs.continue_job(
-        job_id=job.job_id,
-        new_limit=50,  # Increase to 50 records
-    )
-    print(f"Job continued: {continued.job_id}")
-    
-    # Wait for completion
-    while True:
-        status = client.jobs.get_job_status(job.job_id)
-        if status.status == "completed":
-            break
-        time.sleep(60)
-    
-    # Get final results
-    results = client.jobs.get_job_results(job.job_id)
-    print(f"Final: {results.valid_records} records")
-```
-
-Jobs process asynchronously and typically complete in 10-15 minutes. To learn more, see the [Quickstart](https://www.newscatcherapi.com/docs/v3/catch-all/overview/quickstart).
-
-### Monitors
-
-Automate recurring queries with scheduled execution:
+Instantiate and use the client with the following:
 
 ```python
 from newscatcher_catchall import CatchAllApi
 
-client = CatchAllApi(api_key="YOUR_API_KEY")
-
-# Create a monitor from a completed job
-monitor = client.monitors.create_monitor(
-    reference_job_id=job.job_id,
-    schedule="every day at 12 PM UTC",
-    webhook={
-        "url": "https://your-endpoint.com/webhook",
-        "method": "POST",
-        "headers": {"Authorization": "Bearer YOUR_TOKEN"},
-    },
+client = CatchAllApi(
+    api_key="YOUR_API_KEY",
 )
-print(f"Monitor created: {monitor.monitor_id}")
-
-# Update webhook configuration without recreating monitor
-updated = client.monitors.update_monitor(
-    monitor_id=monitor.monitor_id,
-    webhook={
-        "url": "https://new-endpoint.com/webhook",
-        "method": "POST",
-        "headers": {"Authorization": "Bearer NEW_TOKEN"},
-    },
+client.jobs.create_job(
+    query="AI company acquisitions",
+    context="Focus on deal size and acquiring company details",
 )
-
-# Pause monitor execution
-client.monitors.disable_monitor(monitor.monitor_id)
-print("Monitor paused")
-
-# Resume monitor execution
-client.monitors.enable_monitor(monitor.monitor_id)
-print("Monitor resumed")
-
-# List monitor execution history
-jobs = client.monitors.list_monitor_jobs(
-    monitor_id=monitor.monitor_id,
-    sort="desc",  # Most recent first
-)
-print(f"Monitor has executed {jobs.total_jobs} jobs")
-for job in jobs.jobs:
-    print(f"  Job {job.job_id}: {job.start_date} to {job.end_date}")
-
-# Get aggregated results
-results = client.monitors.pull_monitor_results(monitor.monitor_id)
-print(f"Collected {results.records} records across all executions")
 ```
 
-Monitors run jobs on your schedule and send webhook notifications when complete. See the [Monitors documentation](https://www.newscatcherapi.com/docs/v3/catch-all/overview/monitors) for setup and configuration.
+## Async Client
 
-## Async client
-
-Use the async client for non-blocking API calls:
+The SDK also exports an `async` client so that you can make non-blocking calls to our API. Note that if you are constructing an Async httpx client class to pass into this client, use `httpx.AsyncClient()` instead of `httpx.Client()` (e.g. for the `httpx_client` parameter of this client).
 
 ```python
+import asyncio
+
+from newscatcher_catchall import AsyncCatchAllApi
+
+client = AsyncCatchAllApi(
+    api_key="YOUR_API_KEY",
+)
+
+
 async def main() -> None:
-    job = await client.jobs.create_job(
-        query="Tech company earnings this quarter",
-        context="Focus on revenue and profit margins",
+    await client.jobs.create_job(
+        query="AI company acquisitions",
+        context="Focus on deal size and acquiring company details",
     )
-    print(f"Job created: {job.job_id}")
 
-    # Wait for completion
-    while True:
-        status = await client.jobs.get_job_status(job.job_id)
 
-        completed = any(s.status == "completed" and s.completed for s in status.steps)
-        if completed:
-            print("Job completed!")
-            break
-
-        current_step = next((s for s in status.steps if not s.completed), None)
-        if current_step:
-            print(f"Processing: {current_step.status} (step {current_step.order}/7)")
-
-        await asyncio.sleep(60)
+asyncio.run(main())
 ```
 
-## Exception handling
+## Exception Handling
 
-Handle API errors with the `ApiError` exception:
+When the API returns a non-success status code (4xx or 5xx response), a subclass of the following error
+will be thrown.
 
 ```python
 from newscatcher_catchall.core.api_error import ApiError
 
 try:
-    client.jobs.create_job(query="...")
+    client.jobs.create_job(...)
 except ApiError as e:
-    print(f"Status: {e.status_code}")
-    print(f"Error: {e.body}")
+    print(e.status_code)
+    print(e.body)
 ```
 
 ## Advanced
 
-### Pagination
+### Access Raw Response Data
 
-Retrieve large result sets with pagination:
-
-```python
-# Retrieve large result sets with pagination
-page = 1
-while True:
-    results = client.jobs.get_job_results(
-        job_id="...",
-        page=page,
-        page_size=100,
-    )
-    
-    print(f"Page {results.page}/{results.total_pages}: {len(results.all_records)} records")
-    
-    for record in results.all_records:
-        # Process each record
-        print(f"  - {record.record_title}")
-    
-    if results.page >= results.total_pages:
-        break
-    page += 1
-
-print(f"Processed {results.valid_records} total records")
-```
-
-### Access raw response data
-
-Access response headers and raw data:
+The SDK provides access to raw response data, including headers, through the `.with_raw_response` property.
+The `.with_raw_response` property returns a "raw" client that can be used to access the `.headers` and `.data` attributes.
 
 ```python
-response = client.jobs.with_raw_response.create_job(query="...")
-print(response.headers)
-print(response.data)
+from newscatcher_catchall import CatchAllApi
+
+client = CatchAllApi(
+    ...,
+)
+response = client.jobs.with_raw_response.create_job(...)
+print(response.headers)  # access the response headers
+print(response.data)  # access the underlying object
 ```
 
 ### Retries
 
-The SDK retries failed requests automatically with exponential backoff. Configure retry behavior:
+The SDK is instrumented with automatic retries with exponential backoff. A request will be retried as long
+as the request is deemed retryable and the number of retry attempts has not grown larger than the configured
+retry limit (default: 2).
+
+A request is deemed retryable when any of the following HTTP status codes is returned:
+
+- [408](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/408) (Timeout)
+- [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) (Too Many Requests)
+- [5XX](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500) (Internal Server Errors)
+
+Use the `max_retries` request option to configure this behavior.
 
 ```python
-client.jobs.create_job(
-    query="...",
-    request_options={"max_retries": 3},
-)
+client.jobs.create_job(..., request_options={
+    "max_retries": 1
+})
 ```
 
 ### Timeouts
 
-Set custom timeouts at the client or request level:
+The SDK defaults to a 60 second timeout. You can configure this with a timeout option at the client or request level.
 
 ```python
-# Client-level timeout
-client = CatchAllApi(api_key="YOUR_API_KEY", timeout=30.0)
 
-# Request-level timeout
-client.jobs.create_job(
-    query="...",
-    request_options={"timeout_in_seconds": 10},
+from newscatcher_catchall import CatchAllApi
+
+client = CatchAllApi(
+    ...,
+    timeout=20.0,
 )
+
+
+# Override timeout for a specific method
+client.jobs.create_job(..., request_options={
+    "timeout_in_seconds": 1
+})
 ```
 
-### Custom HTTP client
+### Custom Client
 
-Customize the underlying HTTP client for proxies or custom transports:
+You can override the `httpx` client to customize it for your use-case. Some common use-cases include support for proxies
+and transports.
 
 ```python
 import httpx
 from newscatcher_catchall import CatchAllApi
 
 client = CatchAllApi(
-    api_key="YOUR_API_KEY",
+    ...,
     httpx_client=httpx.Client(
-        proxy="http://my.proxy.example.com",
+        proxy="http://my.test.proxy.example.com",
         transport=httpx.HTTPTransport(local_address="0.0.0.0"),
     ),
 )
@@ -264,9 +173,15 @@ CatchAll API is in beta. Breaking changes may occur in minor version updates. Se
 
 ## Contributing
 
-This library is generated programmatically from our API specification. Direct contributions to the generated code cannot be merged, but README improvements are welcome. To suggest SDK changes, please [open an issue](https://github.com/Newscatcher/newscatcher-catchall-python/issues).
+While we value open-source contributions to this SDK, this library is generated programmatically.
+Additions made directly to this library would have to be moved over to our generation code,
+otherwise they would be overwritten upon the next generated release. Feel free to open a PR as
+a proof of concept, but know that we will not be able to merge it as-is. We suggest opening
+an issue first to discuss with us!
 
+On the other hand, contributions to the README are always very welcome!
 ## Support
 
 - Documentation: [https://www.newscatcherapi.com/docs/v3/catch-all](https://www.newscatcherapi.com/docs/v3/catch-all)
 - Support: <support@newscatcherapi.com>
+
