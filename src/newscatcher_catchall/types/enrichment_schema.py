@@ -4,34 +4,27 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .user_job import UserJob
+from .enrichment_type import EnrichmentType
 
 
-class ListUserJobsResponseDto(UniversalBaseModel):
-    total: int = pydantic.Field()
+class EnrichmentSchema(UniversalBaseModel):
     """
-    Total number of jobs for this user.
+    Schema for a single enrichment field that extracts structured data.
+
+    Enrichments are applied during the enriching stage to extract information from validated clusters.
     """
 
-    page: int = pydantic.Field()
+    name: str = pydantic.Field()
     """
-    Current page number.
-    """
-
-    page_size: int = pydantic.Field()
-    """
-    Number of jobs per page.
+    Enrichment field name (snake_case recommended).
     """
 
-    total_pages: int = pydantic.Field()
+    description: str = pydantic.Field()
     """
-    Total number of pages available.
+    What information this field extracts.
     """
 
-    jobs: typing.List[UserJob] = pydantic.Field()
-    """
-    Array of user jobs on this page.
-    """
+    type: EnrichmentType
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
