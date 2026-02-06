@@ -41,6 +41,8 @@ A full reference for this library is available [here](https://github.com/Newscat
 Instantiate and use the client with the following:
 
 ```python
+import datetime
+
 from newscatcher_catchall import CatchAllApi
 
 client = CatchAllApi(
@@ -49,6 +51,13 @@ client = CatchAllApi(
 client.jobs.create_job(
     query="AI company acquisitions",
     context="Focus on deal size and acquiring company details",
+    limit=10,
+    start_date=datetime.datetime.fromisoformat(
+        "2026-01-30 00:00:00+00:00",
+    ),
+    end_date=datetime.datetime.fromisoformat(
+        "2026-02-05 00:00:00+00:00",
+    ),
 )
 ```
 
@@ -58,6 +67,7 @@ The SDK also exports an `async` client so that you can make non-blocking calls t
 
 ```python
 import asyncio
+import datetime
 
 from newscatcher_catchall import AsyncCatchAllApi
 
@@ -70,6 +80,13 @@ async def main() -> None:
     await client.jobs.create_job(
         query="AI company acquisitions",
         context="Focus on deal size and acquiring company details",
+        limit=10,
+        start_date=datetime.datetime.fromisoformat(
+            "2026-01-30 00:00:00+00:00",
+        ),
+        end_date=datetime.datetime.fromisoformat(
+            "2026-02-05 00:00:00+00:00",
+        ),
     )
 
 
@@ -106,6 +123,7 @@ client = CatchAllApi(
 )
 response = client.jobs.with_raw_response.create_job(...)
 print(response.headers)  # access the response headers
+print(response.status_code)  # access the response status code
 print(response.data)  # access the underlying object
 ```
 
@@ -184,4 +202,5 @@ On the other hand, contributions to the README are always very welcome!
 
 - Documentation: [https://www.newscatcherapi.com/docs/v3/catch-all](https://www.newscatcherapi.com/docs/v3/catch-all)
 - Support: <support@newscatcherapi.com>
+
 

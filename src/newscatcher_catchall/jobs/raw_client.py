@@ -9,20 +9,27 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.context import Context
 from ..types.continue_response_dto import ContinueResponseDto
+from ..types.end_date import EndDate
+from ..types.enrichment_schema import EnrichmentSchema
 from ..types.error import Error
+from ..types.initialize_response_dto import InitializeResponseDto
+from ..types.limit import Limit
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.pull_job_response_dto import PullJobResponseDto
 from ..types.query import Query
 from ..types.schema import Schema
+from ..types.start_date import StartDate
 from ..types.status_response_dto import StatusResponseDto
 from ..types.submit_response_body import SubmitResponseBody
 from ..types.validation_error_response import ValidationErrorResponse
+from ..types.validator_schema import ValidatorSchema
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -32,17 +39,100 @@ class RawJobsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
+    def initialize(
+        self,
+        *,
+        query: Query,
+        context: typing.Optional[Context] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[InitializeResponseDto]:
+        """
+        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
+
+        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+
+        Parameters
+        ----------
+        query : Query
+
+        context : typing.Optional[Context]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[InitializeResponseDto]
+            Suggestions retrieved successfully
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "catchAll/initialize",
+            method="POST",
+            json={
+                "query": query,
+                "context": context,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    InitializeResponseDto,
+                    parse_obj_as(
+                        type_=InitializeResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def create_job(
         self,
         *,
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
-        limit: typing.Optional[int] = OMIT,
+        limit: typing.Optional[Limit] = OMIT,
+        start_date: typing.Optional[StartDate] = OMIT,
+        end_date: typing.Optional[EndDate] = OMIT,
+        validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
+        enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SubmitResponseBody]:
         """
         Submit a natural language query to create a new processing job.
+
+        Optionally specify context, date ranges, limit, custom validators, and enrichments.
+        If dates exceed plan limits, returns 400 error.
 
         Parameters
         ----------
@@ -52,10 +142,21 @@ class RawJobsClient:
 
         context : typing.Optional[Context]
 
-        limit : typing.Optional[int]
-            Maximum number of records to return. If not specified, defaults to your plan limit.
+        limit : typing.Optional[Limit]
 
-            Use /catchAll/continue to extend the limit after job completion without reprocessing.
+        start_date : typing.Optional[StartDate]
+
+        end_date : typing.Optional[EndDate]
+
+        validators : typing.Optional[typing.Sequence[ValidatorSchema]]
+            Custom validators for filtering article clusters.
+
+            If not provided, validators are generated automatically based on the query.
+
+        enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
+            Custom enrichment fields for data extraction.
+
+            If not provided, enrichments are generated automatically based on the query.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -73,6 +174,14 @@ class RawJobsClient:
                 "schema": schema,
                 "context": context,
                 "limit": limit,
+                "start_date": start_date,
+                "end_date": end_date,
+                "validators": convert_and_respect_annotation_metadata(
+                    object_=validators, annotation=typing.Sequence[ValidatorSchema], direction="write"
+                ),
+                "enrichments": convert_and_respect_annotation_metadata(
+                    object_=enrichments, annotation=typing.Sequence[EnrichmentSchema], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -90,6 +199,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -209,7 +329,7 @@ class RawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -262,24 +382,38 @@ class RawJobsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def get_user_jobs(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[typing.List[ListUserJobsResponseDto]]:
         """
         Returns all jobs created by the authenticated user.
 
         Parameters
         ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
         HttpResponse[typing.List[ListUserJobsResponseDto]]
-            List of user jobs
+            User jobs retrieved successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             "catchAll/jobs/user",
             method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
             request_options=request_options,
         )
         try:
@@ -292,6 +426,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -311,7 +456,7 @@ class RawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         page : typing.Optional[int]
             Page number to retrieve.
@@ -378,17 +523,100 @@ class AsyncRawJobsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
+    async def initialize(
+        self,
+        *,
+        query: Query,
+        context: typing.Optional[Context] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[InitializeResponseDto]:
+        """
+        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
+
+        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+
+        Parameters
+        ----------
+        query : Query
+
+        context : typing.Optional[Context]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[InitializeResponseDto]
+            Suggestions retrieved successfully
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "catchAll/initialize",
+            method="POST",
+            json={
+                "query": query,
+                "context": context,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    InitializeResponseDto,
+                    parse_obj_as(
+                        type_=InitializeResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def create_job(
         self,
         *,
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
-        limit: typing.Optional[int] = OMIT,
+        limit: typing.Optional[Limit] = OMIT,
+        start_date: typing.Optional[StartDate] = OMIT,
+        end_date: typing.Optional[EndDate] = OMIT,
+        validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
+        enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SubmitResponseBody]:
         """
         Submit a natural language query to create a new processing job.
+
+        Optionally specify context, date ranges, limit, custom validators, and enrichments.
+        If dates exceed plan limits, returns 400 error.
 
         Parameters
         ----------
@@ -398,10 +626,21 @@ class AsyncRawJobsClient:
 
         context : typing.Optional[Context]
 
-        limit : typing.Optional[int]
-            Maximum number of records to return. If not specified, defaults to your plan limit.
+        limit : typing.Optional[Limit]
 
-            Use /catchAll/continue to extend the limit after job completion without reprocessing.
+        start_date : typing.Optional[StartDate]
+
+        end_date : typing.Optional[EndDate]
+
+        validators : typing.Optional[typing.Sequence[ValidatorSchema]]
+            Custom validators for filtering article clusters.
+
+            If not provided, validators are generated automatically based on the query.
+
+        enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
+            Custom enrichment fields for data extraction.
+
+            If not provided, enrichments are generated automatically based on the query.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -419,6 +658,14 @@ class AsyncRawJobsClient:
                 "schema": schema,
                 "context": context,
                 "limit": limit,
+                "start_date": start_date,
+                "end_date": end_date,
+                "validators": convert_and_respect_annotation_metadata(
+                    object_=validators, annotation=typing.Sequence[ValidatorSchema], direction="write"
+                ),
+                "enrichments": convert_and_respect_annotation_metadata(
+                    object_=enrichments, annotation=typing.Sequence[EnrichmentSchema], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -436,6 +683,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -555,7 +813,7 @@ class AsyncRawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -608,24 +866,38 @@ class AsyncRawJobsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def get_user_jobs(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[typing.List[ListUserJobsResponseDto]]:
         """
         Returns all jobs created by the authenticated user.
 
         Parameters
         ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
         AsyncHttpResponse[typing.List[ListUserJobsResponseDto]]
-            List of user jobs
+            User jobs retrieved successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             "catchAll/jobs/user",
             method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
             request_options=request_options,
         )
         try:
@@ -638,6 +910,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -657,7 +940,7 @@ class AsyncRawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         page : typing.Optional[int]
             Page number to retrieve.
