@@ -44,11 +44,15 @@ class RawMonitorsClient:
         """
         Create a monitor that runs jobs based on a reference job with a specified schedule.
 
+        **Reference job requirements:**
+        - Job's `end_date` must be within the last 7 days
+
         **Schedule requirements:**
         - Minimum 24-hour interval between executions
         - Natural language format (e.g., "every day at 12 PM UTC", "every 48 hours")
 
         **Validation:**
+        - Reference jobs older than 7 days return 400 Bad Request.
         - Schedules below minimum frequency return error with descriptive message.
         - Invalid job IDs return 400 Bad Request.
         - Duplicate monitors (same job already monitored) return error.
@@ -57,6 +61,8 @@ class RawMonitorsClient:
         ----------
         reference_job_id : str
             Job ID to use as template for scheduled runs.
+
+            Job's `end_date` must be within the last 7 days.
 
         schedule : str
             Natural language schedule (e.g. 'every day at 12 AM EST').
@@ -566,11 +572,15 @@ class AsyncRawMonitorsClient:
         """
         Create a monitor that runs jobs based on a reference job with a specified schedule.
 
+        **Reference job requirements:**
+        - Job's `end_date` must be within the last 7 days
+
         **Schedule requirements:**
         - Minimum 24-hour interval between executions
         - Natural language format (e.g., "every day at 12 PM UTC", "every 48 hours")
 
         **Validation:**
+        - Reference jobs older than 7 days return 400 Bad Request.
         - Schedules below minimum frequency return error with descriptive message.
         - Invalid job IDs return 400 Bad Request.
         - Duplicate monitors (same job already monitored) return error.
@@ -579,6 +589,8 @@ class AsyncRawMonitorsClient:
         ----------
         reference_job_id : str
             Job ID to use as template for scheduled runs.
+
+            Job's `end_date` must be within the last 7 days.
 
         schedule : str
             Natural language schedule (e.g. 'every day at 12 AM EST').

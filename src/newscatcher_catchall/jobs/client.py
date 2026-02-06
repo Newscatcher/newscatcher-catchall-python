@@ -6,12 +6,18 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.context import Context
 from ..types.continue_response_dto import ContinueResponseDto
+from ..types.end_date import EndDate
+from ..types.enrichment_schema import EnrichmentSchema
+from ..types.initialize_response_dto import InitializeResponseDto
+from ..types.limit import Limit
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.pull_job_response_dto import PullJobResponseDto
 from ..types.query import Query
 from ..types.schema import Schema
+from ..types.start_date import StartDate
 from ..types.status_response_dto import StatusResponseDto
 from ..types.submit_response_body import SubmitResponseBody
+from ..types.validator_schema import ValidatorSchema
 from .raw_client import AsyncRawJobsClient, RawJobsClient
 
 # this is used as the default value for optional parameters
@@ -33,17 +39,64 @@ class JobsClient:
         """
         return self._raw_client
 
+    def initialize(
+        self,
+        *,
+        query: Query,
+        context: typing.Optional[Context] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> InitializeResponseDto:
+        """
+        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
+
+        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+
+        Parameters
+        ----------
+        query : Query
+
+        context : typing.Optional[Context]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        InitializeResponseDto
+            Suggestions retrieved successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.initialize(
+            query="AI company acquisitions in fintech last week",
+        )
+        """
+        _response = self._raw_client.initialize(query=query, context=context, request_options=request_options)
+        return _response.data
+
     def create_job(
         self,
         *,
         query: Query,
         schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
-        limit: typing.Optional[int] = OMIT,
+        limit: typing.Optional[Limit] = OMIT,
+        start_date: typing.Optional[StartDate] = OMIT,
+        end_date: typing.Optional[EndDate] = OMIT,
+        validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
+        enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseBody:
         """
         Submit a natural language query to create a new processing job.
+
+        Optionally specify context, date ranges, limit, custom validators, and enrichments.
+        If dates exceed plan limits, returns 400 error.
 
         Parameters
         ----------
@@ -53,10 +106,21 @@ class JobsClient:
 
         context : typing.Optional[Context]
 
-        limit : typing.Optional[int]
-            Maximum number of records to return. If not specified, defaults to your plan limit.
+        limit : typing.Optional[Limit]
 
-            Use /catchAll/continue to extend the limit after job completion without reprocessing.
+        start_date : typing.Optional[StartDate]
+
+        end_date : typing.Optional[EndDate]
+
+        validators : typing.Optional[typing.Sequence[ValidatorSchema]]
+            Custom validators for filtering article clusters.
+
+            If not provided, validators are generated automatically based on the query.
+
+        enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
+            Custom enrichment fields for data extraction.
+
+            If not provided, enrichments are generated automatically based on the query.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -68,6 +132,8 @@ class JobsClient:
 
         Examples
         --------
+        import datetime
+
         from newscatcher_catchall import CatchAllApi
 
         client = CatchAllApi(
@@ -76,10 +142,25 @@ class JobsClient:
         client.jobs.create_job(
             query="AI company acquisitions",
             context="Focus on deal size and acquiring company details",
+            limit=10,
+            start_date=datetime.datetime.fromisoformat(
+                "2026-01-30 00:00:00+00:00",
+            ),
+            end_date=datetime.datetime.fromisoformat(
+                "2026-02-05 00:00:00+00:00",
+            ),
         )
         """
         _response = self._raw_client.create_job(
-            query=query, schema=schema, context=context, limit=limit, request_options=request_options
+            query=query,
+            schema=schema,
+            context=context,
+            limit=limit,
+            start_date=start_date,
+            end_date=end_date,
+            validators=validators,
+            enrichments=enrichments,
+            request_options=request_options,
         )
         return _response.data
 
@@ -129,7 +210,7 @@ class JobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -154,20 +235,30 @@ class JobsClient:
         return _response.data
 
     def get_user_jobs(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.List[ListUserJobsResponseDto]:
         """
         Returns all jobs created by the authenticated user.
 
         Parameters
         ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
         typing.List[ListUserJobsResponseDto]
-            List of user jobs
+            User jobs retrieved successfully
 
         Examples
         --------
@@ -178,7 +269,7 @@ class JobsClient:
         )
         client.jobs.get_user_jobs()
         """
-        _response = self._raw_client.get_user_jobs(request_options=request_options)
+        _response = self._raw_client.get_user_jobs(page=page, page_size=page_size, request_options=request_options)
         return _response.data
 
     def get_job_results(
@@ -195,7 +286,7 @@ class JobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         page : typing.Optional[int]
             Page number to retrieve.
@@ -243,38 +334,31 @@ class AsyncJobsClient:
         """
         return self._raw_client
 
-    async def create_job(
+    async def initialize(
         self,
         *,
         query: Query,
-        schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
-        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SubmitResponseBody:
+    ) -> InitializeResponseDto:
         """
-        Submit a natural language query to create a new processing job.
+        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
+
+        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
 
         Parameters
         ----------
         query : Query
 
-        schema : typing.Optional[Schema]
-
         context : typing.Optional[Context]
-
-        limit : typing.Optional[int]
-            Maximum number of records to return. If not specified, defaults to your plan limit.
-
-            Use /catchAll/continue to extend the limit after job completion without reprocessing.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        SubmitResponseBody
-            Job created successfully
+        InitializeResponseDto
+            Suggestions retrieved successfully
 
         Examples
         --------
@@ -288,16 +372,105 @@ class AsyncJobsClient:
 
 
         async def main() -> None:
+            await client.jobs.initialize(
+                query="AI company acquisitions in fintech last week",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.initialize(query=query, context=context, request_options=request_options)
+        return _response.data
+
+    async def create_job(
+        self,
+        *,
+        query: Query,
+        schema: typing.Optional[Schema] = OMIT,
+        context: typing.Optional[Context] = OMIT,
+        limit: typing.Optional[Limit] = OMIT,
+        start_date: typing.Optional[StartDate] = OMIT,
+        end_date: typing.Optional[EndDate] = OMIT,
+        validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
+        enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SubmitResponseBody:
+        """
+        Submit a natural language query to create a new processing job.
+
+        Optionally specify context, date ranges, limit, custom validators, and enrichments.
+        If dates exceed plan limits, returns 400 error.
+
+        Parameters
+        ----------
+        query : Query
+
+        schema : typing.Optional[Schema]
+
+        context : typing.Optional[Context]
+
+        limit : typing.Optional[Limit]
+
+        start_date : typing.Optional[StartDate]
+
+        end_date : typing.Optional[EndDate]
+
+        validators : typing.Optional[typing.Sequence[ValidatorSchema]]
+            Custom validators for filtering article clusters.
+
+            If not provided, validators are generated automatically based on the query.
+
+        enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
+            Custom enrichment fields for data extraction.
+
+            If not provided, enrichments are generated automatically based on the query.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SubmitResponseBody
+            Job created successfully
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
             await client.jobs.create_job(
                 query="AI company acquisitions",
                 context="Focus on deal size and acquiring company details",
+                limit=10,
+                start_date=datetime.datetime.fromisoformat(
+                    "2026-01-30 00:00:00+00:00",
+                ),
+                end_date=datetime.datetime.fromisoformat(
+                    "2026-02-05 00:00:00+00:00",
+                ),
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.create_job(
-            query=query, schema=schema, context=context, limit=limit, request_options=request_options
+            query=query,
+            schema=schema,
+            context=context,
+            limit=limit,
+            start_date=start_date,
+            end_date=end_date,
+            validators=validators,
+            enrichments=enrichments,
+            request_options=request_options,
         )
         return _response.data
 
@@ -357,7 +530,7 @@ class AsyncJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -390,20 +563,30 @@ class AsyncJobsClient:
         return _response.data
 
     async def get_user_jobs(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.List[ListUserJobsResponseDto]:
         """
         Returns all jobs created by the authenticated user.
 
         Parameters
         ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
         typing.List[ListUserJobsResponseDto]
-            List of user jobs
+            User jobs retrieved successfully
 
         Examples
         --------
@@ -422,7 +605,9 @@ class AsyncJobsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_user_jobs(request_options=request_options)
+        _response = await self._raw_client.get_user_jobs(
+            page=page, page_size=page_size, request_options=request_options
+        )
         return _response.data
 
     async def get_job_results(
@@ -439,7 +624,7 @@ class AsyncJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the `/catchAll/submit` endpoint.
+            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
 
         page : typing.Optional[int]
             Page number to retrieve.

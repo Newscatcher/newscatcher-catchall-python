@@ -4,33 +4,28 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .user_job import UserJob
 
 
-class ListUserJobsResponseDto(UniversalBaseModel):
-    total: int = pydantic.Field()
+class ValidatorSchema(UniversalBaseModel):
     """
-    Total number of jobs for this user.
+    Schema for a single validator that filters article clusters.
+
+    Validators are applied during the enriching stage to determine which clusters are relevant.
     """
 
-    page: int = pydantic.Field()
+    name: str = pydantic.Field()
     """
-    Current page number.
-    """
-
-    page_size: int = pydantic.Field()
-    """
-    Number of jobs per page.
+    Validator field name (snake_case recommended).
     """
 
-    total_pages: int = pydantic.Field()
+    description: str = pydantic.Field()
     """
-    Total number of pages available.
+    What this validator checks for in the article.
     """
 
-    jobs: typing.List[UserJob] = pydantic.Field()
+    type: typing.Optional[typing.Literal["boolean"]] = pydantic.Field(default=None)
     """
-    Array of user jobs on this page.
+    Validator type (currently only boolean supported).
     """
 
     if IS_PYDANTIC_V2:
