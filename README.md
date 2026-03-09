@@ -181,7 +181,7 @@ an issue first to discuss with us!
 On the other hand, contributions to the README are always very welcome!
 ## Support
 
-- Documentation: [https://www.newscatcherapi.com/docs/v3/catch-all](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
+- Documentation: [newscatcherapi.com/docs/web-search-api](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
 - Support: <support@newscatcherapi.com>
 
 
