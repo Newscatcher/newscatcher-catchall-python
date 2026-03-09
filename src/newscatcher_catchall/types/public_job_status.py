@@ -2,6 +2,6 @@
 
 import typing
 
-JobStatus = typing.Union[
+PublicJobStatus = typing.Union[
     typing.Literal["submitted", "analyzing", "fetching", "clustering", "enriching", "completed", "failed"], typing.Any
 ]

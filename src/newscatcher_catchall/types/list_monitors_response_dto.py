@@ -8,9 +8,24 @@ from .monitor_list_item_dto import MonitorListItemDto
 
 
 class ListMonitorsResponseDto(UniversalBaseModel):
-    total_monitors: int = pydantic.Field()
+    total: int = pydantic.Field()
     """
     Total number of monitors for this user.
+    """
+
+    page: int = pydantic.Field()
+    """
+    Current page number.
+    """
+
+    page_size: int = pydantic.Field()
+    """
+    Number of monitors per page.
+    """
+
+    total_pages: int = pydantic.Field()
+    """
+    Total number of pages available.
     """
 
     monitors: typing.List[MonitorListItemDto] = pydantic.Field()

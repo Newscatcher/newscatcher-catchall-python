@@ -4,36 +4,20 @@ import datetime as dt
 import typing
 
 import pydantic
-from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from .base_record import BaseRecord
 from .monitor_citation import MonitorCitation
 
 
-class MonitorRecord(UniversalBaseModel):
+class MonitorRecord(BaseRecord):
     """
     Record with monitor-specific metadata. Used in monitor results and webhook payloads.
     Includes timestamps tracking when records were added and updated, and citations include job tracking.
     """
 
-    record_id: str = pydantic.Field()
-    """
-    Unique identifier for the record.
-    """
-
-    record_title: str = pydantic.Field()
-    """
-    Short title summarizing the record.
-    """
-
-    enrichment: typing.Dict[str, typing.Any] = pydantic.Field()
-    """
-    Structured data extracted from articles. Schema is dynamically generated per job. Field names are chosen semantically to match the content.
-    
-    See [Understanding dynamic schemas](https://www.newscatcherapi.com/docs/v3/catch-all/overview/dynamic-schemas) for integration guidance.
-    """
-
     citations: typing.List[MonitorCitation] = pydantic.Field()
     """
-    Source articles with monitor-specific metadata (job_id, added_on timestamps).
+    Source documents with monitor-specific metadata (job_id, added_on timestamps).
     """
 
     added_on: typing.Optional[dt.datetime] = pydantic.Field(default=None)

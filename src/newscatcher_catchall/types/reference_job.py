@@ -9,7 +9,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class ReferenceJob(UniversalBaseModel):
     query: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Natural language query from the reference job.
+    Plain text query from the reference job.
     """
 
     context: typing.Optional[str] = pydantic.Field(default=None)

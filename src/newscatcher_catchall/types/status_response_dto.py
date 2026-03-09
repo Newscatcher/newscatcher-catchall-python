@@ -4,8 +4,8 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .job_status import JobStatus
 from .job_step import JobStep
+from .public_job_status import PublicJobStatus
 
 
 class StatusResponseDto(UniversalBaseModel):
@@ -14,12 +14,12 @@ class StatusResponseDto(UniversalBaseModel):
     Job identifier.
     """
 
-    status: typing.Optional[JobStatus] = pydantic.Field(default=None)
+    status: typing.Optional[PublicJobStatus] = pydantic.Field(default=None)
     """
     Current job processing status.
     """
 
-    steps: typing.List[JobStep] = pydantic.Field()
+    steps: typing.Optional[typing.List[JobStep]] = pydantic.Field(default=None)
     """
     Detailed progress tracking for each processing stage. Steps progress sequentially from order 1 (submitted) through 5 (enriching), ending at order 6 (completed) or 7 (failed).
     """
