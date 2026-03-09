@@ -17,7 +17,8 @@ class PullMonitorResponseDto(UniversalBaseModel):
 
     cron_expression: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Parsed cron expression from the natural language schedule.
+    The cron expression for a monitor schedule parsed from the text schedule you provide.
+    
     Standard cron format (minute hour day month day-of-week).
     """
 
@@ -44,8 +45,12 @@ class PullMonitorResponseDto(UniversalBaseModel):
 
     all_records: typing.Optional[typing.List[MonitorRecord]] = pydantic.Field(default=None)
     """
-    Aggregated records from all jobs executed by this monitor.
-    Each record includes structured data extracted from web sources with citations.
+    Aggregated records from all jobs executed by this monitor. Each record includes structured data extracted from web sources with citations.
+    """
+
+    limit: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Record limit applied to this monitor's jobs.
     """
 
     if IS_PYDANTIC_V2:

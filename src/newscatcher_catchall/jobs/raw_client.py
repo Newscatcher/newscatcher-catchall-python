@@ -24,10 +24,9 @@ from ..types.limit import Limit
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.pull_job_response_dto import PullJobResponseDto
 from ..types.query import Query
-from ..types.schema import Schema
 from ..types.start_date import StartDate
 from ..types.status_response_dto import StatusResponseDto
-from ..types.submit_response_body import SubmitResponseBody
+from ..types.submit_response_dto import SubmitResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
 from ..types.validator_schema import ValidatorSchema
 
@@ -47,9 +46,7 @@ class RawJobsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[InitializeResponseDto]:
         """
-        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
-
-        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+        Get suggested validators, enrichments, and date ranges for a query.
 
         Parameters
         ----------
@@ -119,7 +116,6 @@ class RawJobsClient:
         self,
         *,
         query: Query,
-        schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
         limit: typing.Optional[Limit] = OMIT,
         start_date: typing.Optional[StartDate] = OMIT,
@@ -127,18 +123,13 @@ class RawJobsClient:
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[SubmitResponseBody]:
+    ) -> HttpResponse[SubmitResponseDto]:
         """
-        Submit a natural language query to create a new processing job.
-
-        Optionally specify context, date ranges, limit, custom validators, and enrichments.
-        If dates exceed plan limits, returns 400 error.
+        Submit a query to create a new processing job.
 
         Parameters
         ----------
         query : Query
-
-        schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
 
@@ -149,7 +140,7 @@ class RawJobsClient:
         end_date : typing.Optional[EndDate]
 
         validators : typing.Optional[typing.Sequence[ValidatorSchema]]
-            Custom validators for filtering article clusters.
+            Custom validators for filtering web page clusters.
 
             If not provided, validators are generated automatically based on the query.
 
@@ -163,7 +154,7 @@ class RawJobsClient:
 
         Returns
         -------
-        HttpResponse[SubmitResponseBody]
+        HttpResponse[SubmitResponseDto]
             Job created successfully
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -171,7 +162,6 @@ class RawJobsClient:
             method="POST",
             json={
                 "query": query,
-                "schema": schema,
                 "context": context,
                 "limit": limit,
                 "start_date": start_date,
@@ -192,9 +182,9 @@ class RawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SubmitResponseBody,
+                    SubmitResponseDto,
                     parse_obj_as(
-                        type_=SubmitResponseBody,  # type: ignore
+                        type_=SubmitResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -238,7 +228,11 @@ class RawJobsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def continue_job(
-        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        job_id: str,
+        new_limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ContinueResponseDto]:
         """
         Continue an existing job to process more records beyond the initial limit.
@@ -248,8 +242,8 @@ class RawJobsClient:
         job_id : str
             Job identifier of the completed job to continue.
 
-        new_limit : int
-            New record limit for continued processing. Must be greater than the previous limit.
+        new_limit : typing.Optional[int]
+            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -329,7 +323,7 @@ class RawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -337,7 +331,7 @@ class RawJobsClient:
         Returns
         -------
         HttpResponse[StatusResponseDto]
-            Status retrieved successfully.
+            Status retrieved successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/status/{jsonable_encoder(job_id)}",
@@ -387,7 +381,7 @@ class RawJobsClient:
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[typing.List[ListUserJobsResponseDto]]:
+    ) -> HttpResponse[ListUserJobsResponseDto]:
         """
         Returns all jobs created by the authenticated user.
 
@@ -404,7 +398,7 @@ class RawJobsClient:
 
         Returns
         -------
-        HttpResponse[typing.List[ListUserJobsResponseDto]]
+        HttpResponse[ListUserJobsResponseDto]
             User jobs retrieved successfully
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -419,9 +413,9 @@ class RawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[ListUserJobsResponseDto],
+                    ListUserJobsResponseDto,
                     parse_obj_as(
-                        type_=typing.List[ListUserJobsResponseDto],  # type: ignore
+                        type_=ListUserJobsResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -456,7 +450,7 @@ class RawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         page : typing.Optional[int]
             Page number to retrieve.
@@ -531,9 +525,7 @@ class AsyncRawJobsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[InitializeResponseDto]:
         """
-        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
-
-        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+        Get suggested validators, enrichments, and date ranges for a query.
 
         Parameters
         ----------
@@ -603,7 +595,6 @@ class AsyncRawJobsClient:
         self,
         *,
         query: Query,
-        schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
         limit: typing.Optional[Limit] = OMIT,
         start_date: typing.Optional[StartDate] = OMIT,
@@ -611,18 +602,13 @@ class AsyncRawJobsClient:
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[SubmitResponseBody]:
+    ) -> AsyncHttpResponse[SubmitResponseDto]:
         """
-        Submit a natural language query to create a new processing job.
-
-        Optionally specify context, date ranges, limit, custom validators, and enrichments.
-        If dates exceed plan limits, returns 400 error.
+        Submit a query to create a new processing job.
 
         Parameters
         ----------
         query : Query
-
-        schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
 
@@ -633,7 +619,7 @@ class AsyncRawJobsClient:
         end_date : typing.Optional[EndDate]
 
         validators : typing.Optional[typing.Sequence[ValidatorSchema]]
-            Custom validators for filtering article clusters.
+            Custom validators for filtering web page clusters.
 
             If not provided, validators are generated automatically based on the query.
 
@@ -647,7 +633,7 @@ class AsyncRawJobsClient:
 
         Returns
         -------
-        AsyncHttpResponse[SubmitResponseBody]
+        AsyncHttpResponse[SubmitResponseDto]
             Job created successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -655,7 +641,6 @@ class AsyncRawJobsClient:
             method="POST",
             json={
                 "query": query,
-                "schema": schema,
                 "context": context,
                 "limit": limit,
                 "start_date": start_date,
@@ -676,9 +661,9 @@ class AsyncRawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SubmitResponseBody,
+                    SubmitResponseDto,
                     parse_obj_as(
-                        type_=SubmitResponseBody,  # type: ignore
+                        type_=SubmitResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -722,7 +707,11 @@ class AsyncRawJobsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def continue_job(
-        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        job_id: str,
+        new_limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ContinueResponseDto]:
         """
         Continue an existing job to process more records beyond the initial limit.
@@ -732,8 +721,8 @@ class AsyncRawJobsClient:
         job_id : str
             Job identifier of the completed job to continue.
 
-        new_limit : int
-            New record limit for continued processing. Must be greater than the previous limit.
+        new_limit : typing.Optional[int]
+            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -813,7 +802,7 @@ class AsyncRawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -821,7 +810,7 @@ class AsyncRawJobsClient:
         Returns
         -------
         AsyncHttpResponse[StatusResponseDto]
-            Status retrieved successfully.
+            Status retrieved successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/status/{jsonable_encoder(job_id)}",
@@ -871,7 +860,7 @@ class AsyncRawJobsClient:
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[typing.List[ListUserJobsResponseDto]]:
+    ) -> AsyncHttpResponse[ListUserJobsResponseDto]:
         """
         Returns all jobs created by the authenticated user.
 
@@ -888,7 +877,7 @@ class AsyncRawJobsClient:
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[ListUserJobsResponseDto]]
+        AsyncHttpResponse[ListUserJobsResponseDto]
             User jobs retrieved successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -903,9 +892,9 @@ class AsyncRawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[ListUserJobsResponseDto],
+                    ListUserJobsResponseDto,
                     parse_obj_as(
-                        type_=typing.List[ListUserJobsResponseDto],  # type: ignore
+                        type_=ListUserJobsResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -940,7 +929,7 @@ class AsyncRawJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         page : typing.Optional[int]
             Page number to retrieve.

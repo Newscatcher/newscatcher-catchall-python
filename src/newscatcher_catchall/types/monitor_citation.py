@@ -4,10 +4,11 @@ import datetime as dt
 import typing
 
 import pydantic
-from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from .citation import Citation
 
 
-class MonitorCitation(UniversalBaseModel):
+class MonitorCitation(Citation):
     """
     Citation with monitor-specific metadata. Used in monitor results and webhook payloads.
     Extends base citation with tracking information for job_id and timestamps.
@@ -15,22 +16,7 @@ class MonitorCitation(UniversalBaseModel):
 
     id: str = pydantic.Field()
     """
-    Article identifier from News API
-    """
-
-    title: str = pydantic.Field()
-    """
-    Article title
-    """
-
-    link: str = pydantic.Field()
-    """
-    URL to the source article
-    """
-
-    published_date: dt.datetime = pydantic.Field()
-    """
-    Article publication date in ISO 8601 format with UTC timezone.
+    Unique identifier of the document in the search index.
     """
 
     job_id: str = pydantic.Field()

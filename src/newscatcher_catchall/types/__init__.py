@@ -6,7 +6,15 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
+    from .base_record import BaseRecord
+    from .base_record_enrichment import BaseRecordEnrichment
+    from .base_record_enrichment_enrichment_confidence import BaseRecordEnrichmentEnrichmentConfidence
     from .citation import Citation
+    from .company_enrichment_output import CompanyEnrichmentOutput
+    from .company_enrichment_output_metadata import CompanyEnrichmentOutputMetadata
+    from .company_enrichment_output_metadata_domain_url_confidence import (
+        CompanyEnrichmentOutputMetadataDomainUrlConfidence,
+    )
     from .context import Context
     from .continue_response_dto import ContinueResponseDto
     from .create_monitor_response_dto import CreateMonitorResponseDto
@@ -15,7 +23,6 @@ if typing.TYPE_CHECKING:
     from .enrichment_type import EnrichmentType
     from .error import Error
     from .initialize_response_dto import InitializeResponseDto
-    from .job_status import JobStatus
     from .job_step import JobStep
     from .limit import Limit
     from .list_monitors_response_dto import ListMonitorsResponseDto
@@ -24,6 +31,7 @@ if typing.TYPE_CHECKING:
     from .monitor_job_item import MonitorJobItem
     from .monitor_list_item_dto import MonitorListItemDto
     from .monitor_record import MonitorRecord
+    from .public_job_status import PublicJobStatus
     from .pull_job_response_dto import PullJobResponseDto
     from .pull_job_response_dto_date_range import PullJobResponseDtoDateRange
     from .pull_monitor_response_dto import PullMonitorResponseDto
@@ -31,10 +39,9 @@ if typing.TYPE_CHECKING:
     from .query import Query
     from .record import Record
     from .reference_job import ReferenceJob
-    from .schema import Schema
     from .start_date import StartDate
     from .status_response_dto import StatusResponseDto
-    from .submit_response_body import SubmitResponseBody
+    from .submit_response_dto import SubmitResponseDto
     from .update_monitor_response_dto import UpdateMonitorResponseDto
     from .user_job import UserJob
     from .validation_error_detail import ValidationErrorDetail
@@ -45,7 +52,13 @@ if typing.TYPE_CHECKING:
     from .webhook_dto_method import WebhookDtoMethod
     from .webhook_payload import WebhookPayload
 _dynamic_imports: typing.Dict[str, str] = {
+    "BaseRecord": ".base_record",
+    "BaseRecordEnrichment": ".base_record_enrichment",
+    "BaseRecordEnrichmentEnrichmentConfidence": ".base_record_enrichment_enrichment_confidence",
     "Citation": ".citation",
+    "CompanyEnrichmentOutput": ".company_enrichment_output",
+    "CompanyEnrichmentOutputMetadata": ".company_enrichment_output_metadata",
+    "CompanyEnrichmentOutputMetadataDomainUrlConfidence": ".company_enrichment_output_metadata_domain_url_confidence",
     "Context": ".context",
     "ContinueResponseDto": ".continue_response_dto",
     "CreateMonitorResponseDto": ".create_monitor_response_dto",
@@ -54,7 +67,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "EnrichmentType": ".enrichment_type",
     "Error": ".error",
     "InitializeResponseDto": ".initialize_response_dto",
-    "JobStatus": ".job_status",
     "JobStep": ".job_step",
     "Limit": ".limit",
     "ListMonitorsResponseDto": ".list_monitors_response_dto",
@@ -63,6 +75,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MonitorJobItem": ".monitor_job_item",
     "MonitorListItemDto": ".monitor_list_item_dto",
     "MonitorRecord": ".monitor_record",
+    "PublicJobStatus": ".public_job_status",
     "PullJobResponseDto": ".pull_job_response_dto",
     "PullJobResponseDtoDateRange": ".pull_job_response_dto_date_range",
     "PullMonitorResponseDto": ".pull_monitor_response_dto",
@@ -70,10 +83,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Query": ".query",
     "Record": ".record",
     "ReferenceJob": ".reference_job",
-    "Schema": ".schema",
     "StartDate": ".start_date",
     "StatusResponseDto": ".status_response_dto",
-    "SubmitResponseBody": ".submit_response_body",
+    "SubmitResponseDto": ".submit_response_dto",
     "UpdateMonitorResponseDto": ".update_monitor_response_dto",
     "UserJob": ".user_job",
     "ValidationErrorDetail": ".validation_error_detail",
@@ -108,7 +120,13 @@ def __dir__():
 
 
 __all__ = [
+    "BaseRecord",
+    "BaseRecordEnrichment",
+    "BaseRecordEnrichmentEnrichmentConfidence",
     "Citation",
+    "CompanyEnrichmentOutput",
+    "CompanyEnrichmentOutputMetadata",
+    "CompanyEnrichmentOutputMetadataDomainUrlConfidence",
     "Context",
     "ContinueResponseDto",
     "CreateMonitorResponseDto",
@@ -117,7 +135,6 @@ __all__ = [
     "EnrichmentType",
     "Error",
     "InitializeResponseDto",
-    "JobStatus",
     "JobStep",
     "Limit",
     "ListMonitorsResponseDto",
@@ -126,6 +143,7 @@ __all__ = [
     "MonitorJobItem",
     "MonitorListItemDto",
     "MonitorRecord",
+    "PublicJobStatus",
     "PullJobResponseDto",
     "PullJobResponseDtoDateRange",
     "PullMonitorResponseDto",
@@ -133,10 +151,9 @@ __all__ = [
     "Query",
     "Record",
     "ReferenceJob",
-    "Schema",
     "StartDate",
     "StatusResponseDto",
-    "SubmitResponseBody",
+    "SubmitResponseDto",
     "UpdateMonitorResponseDto",
     "UserJob",
     "ValidationErrorDetail",

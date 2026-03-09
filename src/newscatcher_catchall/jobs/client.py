@@ -13,10 +13,9 @@ from ..types.limit import Limit
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.pull_job_response_dto import PullJobResponseDto
 from ..types.query import Query
-from ..types.schema import Schema
 from ..types.start_date import StartDate
 from ..types.status_response_dto import StatusResponseDto
-from ..types.submit_response_body import SubmitResponseBody
+from ..types.submit_response_dto import SubmitResponseDto
 from ..types.validator_schema import ValidatorSchema
 from .raw_client import AsyncRawJobsClient, RawJobsClient
 
@@ -47,9 +46,7 @@ class JobsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InitializeResponseDto:
         """
-        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
-
-        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+        Get suggested validators, enrichments, and date ranges for a query.
 
         Parameters
         ----------
@@ -73,7 +70,8 @@ class JobsClient:
             api_key="YOUR_API_KEY",
         )
         client.jobs.initialize(
-            query="AI company acquisitions in fintech last week",
+            query="Series B funding rounds for SaaS startups",
+            context="Focus on funding amount and company name",
         )
         """
         _response = self._raw_client.initialize(query=query, context=context, request_options=request_options)
@@ -83,7 +81,6 @@ class JobsClient:
         self,
         *,
         query: Query,
-        schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
         limit: typing.Optional[Limit] = OMIT,
         start_date: typing.Optional[StartDate] = OMIT,
@@ -91,18 +88,13 @@ class JobsClient:
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SubmitResponseBody:
+    ) -> SubmitResponseDto:
         """
-        Submit a natural language query to create a new processing job.
-
-        Optionally specify context, date ranges, limit, custom validators, and enrichments.
-        If dates exceed plan limits, returns 400 error.
+        Submit a query to create a new processing job.
 
         Parameters
         ----------
         query : Query
-
-        schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
 
@@ -113,7 +105,7 @@ class JobsClient:
         end_date : typing.Optional[EndDate]
 
         validators : typing.Optional[typing.Sequence[ValidatorSchema]]
-            Custom validators for filtering article clusters.
+            Custom validators for filtering web page clusters.
 
             If not provided, validators are generated automatically based on the query.
 
@@ -127,7 +119,7 @@ class JobsClient:
 
         Returns
         -------
-        SubmitResponseBody
+        SubmitResponseDto
             Job created successfully
 
         Examples
@@ -140,20 +132,19 @@ class JobsClient:
             api_key="YOUR_API_KEY",
         )
         client.jobs.create_job(
-            query="AI company acquisitions",
-            context="Focus on deal size and acquiring company details",
+            query="Series B funding rounds for SaaS startups",
+            context="Focus on funding amount and company name",
             limit=10,
             start_date=datetime.datetime.fromisoformat(
-                "2026-01-30 00:00:00+00:00",
+                "2026-02-18 00:00:00+00:00",
             ),
             end_date=datetime.datetime.fromisoformat(
-                "2026-02-05 00:00:00+00:00",
+                "2026-02-23 00:00:00+00:00",
             ),
         )
         """
         _response = self._raw_client.create_job(
             query=query,
-            schema=schema,
             context=context,
             limit=limit,
             start_date=start_date,
@@ -165,7 +156,11 @@ class JobsClient:
         return _response.data
 
     def continue_job(
-        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        job_id: str,
+        new_limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> ContinueResponseDto:
         """
         Continue an existing job to process more records beyond the initial limit.
@@ -175,8 +170,8 @@ class JobsClient:
         job_id : str
             Job identifier of the completed job to continue.
 
-        new_limit : int
-            New record limit for continued processing. Must be greater than the previous limit.
+        new_limit : typing.Optional[int]
+            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -194,7 +189,7 @@ class JobsClient:
             api_key="YOUR_API_KEY",
         )
         client.jobs.continue_job(
-            job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+            job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
             new_limit=100,
         )
         """
@@ -210,7 +205,7 @@ class JobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -218,7 +213,7 @@ class JobsClient:
         Returns
         -------
         StatusResponseDto
-            Status retrieved successfully.
+            Status retrieved successfully
 
         Examples
         --------
@@ -228,7 +223,7 @@ class JobsClient:
             api_key="YOUR_API_KEY",
         )
         client.jobs.get_job_status(
-            job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+            job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
         )
         """
         _response = self._raw_client.get_job_status(job_id, request_options=request_options)
@@ -240,7 +235,7 @@ class JobsClient:
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.List[ListUserJobsResponseDto]:
+    ) -> ListUserJobsResponseDto:
         """
         Returns all jobs created by the authenticated user.
 
@@ -257,7 +252,7 @@ class JobsClient:
 
         Returns
         -------
-        typing.List[ListUserJobsResponseDto]
+        ListUserJobsResponseDto
             User jobs retrieved successfully
 
         Examples
@@ -286,7 +281,7 @@ class JobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         page : typing.Optional[int]
             Page number to retrieve.
@@ -310,7 +305,7 @@ class JobsClient:
             api_key="YOUR_API_KEY",
         )
         client.jobs.get_job_results(
-            job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+            job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
         )
         """
         _response = self._raw_client.get_job_results(
@@ -342,9 +337,7 @@ class AsyncJobsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InitializeResponseDto:
         """
-        Get suggested validators, enrichments, and date ranges for a query before submitting a job.
-
-        Returns LLM-generated suggestions based on query analysis and validates against plan limits.
+        Get suggested validators, enrichments, and date ranges for a query.
 
         Parameters
         ----------
@@ -373,7 +366,8 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.jobs.initialize(
-                query="AI company acquisitions in fintech last week",
+                query="Series B funding rounds for SaaS startups",
+                context="Focus on funding amount and company name",
             )
 
 
@@ -386,7 +380,6 @@ class AsyncJobsClient:
         self,
         *,
         query: Query,
-        schema: typing.Optional[Schema] = OMIT,
         context: typing.Optional[Context] = OMIT,
         limit: typing.Optional[Limit] = OMIT,
         start_date: typing.Optional[StartDate] = OMIT,
@@ -394,18 +387,13 @@ class AsyncJobsClient:
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SubmitResponseBody:
+    ) -> SubmitResponseDto:
         """
-        Submit a natural language query to create a new processing job.
-
-        Optionally specify context, date ranges, limit, custom validators, and enrichments.
-        If dates exceed plan limits, returns 400 error.
+        Submit a query to create a new processing job.
 
         Parameters
         ----------
         query : Query
-
-        schema : typing.Optional[Schema]
 
         context : typing.Optional[Context]
 
@@ -416,7 +404,7 @@ class AsyncJobsClient:
         end_date : typing.Optional[EndDate]
 
         validators : typing.Optional[typing.Sequence[ValidatorSchema]]
-            Custom validators for filtering article clusters.
+            Custom validators for filtering web page clusters.
 
             If not provided, validators are generated automatically based on the query.
 
@@ -430,7 +418,7 @@ class AsyncJobsClient:
 
         Returns
         -------
-        SubmitResponseBody
+        SubmitResponseDto
             Job created successfully
 
         Examples
@@ -447,14 +435,14 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.jobs.create_job(
-                query="AI company acquisitions",
-                context="Focus on deal size and acquiring company details",
+                query="Series B funding rounds for SaaS startups",
+                context="Focus on funding amount and company name",
                 limit=10,
                 start_date=datetime.datetime.fromisoformat(
-                    "2026-01-30 00:00:00+00:00",
+                    "2026-02-18 00:00:00+00:00",
                 ),
                 end_date=datetime.datetime.fromisoformat(
-                    "2026-02-05 00:00:00+00:00",
+                    "2026-02-23 00:00:00+00:00",
                 ),
             )
 
@@ -463,7 +451,6 @@ class AsyncJobsClient:
         """
         _response = await self._raw_client.create_job(
             query=query,
-            schema=schema,
             context=context,
             limit=limit,
             start_date=start_date,
@@ -475,7 +462,11 @@ class AsyncJobsClient:
         return _response.data
 
     async def continue_job(
-        self, *, job_id: str, new_limit: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        job_id: str,
+        new_limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> ContinueResponseDto:
         """
         Continue an existing job to process more records beyond the initial limit.
@@ -485,8 +476,8 @@ class AsyncJobsClient:
         job_id : str
             Job identifier of the completed job to continue.
 
-        new_limit : int
-            New record limit for continued processing. Must be greater than the previous limit.
+        new_limit : typing.Optional[int]
+            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -509,7 +500,7 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.jobs.continue_job(
-                job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+                job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
                 new_limit=100,
             )
 
@@ -530,7 +521,7 @@ class AsyncJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -538,7 +529,7 @@ class AsyncJobsClient:
         Returns
         -------
         StatusResponseDto
-            Status retrieved successfully.
+            Status retrieved successfully
 
         Examples
         --------
@@ -553,7 +544,7 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.jobs.get_job_status(
-                job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+                job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
             )
 
 
@@ -568,7 +559,7 @@ class AsyncJobsClient:
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.List[ListUserJobsResponseDto]:
+    ) -> ListUserJobsResponseDto:
         """
         Returns all jobs created by the authenticated user.
 
@@ -585,7 +576,7 @@ class AsyncJobsClient:
 
         Returns
         -------
-        typing.List[ListUserJobsResponseDto]
+        ListUserJobsResponseDto
             User jobs retrieved successfully
 
         Examples
@@ -624,7 +615,7 @@ class AsyncJobsClient:
         Parameters
         ----------
         job_id : str
-            Unique job identifier returned from the [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job) endpoint.
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
 
         page : typing.Optional[int]
             Page number to retrieve.
@@ -653,7 +644,7 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.jobs.get_job_results(
-                job_id="af7a26d6-cf0b-458c-a6ed-4b6318c74da3",
+                job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
             )
 
 

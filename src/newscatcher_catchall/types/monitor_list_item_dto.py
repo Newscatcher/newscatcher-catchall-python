@@ -21,7 +21,7 @@ class MonitorListItemDto(UniversalBaseModel):
 
     reference_job_query: str = pydantic.Field()
     """
-    Natural language query from the reference job.
+    Plain text query from the reference job.
     """
 
     enabled: bool = pydantic.Field()
@@ -36,7 +36,7 @@ class MonitorListItemDto(UniversalBaseModel):
 
     schedule_human_readable: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Natural language description of the monitor schedule.
+    The monitor schedule in a plain text format.
     """
 
     timezone: typing.Optional[str] = pydantic.Field(default=None)
