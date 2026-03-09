@@ -4,17 +4,17 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .job_status import JobStatus
+from .public_job_status import PublicJobStatus
 
 
 class JobStep(UniversalBaseModel):
-    status: JobStatus
+    status: PublicJobStatus
     order: int = pydantic.Field()
     """
     Sequential position of this step in the pipeline (1-7).
     """
 
-    completed: typing.Optional[bool] = pydantic.Field(default=None)
+    completed: bool = pydantic.Field()
     """
     Whether this step has finished processing.
     """

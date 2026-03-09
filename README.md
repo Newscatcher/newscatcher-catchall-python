@@ -1,9 +1,9 @@
-# Newscatcher Python Library
+# Newscatcher CatchAll Python Library
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FNewscatcher%2Fnewscatcher-catchall-python)
 [![pypi](https://img.shields.io/pypi/v/newscatcher-catchall-sdk)](https://pypi.python.org/pypi/newscatcher-catchall-sdk)
 
-The Newscatcher Python library provides convenient access to the Newscatcher APIs from Python.
+The Newscatcher CatchAll Python library provides convenient access to the Web Search API from Python.
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ The Newscatcher Python library provides convenient access to the Newscatcher API
 
 ## Documentation
 
-API reference documentation is available [here](https://www.newscatcherapi.com/docs/v3/catch-all/endpoints/create-job).
+API reference documentation is available [here](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/initialize-job).
 
 ## Installation
 
@@ -41,23 +41,19 @@ A full reference for this library is available [here](https://github.com/Newscat
 Instantiate and use the client with the following:
 
 ```python
+from newscatcher_catchall import CatchAllApi
 import datetime
 
-from newscatcher_catchall import CatchAllApi
-
 client = CatchAllApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
 )
+
 client.jobs.create_job(
-    query="AI company acquisitions",
-    context="Focus on deal size and acquiring company details",
+    query="Series B funding rounds for SaaS startups",
+    context="Focus on funding amount and company name",
     limit=10,
-    start_date=datetime.datetime.fromisoformat(
-        "2026-01-30 00:00:00+00:00",
-    ),
-    end_date=datetime.datetime.fromisoformat(
-        "2026-02-05 00:00:00+00:00",
-    ),
+    start_date=datetime.datetime.fromisoformat("2026-02-18T00:00:00+00:00"),
+    end_date=datetime.datetime.fromisoformat("2026-02-23T00:00:00+00:00"),
 )
 ```
 
@@ -72,21 +68,17 @@ import datetime
 from newscatcher_catchall import AsyncCatchAllApi
 
 client = AsyncCatchAllApi(
-    api_key="YOUR_API_KEY",
+    api_key="<value>",
 )
 
 
 async def main() -> None:
     await client.jobs.create_job(
-        query="AI company acquisitions",
-        context="Focus on deal size and acquiring company details",
+        query="Series B funding rounds for SaaS startups",
+        context="Focus on funding amount and company name",
         limit=10,
-        start_date=datetime.datetime.fromisoformat(
-            "2026-01-30 00:00:00+00:00",
-        ),
-        end_date=datetime.datetime.fromisoformat(
-            "2026-02-05 00:00:00+00:00",
-        ),
+        start_date=datetime.datetime.fromisoformat("2026-02-18T00:00:00+00:00"),
+        end_date=datetime.datetime.fromisoformat("2026-02-23T00:00:00+00:00"),
     )
 
 
@@ -118,9 +110,7 @@ The `.with_raw_response` property returns a "raw" client that can be used to acc
 ```python
 from newscatcher_catchall import CatchAllApi
 
-client = CatchAllApi(
-    ...,
-)
+client = CatchAllApi(...)
 response = client.jobs.with_raw_response.create_job(...)
 print(response.headers)  # access the response headers
 print(response.status_code)  # access the response status code
@@ -152,14 +142,9 @@ client.jobs.create_job(..., request_options={
 The SDK defaults to a 60 second timeout. You can configure this with a timeout option at the client or request level.
 
 ```python
-
 from newscatcher_catchall import CatchAllApi
 
-client = CatchAllApi(
-    ...,
-    timeout=20.0,
-)
-
+client = CatchAllApi(..., timeout=20.0)
 
 # Override timeout for a specific method
 client.jobs.create_job(..., request_options={
@@ -185,10 +170,6 @@ client = CatchAllApi(
 )
 ```
 
-## Beta status
-
-CatchAll API is in beta. Breaking changes may occur in minor version updates. See the [Changelog](https://www.newscatcherapi.com/docs/v3/catch-all/overview/changelog) for updates.
-
 ## Contributing
 
 While we value open-source contributions to this SDK, this library is generated programmatically.
@@ -200,7 +181,8 @@ an issue first to discuss with us!
 On the other hand, contributions to the README are always very welcome!
 ## Support
 
-- Documentation: [https://www.newscatcherapi.com/docs/v3/catch-all](https://www.newscatcherapi.com/docs/v3/catch-all)
+- Documentation: [newscatcherapi.com/docs/web-search-api](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
 - Support: <support@newscatcherapi.com>
+
 
 

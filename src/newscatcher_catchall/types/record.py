@@ -3,31 +3,15 @@
 import typing
 
 import pydantic
-from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2
+from .base_record import BaseRecord
 from .citation import Citation
 
 
-class Record(UniversalBaseModel):
-    record_id: str = pydantic.Field()
-    """
-    Unique identifier for the record.
-    """
-
-    record_title: str = pydantic.Field()
-    """
-    Short title summarizing the record.
-    """
-
-    enrichment: typing.Dict[str, typing.Any] = pydantic.Field()
-    """
-    Structured data extracted from articles. Schema is dynamically generated per job. Field names are chosen semantically to match the content.
-    
-    See [Understanding dynamic schemas](https://www.newscatcherapi.com/docs/v3/catch-all/overview/dynamic-schemas) for integration guidance.
-    """
-
+class Record(BaseRecord):
     citations: typing.List[Citation] = pydantic.Field()
     """
-    Source articles that were used to extract this record.
+    Source documents that were used to extract this record.
     """
 
     if IS_PYDANTIC_V2:

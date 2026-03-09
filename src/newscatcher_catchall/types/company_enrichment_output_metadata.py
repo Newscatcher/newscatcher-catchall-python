@@ -4,28 +4,25 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .company_enrichment_output_metadata_domain_url_confidence import CompanyEnrichmentOutputMetadataDomainUrlConfidence
 
 
-class ValidatorSchema(UniversalBaseModel):
-    """
-    Schema for a single validator that filters clusters of web pages.
-
-    Validators are applied during the enriching stage to determine which clusters are relevant.
-    """
-
+class CompanyEnrichmentOutputMetadata(UniversalBaseModel):
     name: str = pydantic.Field()
     """
-    Validator field name (snake_case recommended).
+    Normalized company name.
     """
 
-    description: str = pydantic.Field()
+    domain_url: typing.Optional[str] = pydantic.Field(default=None)
     """
-    What this validator checks for in the web page.
+    Company website domain if resolved, otherwise null.
     """
 
-    type: typing.Optional[typing.Literal["boolean"]] = pydantic.Field(default=None)
+    domain_url_confidence: typing.Optional[CompanyEnrichmentOutputMetadataDomainUrlConfidence] = pydantic.Field(
+        default=None
+    )
     """
-    Validator type (currently only boolean supported).
+    Confidence level for the domain URL resolution.
     """
 
     if IS_PYDANTIC_V2:

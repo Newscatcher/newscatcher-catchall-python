@@ -11,15 +11,19 @@ from .validator_schema import ValidatorSchema
 
 
 class InitializeResponseDto(UniversalBaseModel):
+    query: str = pydantic.Field()
     """
-    Suggestions for validators, enrichments, and date ranges based on query analysis.
+    Echo of the query from the request.
+    """
 
-    Date ranges are validated against plan limits and adjusted if necessary.
+    context: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Echo of the context from the request. Null if not provided.
     """
 
     validators: typing.List[ValidatorSchema] = pydantic.Field()
     """
-    Suggested validators for filtering relevant articles.
+    Suggested validators for filtering relevant web pages.
     """
 
     enrichments: typing.List[EnrichmentSchema] = pydantic.Field()
@@ -27,8 +31,8 @@ class InitializeResponseDto(UniversalBaseModel):
     Suggested enrichment fields for data extraction.
     """
 
-    start_date: StartDate
-    end_date: EndDate
+    start_date: typing.Optional[StartDate] = None
+    end_date: typing.Optional[EndDate] = None
     date_modification_message: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
     """
     Messages explaining date adjustments due to plan limits.

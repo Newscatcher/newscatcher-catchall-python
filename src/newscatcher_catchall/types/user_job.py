@@ -15,7 +15,7 @@ class UserJob(UniversalBaseModel):
 
     query: str = pydantic.Field()
     """
-    Natural language query for this job.
+    Plain text query for this job.
     """
 
     created_at: dt.datetime = pydantic.Field()

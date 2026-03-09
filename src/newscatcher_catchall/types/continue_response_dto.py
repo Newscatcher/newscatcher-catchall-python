@@ -22,7 +22,7 @@ class ContinueResponseDto(UniversalBaseModel):
     New record limit after continuation.
     """
 
-    status: typing.Optional[str] = pydantic.Field(default=None)
+    status: str = pydantic.Field()
     """
     Confirmation that the continuation request was accepted.
     """

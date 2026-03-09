@@ -10,17 +10,17 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class Citation(UniversalBaseModel):
     title: str = pydantic.Field()
     """
-    Article title
+    The title of the source document.
     """
 
     link: str = pydantic.Field()
     """
-    URL to the source article
+    URL to the source document.
     """
 
     published_date: dt.datetime = pydantic.Field()
     """
-    Article publication date in ISO 8601 format with UTC timezone.
+    The publication date of the source document in ISO 8601 format (UTC timezone).
     """
 
     if IS_PYDANTIC_V2:

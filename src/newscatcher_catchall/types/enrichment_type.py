@@ -2,4 +2,4 @@
 
 import typing
 
-EnrichmentType = typing.Union[typing.Literal["text", "number", "date", "option", "url", "dict", "company"], typing.Any]
+EnrichmentType = typing.Union[typing.Literal["text", "number", "date", "option", "url", "company"], typing.Any]

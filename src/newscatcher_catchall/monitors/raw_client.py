@@ -39,38 +39,35 @@ class RawMonitorsClient:
         reference_job_id: str,
         schedule: str,
         webhook: typing.Optional[WebhookDto] = OMIT,
+        limit: typing.Optional[int] = OMIT,
+        backfill: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateMonitorResponseDto]:
         """
-        Create a monitor that runs jobs based on a reference job with a specified schedule.
-
-        **Reference job requirements:**
-        - Job's `end_date` must be within the last 7 days
-
-        **Schedule requirements:**
-        - Minimum 24-hour interval between executions
-        - Natural language format (e.g., "every day at 12 PM UTC", "every 48 hours")
-
-        **Validation:**
-        - Reference jobs older than 7 days return 400 Bad Request.
-        - Schedules below minimum frequency return error with descriptive message.
-        - Invalid job IDs return 400 Bad Request.
-        - Duplicate monitors (same job already monitored) return error.
+        Create a scheduled monitor based on a reference job.
 
         Parameters
         ----------
         reference_job_id : str
-            Job ID to use as template for scheduled runs.
+            Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-            Job's `end_date` must be within the last 7 days.
+            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Natural language schedule (e.g. 'every day at 12 AM EST').
+            Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
 
-            **Minimum frequency:** Monitors must be scheduled at least 24 hours apart.
+            Minimum frequency depends on your plan.
 
         webhook : typing.Optional[WebhookDto]
             Optional webhook to receive notifications when jobs complete.
+
+        limit : typing.Optional[int]
+            Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -89,6 +86,8 @@ class RawMonitorsClient:
                 "webhook": convert_and_respect_annotation_metadata(
                     object_=webhook, annotation=WebhookDto, direction="write"
                 ),
+                "limit": limit,
+                "backfill": backfill,
             },
             headers={
                 "content-type": "application/json",
@@ -127,18 +126,11 @@ class RawMonitorsClient:
         monitor_id: str,
         *,
         webhook: typing.Optional[WebhookDto] = OMIT,
+        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UpdateMonitorResponseDto]:
         """
-        Update webhook configuration for an existing monitor without recreating it.
-
-        **Supported updates:**
-        - Webhook URL
-        - HTTP method (POST/PUT)
-        - Headers and authentication
-        - Query parameters
-
-        **Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+        Update the webhook configuration for an existing monitor.
 
         Parameters
         ----------
@@ -147,6 +139,9 @@ class RawMonitorsClient:
 
         webhook : typing.Optional[WebhookDto]
             Updated webhook configuration.
+
+        limit : typing.Optional[int]
+            Updated maximum number of records per monitor run.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -163,6 +158,7 @@ class RawMonitorsClient:
                 "webhook": convert_and_respect_annotation_metadata(
                     object_=webhook, annotation=WebhookDto, direction="write"
                 ),
+                "limit": limit,
             },
             headers={
                 "content-type": "application/json",
@@ -226,8 +222,7 @@ class RawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListMonitorJobsResponse]:
         """
-        Returns all jobs associated with a monitor, sorted by start_date.
-        Each job includes job_id, start_date, and end_date.
+        Return all jobs executed by a monitor.
 
         Parameters
         ----------
@@ -294,8 +289,7 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[PullMonitorResponseDto]:
         """
-        Retrieve aggregated results from all jobs executed by this monitor.
-        Includes monitor configuration, execution history, and all records collected.
+        Retrieve aggregated results from all jobs executed by a monitor.
 
         Parameters
         ----------
@@ -308,7 +302,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[PullMonitorResponseDto]
-            Monitor results retrieved successfully.
+            Monitor results retrieved successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/pull/{jsonable_encoder(monitor_id)}",
@@ -356,8 +350,7 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DisableMonitorResponse]:
         """
-        Disables a monitor to stop executing scheduled jobs.
-        Validates that the provided API key is associated with the monitor.
+        Stop scheduled job execution for a monitor.
 
         Parameters
         ----------
@@ -426,16 +419,24 @@ class RawMonitorsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def enable_monitor(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        monitor_id: str,
+        *,
+        backfill: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[EnableMonitorResponse]:
         """
-        Enables a monitor to resume executing scheduled jobs.
-        Validates that the provided API key is associated with the monitor.
+        Resume scheduled job execution for a monitor.
 
         Parameters
         ----------
         monitor_id : str
             Monitor identifier.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -448,7 +449,14 @@ class RawMonitorsClient:
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{jsonable_encoder(monitor_id)}/enable",
             method="POST",
+            json={
+                "backfill": backfill,
+            },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -499,13 +507,23 @@ class RawMonitorsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def list_monitors(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListMonitorsResponseDto]:
         """
         Returns all monitors created by the authenticated user.
 
         Parameters
         ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -517,6 +535,10 @@ class RawMonitorsClient:
         _response = self._client_wrapper.httpx_client.request(
             "catchAll/monitors",
             method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
             request_options=request_options,
         )
         try:
@@ -567,38 +589,35 @@ class AsyncRawMonitorsClient:
         reference_job_id: str,
         schedule: str,
         webhook: typing.Optional[WebhookDto] = OMIT,
+        limit: typing.Optional[int] = OMIT,
+        backfill: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateMonitorResponseDto]:
         """
-        Create a monitor that runs jobs based on a reference job with a specified schedule.
-
-        **Reference job requirements:**
-        - Job's `end_date` must be within the last 7 days
-
-        **Schedule requirements:**
-        - Minimum 24-hour interval between executions
-        - Natural language format (e.g., "every day at 12 PM UTC", "every 48 hours")
-
-        **Validation:**
-        - Reference jobs older than 7 days return 400 Bad Request.
-        - Schedules below minimum frequency return error with descriptive message.
-        - Invalid job IDs return 400 Bad Request.
-        - Duplicate monitors (same job already monitored) return error.
+        Create a scheduled monitor based on a reference job.
 
         Parameters
         ----------
         reference_job_id : str
-            Job ID to use as template for scheduled runs.
+            Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-            Job's `end_date` must be within the last 7 days.
+            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Natural language schedule (e.g. 'every day at 12 AM EST').
+            Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
 
-            **Minimum frequency:** Monitors must be scheduled at least 24 hours apart.
+            Minimum frequency depends on your plan.
 
         webhook : typing.Optional[WebhookDto]
             Optional webhook to receive notifications when jobs complete.
+
+        limit : typing.Optional[int]
+            Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -617,6 +636,8 @@ class AsyncRawMonitorsClient:
                 "webhook": convert_and_respect_annotation_metadata(
                     object_=webhook, annotation=WebhookDto, direction="write"
                 ),
+                "limit": limit,
+                "backfill": backfill,
             },
             headers={
                 "content-type": "application/json",
@@ -655,18 +676,11 @@ class AsyncRawMonitorsClient:
         monitor_id: str,
         *,
         webhook: typing.Optional[WebhookDto] = OMIT,
+        limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UpdateMonitorResponseDto]:
         """
-        Update webhook configuration for an existing monitor without recreating it.
-
-        **Supported updates:**
-        - Webhook URL
-        - HTTP method (POST/PUT)
-        - Headers and authentication
-        - Query parameters
-
-        **Note:** Schedule and reference job cannot be modified. To change these, create a new monitor.
+        Update the webhook configuration for an existing monitor.
 
         Parameters
         ----------
@@ -675,6 +689,9 @@ class AsyncRawMonitorsClient:
 
         webhook : typing.Optional[WebhookDto]
             Updated webhook configuration.
+
+        limit : typing.Optional[int]
+            Updated maximum number of records per monitor run.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -691,6 +708,7 @@ class AsyncRawMonitorsClient:
                 "webhook": convert_and_respect_annotation_metadata(
                     object_=webhook, annotation=WebhookDto, direction="write"
                 ),
+                "limit": limit,
             },
             headers={
                 "content-type": "application/json",
@@ -754,8 +772,7 @@ class AsyncRawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListMonitorJobsResponse]:
         """
-        Returns all jobs associated with a monitor, sorted by start_date.
-        Each job includes job_id, start_date, and end_date.
+        Return all jobs executed by a monitor.
 
         Parameters
         ----------
@@ -822,8 +839,7 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[PullMonitorResponseDto]:
         """
-        Retrieve aggregated results from all jobs executed by this monitor.
-        Includes monitor configuration, execution history, and all records collected.
+        Retrieve aggregated results from all jobs executed by a monitor.
 
         Parameters
         ----------
@@ -836,7 +852,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[PullMonitorResponseDto]
-            Monitor results retrieved successfully.
+            Monitor results retrieved successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/pull/{jsonable_encoder(monitor_id)}",
@@ -884,8 +900,7 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DisableMonitorResponse]:
         """
-        Disables a monitor to stop executing scheduled jobs.
-        Validates that the provided API key is associated with the monitor.
+        Stop scheduled job execution for a monitor.
 
         Parameters
         ----------
@@ -954,16 +969,24 @@ class AsyncRawMonitorsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def enable_monitor(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        monitor_id: str,
+        *,
+        backfill: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[EnableMonitorResponse]:
         """
-        Enables a monitor to resume executing scheduled jobs.
-        Validates that the provided API key is associated with the monitor.
+        Resume scheduled job execution for a monitor.
 
         Parameters
         ----------
         monitor_id : str
             Monitor identifier.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -976,7 +999,14 @@ class AsyncRawMonitorsClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{jsonable_encoder(monitor_id)}/enable",
             method="POST",
+            json={
+                "backfill": backfill,
+            },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1027,13 +1057,23 @@ class AsyncRawMonitorsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def list_monitors(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListMonitorsResponseDto]:
         """
         Returns all monitors created by the authenticated user.
 
         Parameters
         ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1045,6 +1085,10 @@ class AsyncRawMonitorsClient:
         _response = await self._client_wrapper.httpx_client.request(
             "catchAll/monitors",
             method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
             request_options=request_options,
         )
         try:

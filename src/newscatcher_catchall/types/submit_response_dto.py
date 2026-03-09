@@ -6,7 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class SubmitResponseBody(UniversalBaseModel):
+class SubmitResponseDto(UniversalBaseModel):
     job_id: str = pydantic.Field()
     """
     Unique identifier for the created job. Use this to check status and retrieve results.
