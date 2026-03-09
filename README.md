@@ -172,7 +172,7 @@ client = CatchAllApi(
 
 ## Beta status
 
-CatchAll API is in beta. Breaking changes may occur in minor version updates. See the [Changelog](https://www.newscatcherapi.com/docs/v3/catch-all/overview/changelog) for updates.
+CatchAll API is in beta. Breaking changes may occur in minor version updates. See the [Changelog]([https://www.newscatcherapi.com/docs/v3/catch-all/overview/changelog](https://www.newscatcherapi.com/docs/web-search-api/get-started/changelog)) for updates.
 
 ## Contributing
 
@@ -185,7 +185,7 @@ an issue first to discuss with us!
 On the other hand, contributions to the README are always very welcome!
 ## Support
 
-- Documentation: [https://www.newscatcherapi.com/docs/v3/catch-all](https://www.newscatcherapi.com/docs/v3/catch-all)
+- Documentation: [https://www.newscatcherapi.com/docs/v3/catch-all](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
 - Support: <support@newscatcherapi.com>
 
 
