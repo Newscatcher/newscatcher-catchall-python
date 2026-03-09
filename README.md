@@ -170,10 +170,6 @@ client = CatchAllApi(
 )
 ```
 
-## Beta status
-
-CatchAll API is in beta. Breaking changes may occur in minor version updates. See the [Changelog]([https://www.newscatcherapi.com/docs/v3/catch-all/overview/changelog](https://www.newscatcherapi.com/docs/web-search-api/get-started/changelog)) for updates.
-
 ## Contributing
 
 While we value open-source contributions to this SDK, this library is generated programmatically.
