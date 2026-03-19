@@ -18,6 +18,7 @@ from ..types.status_response_dto import StatusResponseDto
 from ..types.submit_response_dto import SubmitResponseDto
 from ..types.validator_schema import ValidatorSchema
 from .raw_client import AsyncRawJobsClient, RawJobsClient
+from .types.submit_request_dto_mode import SubmitRequestDtoMode
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -87,6 +88,7 @@ class JobsClient:
         end_date: typing.Optional[EndDate] = OMIT,
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
+        mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -113,6 +115,12 @@ class JobsClient:
             Custom enrichment fields for data extraction.
 
             If not provided, enrichments are generated automatically based on the query.
+
+        mode : typing.Optional[SubmitRequestDtoMode]
+            Job processing mode.
+
+            - `base`: Full pipeline with validation and enrichment.
+            - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -141,6 +149,7 @@ class JobsClient:
             end_date=datetime.datetime.fromisoformat(
                 "2026-02-23 00:00:00+00:00",
             ),
+            mode="base",
         )
         """
         _response = self._raw_client.create_job(
@@ -151,6 +160,7 @@ class JobsClient:
             end_date=end_date,
             validators=validators,
             enrichments=enrichments,
+            mode=mode,
             request_options=request_options,
         )
         return _response.data
@@ -386,6 +396,7 @@ class AsyncJobsClient:
         end_date: typing.Optional[EndDate] = OMIT,
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
+        mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -412,6 +423,12 @@ class AsyncJobsClient:
             Custom enrichment fields for data extraction.
 
             If not provided, enrichments are generated automatically based on the query.
+
+        mode : typing.Optional[SubmitRequestDtoMode]
+            Job processing mode.
+
+            - `base`: Full pipeline with validation and enrichment.
+            - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -444,6 +461,7 @@ class AsyncJobsClient:
                 end_date=datetime.datetime.fromisoformat(
                     "2026-02-23 00:00:00+00:00",
                 ),
+                mode="base",
             )
 
 
@@ -457,6 +475,7 @@ class AsyncJobsClient:
             end_date=end_date,
             validators=validators,
             enrichments=enrichments,
+            mode=mode,
             request_options=request_options,
         )
         return _response.data

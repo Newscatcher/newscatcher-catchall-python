@@ -124,6 +124,7 @@ client.jobs.create_job(
     limit=10,
     start_date=datetime.datetime.fromisoformat("2026-02-18T00:00:00+00:00"),
     end_date=datetime.datetime.fromisoformat("2026-02-23T00:00:00+00:00"),
+    mode="base",
 )
 
 ```
@@ -197,6 +198,19 @@ If not provided, validators are generated automatically based on the query.
 Custom enrichment fields for data extraction.
 
 If not provided, enrichments are generated automatically based on the query.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**mode:** `typing.Optional[SubmitRequestDtoMode]` 
+
+Job processing mode.
+
+- `base`: Full pipeline with validation and enrichment.
+- `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
     
 </dd>
 </dl>
@@ -1255,6 +1269,69 @@ client = CatchAllApi(
 )
 
 client.meta.get_version()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.meta.<a href="src/newscatcher_catchall/meta/client.py">get_plan_limits</a>() -> GetPlanLimitsResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns plan features and current usage for the authenticated organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.meta.get_plan_limits()
 
 ```
 </dd>
