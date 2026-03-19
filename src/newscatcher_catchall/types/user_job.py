@@ -5,6 +5,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .user_job_mode import UserJobMode
 
 
 class UserJob(UniversalBaseModel):
@@ -26,6 +27,16 @@ class UserJob(UniversalBaseModel):
     status: str = pydantic.Field()
     """
     Current processing status of the job.
+    """
+
+    mode: typing.Optional[UserJobMode] = pydantic.Field(default=None)
+    """
+    Processing mode used for this job.
+    """
+
+    user_key: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Masked API key that created this job.
     """
 
     if IS_PYDANTIC_V2:
