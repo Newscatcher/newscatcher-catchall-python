@@ -3,3 +3,10 @@
 import datetime as dt
 
 EndDate = dt.datetime
+"""
+End date for web search (ISO 8601 format with UTC timezone).
+
+Defines the end of the search window by web page discovery date, not event date. Web pages discovered within this range may describe events from any time period.
+
+Must be within plan's allowed search depth and after start_date. Default is current date if not specified.
+"""

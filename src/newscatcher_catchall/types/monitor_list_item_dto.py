@@ -51,7 +51,12 @@ class MonitorListItemDto(UniversalBaseModel):
 
     webhook: typing.Optional[WebhookDto] = pydantic.Field(default=None)
     """
-    Webhook configuration for this monitor (if set).
+    Webhook configuration for this monitor, or null if not set.
+    """
+
+    user_key: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Masked API key associated with this monitor.
     """
 
     if IS_PYDANTIC_V2:

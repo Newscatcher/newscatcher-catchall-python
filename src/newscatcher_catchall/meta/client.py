@@ -4,6 +4,7 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.get_plan_limits_response_dto import GetPlanLimitsResponseDto
 from .raw_client import AsyncRawMetaClient, RawMetaClient
 from .types.get_version_response import GetVersionResponse
 from .types.health_check_response import HealthCheckResponse
@@ -74,6 +75,32 @@ class MetaClient:
         client.meta.get_version()
         """
         _response = self._raw_client.get_version(request_options=request_options)
+        return _response.data
+
+    def get_plan_limits(self, *, request_options: typing.Optional[RequestOptions] = None) -> GetPlanLimitsResponseDto:
+        """
+        Returns plan features and current usage for the authenticated organization.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetPlanLimitsResponseDto
+            Plan limits retrieved successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.meta.get_plan_limits()
+        """
+        _response = self._raw_client.get_plan_limits(request_options=request_options)
         return _response.data
 
 
@@ -158,4 +185,40 @@ class AsyncMetaClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.get_version(request_options=request_options)
+        return _response.data
+
+    async def get_plan_limits(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GetPlanLimitsResponseDto:
+        """
+        Returns plan features and current usage for the authenticated organization.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GetPlanLimitsResponseDto
+            Plan limits retrieved successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.meta.get_plan_limits()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_plan_limits(request_options=request_options)
         return _response.data

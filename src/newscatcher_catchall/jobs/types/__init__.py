@@ -6,8 +6,8 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import SubmitRequestDtoMode
-_dynamic_imports: typing.Dict[str, str] = {"SubmitRequestDtoMode": ".types"}
+    from .submit_request_dto_mode import SubmitRequestDtoMode
+_dynamic_imports: typing.Dict[str, str] = {"SubmitRequestDtoMode": ".submit_request_dto_mode"}
 
 
 def __getattr__(attr_name: str) -> typing.Any:

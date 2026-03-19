@@ -3,3 +3,10 @@
 import datetime as dt
 
 StartDate = dt.datetime
+"""
+Start date for web search (ISO 8601 format with UTC timezone).
+
+Defines the start of the search window by web page discovery date, not event date. Web pages discovered within this range may describe events from any time period.
+
+Must be within plan's allowed search depth. Default is 5 days before current date if not specified.
+"""

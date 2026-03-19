@@ -1,9 +1,9 @@
-# Newscatcher CatchAll Python Library
+# Newscatcher Python Library
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FNewscatcher%2Fnewscatcher-catchall-python)
 [![pypi](https://img.shields.io/pypi/v/newscatcher-catchall-sdk)](https://pypi.python.org/pypi/newscatcher-catchall-sdk)
 
-The Newscatcher CatchAll Python library provides convenient access to the Web Search API from Python.
+The Newscatcher Python library provides convenient access to the Newscatcher APIs from Python.
 
 ## Table of Contents
 
@@ -18,7 +18,6 @@ The Newscatcher CatchAll Python library provides convenient access to the Web Se
   - [Retries](#retries)
   - [Timeouts](#timeouts)
   - [Custom Client](#custom-client)
-- [Beta Status](#beta-status)
 - [Contributing](#contributing)
 - [Support](#support)
 
@@ -54,6 +53,7 @@ client.jobs.create_job(
     limit=10,
     start_date=datetime.datetime.fromisoformat("2026-02-18T00:00:00+00:00"),
     end_date=datetime.datetime.fromisoformat("2026-02-23T00:00:00+00:00"),
+    mode="base",
 )
 ```
 
@@ -79,6 +79,7 @@ async def main() -> None:
         limit=10,
         start_date=datetime.datetime.fromisoformat("2026-02-18T00:00:00+00:00"),
         end_date=datetime.datetime.fromisoformat("2026-02-23T00:00:00+00:00"),
+        mode="base",
     )
 
 
@@ -183,6 +184,7 @@ On the other hand, contributions to the README are always very welcome!
 
 - Documentation: [newscatcherapi.com/docs/web-search-api](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
 - Support: <support@newscatcherapi.com>
+
 
 
 
