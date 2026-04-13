@@ -6,7 +6,7 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
-from ..core.jsonable_encoder import jsonable_encoder
+from ..core.jsonable_encoder import encode_path_param
 from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
@@ -34,6 +34,82 @@ OMIT = typing.cast(typing.Any, ...)
 class RawMonitorsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
+
+    def list_monitors(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ListMonitorsResponseDto]:
+        """
+        Returns all monitors created by the authenticated user.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ListMonitorsResponseDto]
+            List of user monitors
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "catchAll/monitors",
+            method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListMonitorsResponseDto,
+                    parse_obj_as(
+                        type_=ListMonitorsResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def create_monitor(
         self,
@@ -127,6 +203,314 @@ class RawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def pull_monitor_results(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[PullMonitorResponseDto]:
+        """
+        Retrieve aggregated results from all jobs executed by a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[PullMonitorResponseDto]
+            Monitor results retrieved successfully
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/pull/{encode_path_param(monitor_id)}",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    PullMonitorResponseDto,
+                    parse_obj_as(
+                        type_=PullMonitorResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def list_monitor_jobs(
+        self,
+        monitor_id: str,
+        *,
+        sort: typing.Optional[ListMonitorJobsRequestSort] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ListMonitorJobsResponse]:
+        """
+        Return all jobs executed by a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        sort : typing.Optional[ListMonitorJobsRequestSort]
+            Sort by start_date (asc or desc).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ListMonitorJobsResponse]
+            List of monitor jobs
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/jobs",
+            method="GET",
+            params={
+                "sort": sort,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListMonitorJobsResponse,
+                    parse_obj_as(
+                        type_=ListMonitorJobsResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def enable_monitor(
+        self,
+        monitor_id: str,
+        *,
+        backfill: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[EnableMonitorResponse]:
+        """
+        Resume scheduled job execution for a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[EnableMonitorResponse]
+            Monitor enabled successfully
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/enable",
+            method="POST",
+            json={
+                "backfill": backfill,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    EnableMonitorResponse,
+                    parse_obj_as(
+                        type_=EnableMonitorResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def disable_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[DisableMonitorResponse]:
+        """
+        Stop scheduled job execution for a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[DisableMonitorResponse]
+            Monitor disabled successfully
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/disable",
+            method="POST",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DisableMonitorResponse,
+                    parse_obj_as(
+                        type_=DisableMonitorResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def update_monitor(
         self,
         monitor_id: str,
@@ -158,7 +542,7 @@ class RawMonitorsClient:
             Monitor updated successfully
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}",
+            f"catchAll/monitors/{encode_path_param(monitor_id)}",
             method="PATCH",
             json={
                 "webhook": convert_and_respect_annotation_metadata(
@@ -224,321 +608,18 @@ class RawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_monitor_jobs(
-        self,
-        monitor_id: str,
-        *,
-        sort: typing.Optional[ListMonitorJobsRequestSort] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ListMonitorJobsResponse]:
-        """
-        Return all jobs executed by a monitor.
 
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
+class AsyncRawMonitorsClient:
+    def __init__(self, *, client_wrapper: AsyncClientWrapper):
+        self._client_wrapper = client_wrapper
 
-        sort : typing.Optional[ListMonitorJobsRequestSort]
-            Sort by start_date (asc or desc).
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[ListMonitorJobsResponse]
-            List of monitor jobs
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}/jobs",
-            method="GET",
-            params={
-                "sort": sort,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    ListMonitorJobsResponse,
-                    parse_obj_as(
-                        type_=ListMonitorJobsResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def pull_monitor_results(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[PullMonitorResponseDto]:
-        """
-        Retrieve aggregated results from all jobs executed by a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[PullMonitorResponseDto]
-            Monitor results retrieved successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/pull/{jsonable_encoder(monitor_id)}",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    PullMonitorResponseDto,
-                    parse_obj_as(
-                        type_=PullMonitorResponseDto,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def disable_monitor(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DisableMonitorResponse]:
-        """
-        Stop scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[DisableMonitorResponse]
-            Monitor disabled successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}/disable",
-            method="POST",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DisableMonitorResponse,
-                    parse_obj_as(
-                        type_=DisableMonitorResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def enable_monitor(
-        self,
-        monitor_id: str,
-        *,
-        backfill: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[EnableMonitorResponse]:
-        """
-        Resume scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        backfill : typing.Optional[bool]
-            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
-
-            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[EnableMonitorResponse]
-            Monitor enabled successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}/enable",
-            method="POST",
-            json={
-                "backfill": backfill,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    EnableMonitorResponse,
-                    parse_obj_as(
-                        type_=EnableMonitorResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def list_monitors(
+    async def list_monitors(
         self,
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ListMonitorsResponseDto]:
+    ) -> AsyncHttpResponse[ListMonitorsResponseDto]:
         """
         Returns all monitors created by the authenticated user.
 
@@ -555,10 +636,10 @@ class RawMonitorsClient:
 
         Returns
         -------
-        HttpResponse[ListMonitorsResponseDto]
+        AsyncHttpResponse[ListMonitorsResponseDto]
             List of user monitors
         """
-        _response = self._client_wrapper.httpx_client.request(
+        _response = await self._client_wrapper.httpx_client.request(
             "catchAll/monitors",
             method="GET",
             params={
@@ -576,7 +657,7 @@ class RawMonitorsClient:
                         object_=_response.json(),
                     ),
                 )
-                return HttpResponse(response=_response, data=_data)
+                return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -607,11 +688,6 @@ class RawMonitorsClient:
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-
-class AsyncRawMonitorsClient:
-    def __init__(self, *, client_wrapper: AsyncClientWrapper):
-        self._client_wrapper = client_wrapper
 
     async def create_monitor(
         self,
@@ -705,72 +781,40 @@ class AsyncRawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_monitor(
-        self,
-        monitor_id: str,
-        *,
-        webhook: typing.Optional[WebhookDto] = OMIT,
-        limit: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[UpdateMonitorResponseDto]:
+    async def pull_monitor_results(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[PullMonitorResponseDto]:
         """
-        Update the webhook configuration for an existing monitor.
+        Retrieve aggregated results from all jobs executed by a monitor.
 
         Parameters
         ----------
         monitor_id : str
             Monitor identifier.
 
-        webhook : typing.Optional[WebhookDto]
-            Updated webhook configuration.
-
-        limit : typing.Optional[int]
-            Updated maximum number of records per monitor run.
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[UpdateMonitorResponseDto]
-            Monitor updated successfully
+        AsyncHttpResponse[PullMonitorResponseDto]
+            Monitor results retrieved successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}",
-            method="PATCH",
-            json={
-                "webhook": convert_and_respect_annotation_metadata(
-                    object_=webhook, annotation=WebhookDto, direction="write"
-                ),
-                "limit": limit,
-            },
-            headers={
-                "content-type": "application/json",
-            },
+            f"catchAll/monitors/pull/{encode_path_param(monitor_id)}",
+            method="GET",
             request_options=request_options,
-            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UpdateMonitorResponseDto,
+                    PullMonitorResponseDto,
                     parse_obj_as(
-                        type_=UpdateMonitorResponseDto,  # type: ignore
+                        type_=PullMonitorResponseDto,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -829,7 +873,7 @@ class AsyncRawMonitorsClient:
             List of monitor jobs
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}/jobs",
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/jobs",
             method="GET",
             params={
                 "sort": sort,
@@ -846,147 +890,6 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def pull_monitor_results(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[PullMonitorResponseDto]:
-        """
-        Retrieve aggregated results from all jobs executed by a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[PullMonitorResponseDto]
-            Monitor results retrieved successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/pull/{jsonable_encoder(monitor_id)}",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    PullMonitorResponseDto,
-                    parse_obj_as(
-                        type_=PullMonitorResponseDto,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def disable_monitor(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DisableMonitorResponse]:
-        """
-        Stop scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[DisableMonitorResponse]
-            Monitor disabled successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}/disable",
-            method="POST",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DisableMonitorResponse,
-                    parse_obj_as(
-                        type_=DisableMonitorResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -1047,7 +950,7 @@ class AsyncRawMonitorsClient:
             Monitor enabled successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/monitors/{jsonable_encoder(monitor_id)}/enable",
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/enable",
             method="POST",
             json={
                 "backfill": backfill,
@@ -1110,53 +1013,150 @@ class AsyncRawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_monitors(
-        self,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ListMonitorsResponseDto]:
+    async def disable_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[DisableMonitorResponse]:
         """
-        Returns all monitors created by the authenticated user.
+        Stop scheduled job execution for a monitor.
 
         Parameters
         ----------
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of records per page.
+        monitor_id : str
+            Monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[ListMonitorsResponseDto]
-            List of user monitors
+        AsyncHttpResponse[DisableMonitorResponse]
+            Monitor disabled successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "catchAll/monitors",
-            method="GET",
-            params={
-                "page": page,
-                "page_size": page_size,
-            },
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/disable",
+            method="POST",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ListMonitorsResponseDto,
+                    DisableMonitorResponse,
                     parse_obj_as(
-                        type_=ListMonitorsResponseDto,  # type: ignore
+                        type_=DisableMonitorResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 403:
                 raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def update_monitor(
+        self,
+        monitor_id: str,
+        *,
+        webhook: typing.Optional[WebhookDto] = OMIT,
+        limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UpdateMonitorResponseDto]:
+        """
+        Update the webhook configuration for an existing monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        webhook : typing.Optional[WebhookDto]
+            Updated webhook configuration.
+
+        limit : typing.Optional[int]
+            Updated maximum number of records per monitor run.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UpdateMonitorResponseDto]
+            Monitor updated successfully
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}",
+            method="PATCH",
+            json={
+                "webhook": convert_and_respect_annotation_metadata(
+                    object_=webhook, annotation=WebhookDto, direction="write"
+                ),
+                "limit": limit,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UpdateMonitorResponseDto,
+                    parse_obj_as(
+                        type_=UpdateMonitorResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         Error,

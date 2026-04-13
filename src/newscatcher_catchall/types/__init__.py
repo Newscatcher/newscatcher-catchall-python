@@ -6,21 +6,43 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
+    from .additional_attributes import AdditionalAttributes
     from .base_record import BaseRecord
     from .base_record_enrichment import BaseRecordEnrichment
     from .base_record_enrichment_enrichment_confidence import BaseRecordEnrichmentEnrichmentConfidence
     from .citation import Citation
+    from .company_attributes import CompanyAttributes
     from .company_enrichment_output import CompanyEnrichmentOutput
     from .company_enrichment_output_metadata import CompanyEnrichmentOutputMetadata
     from .company_enrichment_output_metadata_domain_url_confidence import (
         CompanyEnrichmentOutputMetadataDomainUrlConfidence,
     )
+    from .connected_entity import ConnectedEntity
     from .context import Context
     from .continue_response_dto import ContinueResponseDto
+    from .create_dataset_csv_response import CreateDatasetCsvResponse
+    from .create_entities_batch_response import CreateEntitiesBatchResponse
+    from .create_entity_request import CreateEntityRequest
+    from .create_entity_response import CreateEntityResponse
     from .create_monitor_response_dto import CreateMonitorResponseDto
+    from .dataset_entity_ids_request import DatasetEntityIdsRequest
+    from .dataset_entity_list_response import DatasetEntityListResponse
+    from .dataset_list_response import DatasetListResponse
+    from .dataset_response import DatasetResponse
+    from .dataset_sort_by import DatasetSortBy
+    from .dataset_status import DatasetStatus
+    from .dataset_status_entry import DatasetStatusEntry
+    from .dataset_status_history_response import DatasetStatusHistoryResponse
     from .end_date import EndDate
     from .enrichment_schema import EnrichmentSchema
     from .enrichment_type import EnrichmentType
+    from .entity_list_response import EntityListResponse
+    from .entity_response import EntityResponse
+    from .entity_sort_by import EntitySortBy
+    from .entity_status import EntityStatus
+    from .entity_summary import EntitySummary
+    from .entity_type import EntityType
+    from .entity_validation_error_body import EntityValidationErrorBody
     from .error import Error
     from .get_plan_limits_response_dto import GetPlanLimitsResponseDto
     from .initialize_response_dto import InitializeResponseDto
@@ -28,6 +50,7 @@ if typing.TYPE_CHECKING:
     from .limit import Limit
     from .list_monitors_response_dto import ListMonitorsResponseDto
     from .list_user_jobs_response_dto import ListUserJobsResponseDto
+    from .manage_entities_response import ManageEntitiesResponse
     from .monitor_citation import MonitorCitation
     from .monitor_job_item import MonitorJobItem
     from .monitor_list_item_dto import MonitorListItemDto
@@ -42,33 +65,59 @@ if typing.TYPE_CHECKING:
     from .query import Query
     from .record import Record
     from .reference_job import ReferenceJob
+    from .skipped_row import SkippedRow
+    from .sort_order import SortOrder
     from .start_date import StartDate
     from .status_response_dto import StatusResponseDto
     from .submit_response_dto import SubmitResponseDto
     from .update_monitor_response_dto import UpdateMonitorResponseDto
+    from .upload_csv_to_dataset_response import UploadCsvToDatasetResponse
     from .user_job import UserJob
     from .user_job_mode import UserJobMode
     from .validation_error_detail import ValidationErrorDetail
     from .validation_error_detail_loc_item import ValidationErrorDetailLocItem
     from .validation_error_response import ValidationErrorResponse
+    from .validation_report import ValidationReport
     from .validator_schema import ValidatorSchema
     from .webhook_dto import WebhookDto
     from .webhook_dto_method import WebhookDtoMethod
     from .webhook_payload import WebhookPayload
 _dynamic_imports: typing.Dict[str, str] = {
+    "AdditionalAttributes": ".additional_attributes",
     "BaseRecord": ".base_record",
     "BaseRecordEnrichment": ".base_record_enrichment",
     "BaseRecordEnrichmentEnrichmentConfidence": ".base_record_enrichment_enrichment_confidence",
     "Citation": ".citation",
+    "CompanyAttributes": ".company_attributes",
     "CompanyEnrichmentOutput": ".company_enrichment_output",
     "CompanyEnrichmentOutputMetadata": ".company_enrichment_output_metadata",
     "CompanyEnrichmentOutputMetadataDomainUrlConfidence": ".company_enrichment_output_metadata_domain_url_confidence",
+    "ConnectedEntity": ".connected_entity",
     "Context": ".context",
     "ContinueResponseDto": ".continue_response_dto",
+    "CreateDatasetCsvResponse": ".create_dataset_csv_response",
+    "CreateEntitiesBatchResponse": ".create_entities_batch_response",
+    "CreateEntityRequest": ".create_entity_request",
+    "CreateEntityResponse": ".create_entity_response",
     "CreateMonitorResponseDto": ".create_monitor_response_dto",
+    "DatasetEntityIdsRequest": ".dataset_entity_ids_request",
+    "DatasetEntityListResponse": ".dataset_entity_list_response",
+    "DatasetListResponse": ".dataset_list_response",
+    "DatasetResponse": ".dataset_response",
+    "DatasetSortBy": ".dataset_sort_by",
+    "DatasetStatus": ".dataset_status",
+    "DatasetStatusEntry": ".dataset_status_entry",
+    "DatasetStatusHistoryResponse": ".dataset_status_history_response",
     "EndDate": ".end_date",
     "EnrichmentSchema": ".enrichment_schema",
     "EnrichmentType": ".enrichment_type",
+    "EntityListResponse": ".entity_list_response",
+    "EntityResponse": ".entity_response",
+    "EntitySortBy": ".entity_sort_by",
+    "EntityStatus": ".entity_status",
+    "EntitySummary": ".entity_summary",
+    "EntityType": ".entity_type",
+    "EntityValidationErrorBody": ".entity_validation_error_body",
     "Error": ".error",
     "GetPlanLimitsResponseDto": ".get_plan_limits_response_dto",
     "InitializeResponseDto": ".initialize_response_dto",
@@ -76,6 +125,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Limit": ".limit",
     "ListMonitorsResponseDto": ".list_monitors_response_dto",
     "ListUserJobsResponseDto": ".list_user_jobs_response_dto",
+    "ManageEntitiesResponse": ".manage_entities_response",
     "MonitorCitation": ".monitor_citation",
     "MonitorJobItem": ".monitor_job_item",
     "MonitorListItemDto": ".monitor_list_item_dto",
@@ -90,15 +140,19 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Query": ".query",
     "Record": ".record",
     "ReferenceJob": ".reference_job",
+    "SkippedRow": ".skipped_row",
+    "SortOrder": ".sort_order",
     "StartDate": ".start_date",
     "StatusResponseDto": ".status_response_dto",
     "SubmitResponseDto": ".submit_response_dto",
     "UpdateMonitorResponseDto": ".update_monitor_response_dto",
+    "UploadCsvToDatasetResponse": ".upload_csv_to_dataset_response",
     "UserJob": ".user_job",
     "UserJobMode": ".user_job_mode",
     "ValidationErrorDetail": ".validation_error_detail",
     "ValidationErrorDetailLocItem": ".validation_error_detail_loc_item",
     "ValidationErrorResponse": ".validation_error_response",
+    "ValidationReport": ".validation_report",
     "ValidatorSchema": ".validator_schema",
     "WebhookDto": ".webhook_dto",
     "WebhookDtoMethod": ".webhook_dto_method",
@@ -128,19 +182,41 @@ def __dir__():
 
 
 __all__ = [
+    "AdditionalAttributes",
     "BaseRecord",
     "BaseRecordEnrichment",
     "BaseRecordEnrichmentEnrichmentConfidence",
     "Citation",
+    "CompanyAttributes",
     "CompanyEnrichmentOutput",
     "CompanyEnrichmentOutputMetadata",
     "CompanyEnrichmentOutputMetadataDomainUrlConfidence",
+    "ConnectedEntity",
     "Context",
     "ContinueResponseDto",
+    "CreateDatasetCsvResponse",
+    "CreateEntitiesBatchResponse",
+    "CreateEntityRequest",
+    "CreateEntityResponse",
     "CreateMonitorResponseDto",
+    "DatasetEntityIdsRequest",
+    "DatasetEntityListResponse",
+    "DatasetListResponse",
+    "DatasetResponse",
+    "DatasetSortBy",
+    "DatasetStatus",
+    "DatasetStatusEntry",
+    "DatasetStatusHistoryResponse",
     "EndDate",
     "EnrichmentSchema",
     "EnrichmentType",
+    "EntityListResponse",
+    "EntityResponse",
+    "EntitySortBy",
+    "EntityStatus",
+    "EntitySummary",
+    "EntityType",
+    "EntityValidationErrorBody",
     "Error",
     "GetPlanLimitsResponseDto",
     "InitializeResponseDto",
@@ -148,6 +224,7 @@ __all__ = [
     "Limit",
     "ListMonitorsResponseDto",
     "ListUserJobsResponseDto",
+    "ManageEntitiesResponse",
     "MonitorCitation",
     "MonitorJobItem",
     "MonitorListItemDto",
@@ -162,15 +239,19 @@ __all__ = [
     "Query",
     "Record",
     "ReferenceJob",
+    "SkippedRow",
+    "SortOrder",
     "StartDate",
     "StatusResponseDto",
     "SubmitResponseDto",
     "UpdateMonitorResponseDto",
+    "UploadCsvToDatasetResponse",
     "UserJob",
     "UserJobMode",
     "ValidationErrorDetail",
     "ValidationErrorDetailLocItem",
     "ValidationErrorResponse",
+    "ValidationReport",
     "ValidatorSchema",
     "WebhookDto",
     "WebhookDtoMethod",

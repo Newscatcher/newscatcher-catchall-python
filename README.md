@@ -11,6 +11,7 @@ The Newscatcher Python library provides convenient access to the Newscatcher API
 - [Installation](#installation)
 - [Reference](#reference)
 - [Usage](#usage)
+- [Environments](#environments)
 - [Async Client](#async-client)
 - [Exception Handling](#exception-handling)
 - [Advanced](#advanced)
@@ -54,6 +55,19 @@ client.jobs.create_job(
     start_date=datetime.datetime.fromisoformat("2026-02-18T00:00:00+00:00"),
     end_date=datetime.datetime.fromisoformat("2026-02-23T00:00:00+00:00"),
     mode="base",
+)
+```
+
+## Environments
+
+This SDK allows you to configure different environments for API requests.
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    environment=CatchAllApiEnvironment.DEFAULT,
 )
 ```
 
@@ -184,6 +198,7 @@ On the other hand, contributions to the README are always very welcome!
 
 - Documentation: [newscatcherapi.com/docs/web-search-api](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
 - Support: <support@newscatcherapi.com>
+
 
 
 

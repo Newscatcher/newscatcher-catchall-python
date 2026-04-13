@@ -14,42 +14,43 @@ from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
-from ..errors.unprocessable_entity_error import UnprocessableEntityError
-from ..types.context import Context
-from ..types.continue_response_dto import ContinueResponseDto
-from ..types.end_date import EndDate
-from ..types.enrichment_schema import EnrichmentSchema
+from ..types.additional_attributes import AdditionalAttributes
+from ..types.create_entities_batch_response import CreateEntitiesBatchResponse
+from ..types.create_entity_request import CreateEntityRequest
+from ..types.create_entity_response import CreateEntityResponse
+from ..types.entity_list_response import EntityListResponse
+from ..types.entity_response import EntityResponse
+from ..types.entity_sort_by import EntitySortBy
+from ..types.entity_status import EntityStatus
+from ..types.entity_type import EntityType
 from ..types.error import Error
-from ..types.initialize_response_dto import InitializeResponseDto
-from ..types.limit import Limit
-from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
-from ..types.pull_job_response_dto import PullJobResponseDto
-from ..types.query import Query
-from ..types.start_date import StartDate
-from ..types.status_response_dto import StatusResponseDto
-from ..types.submit_response_dto import SubmitResponseDto
-from ..types.validation_error_response import ValidationErrorResponse
-from ..types.validator_schema import ValidatorSchema
-from .types.submit_request_dto_mode import SubmitRequestDtoMode
+from ..types.sort_order import SortOrder
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawJobsClient:
+class RawEntitiesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def get_user_jobs(
+    def list_entities(
         self,
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        status: typing.Optional[EntityStatus] = None,
+        entity_type: typing.Optional[EntityType] = None,
+        sort_by: typing.Optional[EntitySortBy] = None,
+        sort_order: typing.Optional[SortOrder] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ListUserJobsResponseDto]:
+    ) -> HttpResponse[EntityListResponse]:
         """
-        Returns all jobs created by the authenticated user.
+        Returns a paginated list of entities belonging to the authenticated
+        organization. Supports filtering by status and entity type, and
+        sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -57,31 +58,47 @@ class RawJobsClient:
             Page number to retrieve.
 
         page_size : typing.Optional[int]
-            Number of records per page.
+            Number of entities per page.
+
+        search : typing.Optional[str]
+            Filter entities by name (case-insensitive substring match).
+
+        status : typing.Optional[EntityStatus]
+
+        entity_type : typing.Optional[EntityType]
+
+        sort_by : typing.Optional[EntitySortBy]
+
+        sort_order : typing.Optional[SortOrder]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[ListUserJobsResponseDto]
-            User jobs retrieved successfully
+        HttpResponse[EntityListResponse]
+            Paginated list of entities.
         """
         _response = self._client_wrapper.httpx_client.request(
-            "catchAll/jobs/user",
+            "catchAll/entities",
             method="GET",
             params={
                 "page": page,
                 "page_size": page_size,
+                "search": search,
+                "status": status,
+                "entity_type": entity_type,
+                "sort_by": sort_by,
+                "sort_order": sort_order,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ListUserJobsResponseDto,
+                    EntityListResponse,
                     parse_obj_as(
-                        type_=ListUserJobsResponseDto,  # type: ignore
+                        type_=EntityListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -106,36 +123,53 @@ class RawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def initialize(
+    def create_entity(
         self,
         *,
-        query: Query,
-        context: typing.Optional[Context] = OMIT,
+        name: str,
+        entity_type: typing.Optional[EntityType] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[InitializeResponseDto]:
+    ) -> HttpResponse[CreateEntityResponse]:
         """
-        Get suggested validators, enrichments, and date ranges for a query.
+        Creates a new company entity and begins background enrichment.
+
+        The entity status starts as `pending` and transitions to `ready` once
+        enrichment completes. Provide as much identifying information as
+        possible — `domain` is the highest-signal field because it is
+        unambiguous.
 
         Parameters
         ----------
-        query : Query
+        name : str
+            The company or person name. Required and must be non-empty.
 
-        context : typing.Optional[Context]
+        entity_type : typing.Optional[EntityType]
+
+        description : typing.Optional[str]
+            Free-text description of the entity used for disambiguation when similar names exist.
+
+        additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[InitializeResponseDto]
-            Suggestions retrieved successfully
+        HttpResponse[CreateEntityResponse]
+            Entity created successfully.
         """
         _response = self._client_wrapper.httpx_client.request(
-            "catchAll/initialize",
+            "catchAll/entities",
             method="POST",
             json={
-                "query": query,
-                "context": context,
+                "name": name,
+                "entity_type": entity_type,
+                "description": description,
+                "additional_attributes": convert_and_respect_annotation_metadata(
+                    object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -146,132 +180,9 @@ class RawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    InitializeResponseDto,
+                    CreateEntityResponse,
                     parse_obj_as(
-                        type_=InitializeResponseDto,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def create_job(
-        self,
-        *,
-        query: Query,
-        context: typing.Optional[Context] = OMIT,
-        limit: typing.Optional[Limit] = OMIT,
-        start_date: typing.Optional[StartDate] = OMIT,
-        end_date: typing.Optional[EndDate] = OMIT,
-        validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
-        enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
-        mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
-        connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[SubmitResponseDto]:
-        """
-        Submit a query to create a new processing job.
-
-        Parameters
-        ----------
-        query : Query
-
-        context : typing.Optional[Context]
-
-        limit : typing.Optional[Limit]
-
-        start_date : typing.Optional[StartDate]
-
-        end_date : typing.Optional[EndDate]
-
-        validators : typing.Optional[typing.Sequence[ValidatorSchema]]
-            Custom validators for filtering web page clusters.
-
-            If not provided, validators are generated automatically based on the query.
-
-        enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
-            Custom enrichment fields for data extraction.
-
-            If not provided, enrichments are generated automatically based on the query.
-
-        mode : typing.Optional[SubmitRequestDtoMode]
-            Job processing mode.
-
-            - `base`: Full pipeline with validation and enrichment.
-            - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
-
-        connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
-
-            The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[SubmitResponseDto]
-            Job created successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            "catchAll/submit",
-            method="POST",
-            json={
-                "query": query,
-                "context": context,
-                "limit": limit,
-                "start_date": start_date,
-                "end_date": end_date,
-                "validators": convert_and_respect_annotation_metadata(
-                    object_=validators, annotation=typing.Sequence[ValidatorSchema], direction="write"
-                ),
-                "enrichments": convert_and_respect_annotation_metadata(
-                    object_=enrichments, annotation=typing.Sequence[EnrichmentSchema], direction="write"
-                ),
-                "mode": mode,
-                "connected_dataset_ids": connected_dataset_ids,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    SubmitResponseDto,
-                    parse_obj_as(
-                        type_=SubmitResponseDto,  # type: ignore
+                        type_=CreateEntityResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -298,13 +209,81 @@ class RawJobsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def create_entities_batch(
+        self, *, entities: typing.Sequence[CreateEntityRequest], request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[CreateEntitiesBatchResponse]:
+        """
+        Creates multiple entities in a single request. Each entity is
+        processed independently — a failure in one does not affect others.
+
+        Returns an array of `{id, status}` objects in the same order as
+        the input array.
+
+        Parameters
+        ----------
+        entities : typing.Sequence[CreateEntityRequest]
+            Array of entities to create. Each item follows the same schema
+            as single entity creation.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CreateEntitiesBatchResponse]
+            Batch of entities created successfully.
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "catchAll/entities/batch",
+            method="POST",
+            json={
+                "entities": convert_and_respect_annotation_metadata(
+                    object_=entities, annotation=typing.Sequence[CreateEntityRequest], direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreateEntitiesBatchResponse,
+                    parse_obj_as(
+                        type_=CreateEntitiesBatchResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ValidationErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -318,36 +297,36 @@ class RawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_job_status(
-        self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[StatusResponseDto]:
+    def get_entity(
+        self, entity_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[EntityResponse]:
         """
-        Retrieve the current processing status of a job.
+        Returns a single entity by ID with all attributes and current status.
 
         Parameters
         ----------
-        job_id : str
-            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+        entity_id : str
+            Unique entity identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[StatusResponseDto]
-            Status retrieved successfully
+        HttpResponse[EntityResponse]
+            Full entity object with all attributes and metadata.
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/status/{encode_path_param(job_id)}",
+            f"catchAll/entities/{encode_path_param(entity_id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    StatusResponseDto,
+                    EntityResponse,
                     parse_obj_as(
-                        type_=StatusResponseDto,  # type: ignore
+                        type_=EntityResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -383,55 +362,33 @@ class RawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_job_results(
-        self,
-        job_id: str,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PullJobResponseDto]:
+    def delete_entity(
+        self, entity_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[None]:
         """
-        Retrieve the final results for a completed job.
+        Permanently deletes an entity. The entity is removed from all
+        datasets and the search index. This operation cannot be undone.
 
         Parameters
         ----------
-        job_id : str
-            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
-
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of records per page.
+        entity_id : str
+            Unique entity identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[PullJobResponseDto]
-            Results retrieved successfully
+        HttpResponse[None]
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/pull/{encode_path_param(job_id)}",
-            method="GET",
-            params={
-                "page": page,
-                "page_size": page_size,
-            },
+            f"catchAll/entities/{encode_path_param(entity_id)}",
+            method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    PullJobResponseDto,
-                    parse_obj_as(
-                        type_=PullJobResponseDto,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
+                return HttpResponse(response=_response, data=None)
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -463,38 +420,48 @@ class RawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def continue_job(
+    def update_entity(
         self,
+        entity_id: str,
         *,
-        job_id: str,
-        new_limit: typing.Optional[int] = OMIT,
+        name: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ContinueResponseDto]:
+    ) -> HttpResponse[EntityResponse]:
         """
-        Continue an existing job to process more records beyond the initial limit.
+        Updates one or more fields of an existing entity.
 
         Parameters
         ----------
-        job_id : str
-            Job identifier of the completed job to continue.
+        entity_id : str
+            Unique entity identifier.
 
-        new_limit : typing.Optional[int]
-            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
+        name : typing.Optional[str]
+            Updated entity name.
+
+        description : typing.Optional[str]
+            Updated description.
+
+        additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[ContinueResponseDto]
-            Job continuation accepted
+        HttpResponse[EntityResponse]
+            Full entity object with all attributes and metadata.
         """
         _response = self._client_wrapper.httpx_client.request(
-            "catchAll/continue",
-            method="POST",
+            f"catchAll/entities/{encode_path_param(entity_id)}",
+            method="PATCH",
             json={
-                "job_id": job_id,
-                "new_limit": new_limit,
+                "name": name,
+                "description": description,
+                "additional_attributes": convert_and_respect_annotation_metadata(
+                    object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -505,9 +472,9 @@ class RawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ContinueResponseDto,
+                    EntityResponse,
                     parse_obj_as(
-                        type_=ContinueResponseDto,  # type: ignore
+                        type_=EntityResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -534,13 +501,13 @@ class RawJobsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ValidationErrorResponse,
+                        Error,
                         parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -555,19 +522,26 @@ class RawJobsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
-class AsyncRawJobsClient:
+class AsyncRawEntitiesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def get_user_jobs(
+    async def list_entities(
         self,
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        status: typing.Optional[EntityStatus] = None,
+        entity_type: typing.Optional[EntityType] = None,
+        sort_by: typing.Optional[EntitySortBy] = None,
+        sort_order: typing.Optional[SortOrder] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ListUserJobsResponseDto]:
+    ) -> AsyncHttpResponse[EntityListResponse]:
         """
-        Returns all jobs created by the authenticated user.
+        Returns a paginated list of entities belonging to the authenticated
+        organization. Supports filtering by status and entity type, and
+        sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -575,31 +549,47 @@ class AsyncRawJobsClient:
             Page number to retrieve.
 
         page_size : typing.Optional[int]
-            Number of records per page.
+            Number of entities per page.
+
+        search : typing.Optional[str]
+            Filter entities by name (case-insensitive substring match).
+
+        status : typing.Optional[EntityStatus]
+
+        entity_type : typing.Optional[EntityType]
+
+        sort_by : typing.Optional[EntitySortBy]
+
+        sort_order : typing.Optional[SortOrder]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[ListUserJobsResponseDto]
-            User jobs retrieved successfully
+        AsyncHttpResponse[EntityListResponse]
+            Paginated list of entities.
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "catchAll/jobs/user",
+            "catchAll/entities",
             method="GET",
             params={
                 "page": page,
                 "page_size": page_size,
+                "search": search,
+                "status": status,
+                "entity_type": entity_type,
+                "sort_by": sort_by,
+                "sort_order": sort_order,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ListUserJobsResponseDto,
+                    EntityListResponse,
                     parse_obj_as(
-                        type_=ListUserJobsResponseDto,  # type: ignore
+                        type_=EntityListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -624,36 +614,53 @@ class AsyncRawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def initialize(
+    async def create_entity(
         self,
         *,
-        query: Query,
-        context: typing.Optional[Context] = OMIT,
+        name: str,
+        entity_type: typing.Optional[EntityType] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[InitializeResponseDto]:
+    ) -> AsyncHttpResponse[CreateEntityResponse]:
         """
-        Get suggested validators, enrichments, and date ranges for a query.
+        Creates a new company entity and begins background enrichment.
+
+        The entity status starts as `pending` and transitions to `ready` once
+        enrichment completes. Provide as much identifying information as
+        possible — `domain` is the highest-signal field because it is
+        unambiguous.
 
         Parameters
         ----------
-        query : Query
+        name : str
+            The company or person name. Required and must be non-empty.
 
-        context : typing.Optional[Context]
+        entity_type : typing.Optional[EntityType]
+
+        description : typing.Optional[str]
+            Free-text description of the entity used for disambiguation when similar names exist.
+
+        additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[InitializeResponseDto]
-            Suggestions retrieved successfully
+        AsyncHttpResponse[CreateEntityResponse]
+            Entity created successfully.
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "catchAll/initialize",
+            "catchAll/entities",
             method="POST",
             json={
-                "query": query,
-                "context": context,
+                "name": name,
+                "entity_type": entity_type,
+                "description": description,
+                "additional_attributes": convert_and_respect_annotation_metadata(
+                    object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -664,132 +671,9 @@ class AsyncRawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    InitializeResponseDto,
+                    CreateEntityResponse,
                     parse_obj_as(
-                        type_=InitializeResponseDto,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ValidationErrorResponse,
-                        parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def create_job(
-        self,
-        *,
-        query: Query,
-        context: typing.Optional[Context] = OMIT,
-        limit: typing.Optional[Limit] = OMIT,
-        start_date: typing.Optional[StartDate] = OMIT,
-        end_date: typing.Optional[EndDate] = OMIT,
-        validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
-        enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
-        mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
-        connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[SubmitResponseDto]:
-        """
-        Submit a query to create a new processing job.
-
-        Parameters
-        ----------
-        query : Query
-
-        context : typing.Optional[Context]
-
-        limit : typing.Optional[Limit]
-
-        start_date : typing.Optional[StartDate]
-
-        end_date : typing.Optional[EndDate]
-
-        validators : typing.Optional[typing.Sequence[ValidatorSchema]]
-            Custom validators for filtering web page clusters.
-
-            If not provided, validators are generated automatically based on the query.
-
-        enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
-            Custom enrichment fields for data extraction.
-
-            If not provided, enrichments are generated automatically based on the query.
-
-        mode : typing.Optional[SubmitRequestDtoMode]
-            Job processing mode.
-
-            - `base`: Full pipeline with validation and enrichment.
-            - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
-
-        connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
-
-            The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[SubmitResponseDto]
-            Job created successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            "catchAll/submit",
-            method="POST",
-            json={
-                "query": query,
-                "context": context,
-                "limit": limit,
-                "start_date": start_date,
-                "end_date": end_date,
-                "validators": convert_and_respect_annotation_metadata(
-                    object_=validators, annotation=typing.Sequence[ValidatorSchema], direction="write"
-                ),
-                "enrichments": convert_and_respect_annotation_metadata(
-                    object_=enrichments, annotation=typing.Sequence[EnrichmentSchema], direction="write"
-                ),
-                "mode": mode,
-                "connected_dataset_ids": connected_dataset_ids,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    SubmitResponseDto,
-                    parse_obj_as(
-                        type_=SubmitResponseDto,  # type: ignore
+                        type_=CreateEntityResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -816,13 +700,81 @@ class AsyncRawJobsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def create_entities_batch(
+        self, *, entities: typing.Sequence[CreateEntityRequest], request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[CreateEntitiesBatchResponse]:
+        """
+        Creates multiple entities in a single request. Each entity is
+        processed independently — a failure in one does not affect others.
+
+        Returns an array of `{id, status}` objects in the same order as
+        the input array.
+
+        Parameters
+        ----------
+        entities : typing.Sequence[CreateEntityRequest]
+            Array of entities to create. Each item follows the same schema
+            as single entity creation.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CreateEntitiesBatchResponse]
+            Batch of entities created successfully.
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "catchAll/entities/batch",
+            method="POST",
+            json={
+                "entities": convert_and_respect_annotation_metadata(
+                    object_=entities, annotation=typing.Sequence[CreateEntityRequest], direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreateEntitiesBatchResponse,
+                    parse_obj_as(
+                        type_=CreateEntitiesBatchResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ValidationErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -836,36 +788,36 @@ class AsyncRawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_job_status(
-        self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[StatusResponseDto]:
+    async def get_entity(
+        self, entity_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[EntityResponse]:
         """
-        Retrieve the current processing status of a job.
+        Returns a single entity by ID with all attributes and current status.
 
         Parameters
         ----------
-        job_id : str
-            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+        entity_id : str
+            Unique entity identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[StatusResponseDto]
-            Status retrieved successfully
+        AsyncHttpResponse[EntityResponse]
+            Full entity object with all attributes and metadata.
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/status/{encode_path_param(job_id)}",
+            f"catchAll/entities/{encode_path_param(entity_id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    StatusResponseDto,
+                    EntityResponse,
                     parse_obj_as(
-                        type_=StatusResponseDto,  # type: ignore
+                        type_=EntityResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -901,55 +853,33 @@ class AsyncRawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_job_results(
-        self,
-        job_id: str,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PullJobResponseDto]:
+    async def delete_entity(
+        self, entity_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[None]:
         """
-        Retrieve the final results for a completed job.
+        Permanently deletes an entity. The entity is removed from all
+        datasets and the search index. This operation cannot be undone.
 
         Parameters
         ----------
-        job_id : str
-            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
-
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of records per page.
+        entity_id : str
+            Unique entity identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[PullJobResponseDto]
-            Results retrieved successfully
+        AsyncHttpResponse[None]
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/pull/{encode_path_param(job_id)}",
-            method="GET",
-            params={
-                "page": page,
-                "page_size": page_size,
-            },
+            f"catchAll/entities/{encode_path_param(entity_id)}",
+            method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    PullJobResponseDto,
-                    parse_obj_as(
-                        type_=PullJobResponseDto,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
+                return AsyncHttpResponse(response=_response, data=None)
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -981,38 +911,48 @@ class AsyncRawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def continue_job(
+    async def update_entity(
         self,
+        entity_id: str,
         *,
-        job_id: str,
-        new_limit: typing.Optional[int] = OMIT,
+        name: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ContinueResponseDto]:
+    ) -> AsyncHttpResponse[EntityResponse]:
         """
-        Continue an existing job to process more records beyond the initial limit.
+        Updates one or more fields of an existing entity.
 
         Parameters
         ----------
-        job_id : str
-            Job identifier of the completed job to continue.
+        entity_id : str
+            Unique entity identifier.
 
-        new_limit : typing.Optional[int]
-            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
+        name : typing.Optional[str]
+            Updated entity name.
+
+        description : typing.Optional[str]
+            Updated description.
+
+        additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[ContinueResponseDto]
-            Job continuation accepted
+        AsyncHttpResponse[EntityResponse]
+            Full entity object with all attributes and metadata.
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "catchAll/continue",
-            method="POST",
+            f"catchAll/entities/{encode_path_param(entity_id)}",
+            method="PATCH",
             json={
-                "job_id": job_id,
-                "new_limit": new_limit,
+                "name": name,
+                "description": description,
+                "additional_attributes": convert_and_respect_annotation_metadata(
+                    object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -1023,9 +963,9 @@ class AsyncRawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ContinueResponseDto,
+                    EntityResponse,
                     parse_obj_as(
-                        type_=ContinueResponseDto,  # type: ignore
+                        type_=EntityResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1052,13 +992,13 @@ class AsyncRawJobsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ValidationErrorResponse,
+                        Error,
                         parse_obj_as(
-                            type_=ValidationErrorResponse,  # type: ignore
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
