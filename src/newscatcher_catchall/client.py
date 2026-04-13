@@ -10,6 +10,8 @@ from .core.logging import LogConfig, Logger
 from .environment import CatchAllApiEnvironment
 
 if typing.TYPE_CHECKING:
+    from .datasets.client import AsyncDatasetsClient, DatasetsClient
+    from .entities.client import AsyncEntitiesClient, EntitiesClient
     from .jobs.client import AsyncJobsClient, JobsClient
     from .meta.client import AsyncMetaClient, MetaClient
     from .monitors.client import AsyncMonitorsClient, MonitorsClient
@@ -87,6 +89,8 @@ class CatchAllApi:
         )
         self._jobs: typing.Optional[JobsClient] = None
         self._monitors: typing.Optional[MonitorsClient] = None
+        self._entities: typing.Optional[EntitiesClient] = None
+        self._datasets: typing.Optional[DatasetsClient] = None
         self._meta: typing.Optional[MetaClient] = None
 
     @property
@@ -106,12 +110,46 @@ class CatchAllApi:
         return self._monitors
 
     @property
+    def entities(self):
+        if self._entities is None:
+            from .entities.client import EntitiesClient  # noqa: E402
+
+            self._entities = EntitiesClient(client_wrapper=self._client_wrapper)
+        return self._entities
+
+    @property
+    def datasets(self):
+        if self._datasets is None:
+            from .datasets.client import DatasetsClient  # noqa: E402
+
+            self._datasets = DatasetsClient(client_wrapper=self._client_wrapper)
+        return self._datasets
+
+    @property
     def meta(self):
         if self._meta is None:
             from .meta.client import MetaClient  # noqa: E402
 
             self._meta = MetaClient(client_wrapper=self._client_wrapper)
         return self._meta
+
+
+def _make_default_async_client(
+    timeout: typing.Optional[float],
+    follow_redirects: typing.Optional[bool],
+) -> httpx.AsyncClient:
+    try:
+        import httpx_aiohttp  # type: ignore[import-not-found]
+    except ImportError:
+        pass
+    else:
+        if follow_redirects is not None:
+            return httpx_aiohttp.HttpxAiohttpClient(timeout=timeout, follow_redirects=follow_redirects)
+        return httpx_aiohttp.HttpxAiohttpClient(timeout=timeout)
+
+    if follow_redirects is not None:
+        return httpx.AsyncClient(timeout=timeout, follow_redirects=follow_redirects)
+    return httpx.AsyncClient(timeout=timeout)
 
 
 class AsyncCatchAllApi:
@@ -178,14 +216,14 @@ class AsyncCatchAllApi:
             headers=headers,
             httpx_client=httpx_client
             if httpx_client is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout, follow_redirects=follow_redirects)
-            if follow_redirects is not None
-            else httpx.AsyncClient(timeout=_defaulted_timeout),
+            else _make_default_async_client(timeout=_defaulted_timeout, follow_redirects=follow_redirects),
             timeout=_defaulted_timeout,
             logging=logging,
         )
         self._jobs: typing.Optional[AsyncJobsClient] = None
         self._monitors: typing.Optional[AsyncMonitorsClient] = None
+        self._entities: typing.Optional[AsyncEntitiesClient] = None
+        self._datasets: typing.Optional[AsyncDatasetsClient] = None
         self._meta: typing.Optional[AsyncMetaClient] = None
 
     @property
@@ -203,6 +241,22 @@ class AsyncCatchAllApi:
 
             self._monitors = AsyncMonitorsClient(client_wrapper=self._client_wrapper)
         return self._monitors
+
+    @property
+    def entities(self):
+        if self._entities is None:
+            from .entities.client import AsyncEntitiesClient  # noqa: E402
+
+            self._entities = AsyncEntitiesClient(client_wrapper=self._client_wrapper)
+        return self._entities
+
+    @property
+    def datasets(self):
+        if self._datasets is None:
+            from .datasets.client import AsyncDatasetsClient  # noqa: E402
+
+            self._datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
+        return self._datasets
 
     @property
     def meta(self):
