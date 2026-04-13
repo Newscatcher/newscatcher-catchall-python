@@ -39,6 +39,44 @@ class JobsClient:
         """
         return self._raw_client
 
+    def get_user_jobs(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListUserJobsResponseDto:
+        """
+        Returns all jobs created by the authenticated user.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListUserJobsResponseDto
+            User jobs retrieved successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.get_user_jobs()
+        """
+        _response = self._raw_client.get_user_jobs(page=page, page_size=page_size, request_options=request_options)
+        return _response.data
+
     def initialize(
         self,
         *,
@@ -89,6 +127,7 @@ class JobsClient:
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
+        connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -121,6 +160,11 @@ class JobsClient:
 
             - `base`: Full pipeline with validation and enrichment.
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
+
+        connected_dataset_ids : typing.Optional[typing.Sequence[str]]
+            Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+
+            The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -161,49 +205,9 @@ class JobsClient:
             validators=validators,
             enrichments=enrichments,
             mode=mode,
+            connected_dataset_ids=connected_dataset_ids,
             request_options=request_options,
         )
-        return _response.data
-
-    def continue_job(
-        self,
-        *,
-        job_id: str,
-        new_limit: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ContinueResponseDto:
-        """
-        Continue an existing job to process more records beyond the initial limit.
-
-        Parameters
-        ----------
-        job_id : str
-            Job identifier of the completed job to continue.
-
-        new_limit : typing.Optional[int]
-            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ContinueResponseDto
-            Job continuation accepted
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.jobs.continue_job(
-            job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
-            new_limit=100,
-        )
-        """
-        _response = self._raw_client.continue_job(job_id=job_id, new_limit=new_limit, request_options=request_options)
         return _response.data
 
     def get_job_status(
@@ -237,44 +241,6 @@ class JobsClient:
         )
         """
         _response = self._raw_client.get_job_status(job_id, request_options=request_options)
-        return _response.data
-
-    def get_user_jobs(
-        self,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListUserJobsResponseDto:
-        """
-        Returns all jobs created by the authenticated user.
-
-        Parameters
-        ----------
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of records per page.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ListUserJobsResponseDto
-            User jobs retrieved successfully
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.jobs.get_user_jobs()
-        """
-        _response = self._raw_client.get_user_jobs(page=page, page_size=page_size, request_options=request_options)
         return _response.data
 
     def get_job_results(
@@ -323,6 +289,47 @@ class JobsClient:
         )
         return _response.data
 
+    def continue_job(
+        self,
+        *,
+        job_id: str,
+        new_limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ContinueResponseDto:
+        """
+        Continue an existing job to process more records beyond the initial limit.
+
+        Parameters
+        ----------
+        job_id : str
+            Job identifier of the completed job to continue.
+
+        new_limit : typing.Optional[int]
+            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ContinueResponseDto
+            Job continuation accepted
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.continue_job(
+            job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
+            new_limit=100,
+        )
+        """
+        _response = self._raw_client.continue_job(job_id=job_id, new_limit=new_limit, request_options=request_options)
+        return _response.data
+
 
 class AsyncJobsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -338,6 +345,54 @@ class AsyncJobsClient:
         AsyncRawJobsClient
         """
         return self._raw_client
+
+    async def get_user_jobs(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListUserJobsResponseDto:
+        """
+        Returns all jobs created by the authenticated user.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListUserJobsResponseDto
+            User jobs retrieved successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.jobs.get_user_jobs()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_user_jobs(
+            page=page, page_size=page_size, request_options=request_options
+        )
+        return _response.data
 
     async def initialize(
         self,
@@ -397,6 +452,7 @@ class AsyncJobsClient:
         validators: typing.Optional[typing.Sequence[ValidatorSchema]] = OMIT,
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
+        connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -429,6 +485,11 @@ class AsyncJobsClient:
 
             - `base`: Full pipeline with validation and enrichment.
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
+
+        connected_dataset_ids : typing.Optional[typing.Sequence[str]]
+            Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+
+            The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -476,58 +537,8 @@ class AsyncJobsClient:
             validators=validators,
             enrichments=enrichments,
             mode=mode,
+            connected_dataset_ids=connected_dataset_ids,
             request_options=request_options,
-        )
-        return _response.data
-
-    async def continue_job(
-        self,
-        *,
-        job_id: str,
-        new_limit: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ContinueResponseDto:
-        """
-        Continue an existing job to process more records beyond the initial limit.
-
-        Parameters
-        ----------
-        job_id : str
-            Job identifier of the completed job to continue.
-
-        new_limit : typing.Optional[int]
-            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ContinueResponseDto
-            Job continuation accepted
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.jobs.continue_job(
-                job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
-                new_limit=100,
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.continue_job(
-            job_id=job_id, new_limit=new_limit, request_options=request_options
         )
         return _response.data
 
@@ -570,54 +581,6 @@ class AsyncJobsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.get_job_status(job_id, request_options=request_options)
-        return _response.data
-
-    async def get_user_jobs(
-        self,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListUserJobsResponseDto:
-        """
-        Returns all jobs created by the authenticated user.
-
-        Parameters
-        ----------
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of records per page.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ListUserJobsResponseDto
-            User jobs retrieved successfully
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.jobs.get_user_jobs()
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.get_user_jobs(
-            page=page, page_size=page_size, request_options=request_options
-        )
         return _response.data
 
     async def get_job_results(
@@ -671,5 +634,56 @@ class AsyncJobsClient:
         """
         _response = await self._raw_client.get_job_results(
             job_id, page=page, page_size=page_size, request_options=request_options
+        )
+        return _response.data
+
+    async def continue_job(
+        self,
+        *,
+        job_id: str,
+        new_limit: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ContinueResponseDto:
+        """
+        Continue an existing job to process more records beyond the initial limit.
+
+        Parameters
+        ----------
+        job_id : str
+            Job identifier of the completed job to continue.
+
+        new_limit : typing.Optional[int]
+            New record limit for continued processing. Must be greater than the previous limit. If not provided, defaults to the plan maximum.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ContinueResponseDto
+            Job continuation accepted
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.jobs.continue_job(
+                job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
+                new_limit=100,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.continue_job(
+            job_id=job_id, new_limit=new_limit, request_options=request_options
         )
         return _response.data

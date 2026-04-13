@@ -12,6 +12,7 @@ from .monitor_citation import MonitorCitation
 class MonitorRecord(BaseRecord):
     """
     Record with monitor-specific metadata. Used in monitor results and webhook payloads.
+
     Includes timestamps tracking when records were added and updated, and citations include job tracking.
     """
 

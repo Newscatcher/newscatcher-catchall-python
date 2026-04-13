@@ -34,6 +34,44 @@ class MonitorsClient:
         """
         return self._raw_client
 
+    def list_monitors(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListMonitorsResponseDto:
+        """
+        Returns all monitors created by the authenticated user.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of records per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListMonitorsResponseDto
+            List of user monitors
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.list_monitors()
+        """
+        _response = self._raw_client.list_monitors(page=page, page_size=page_size, request_options=request_options)
+        return _response.data
+
     def create_monitor(
         self,
         *,
@@ -107,6 +145,155 @@ class MonitorsClient:
         )
         return _response.data
 
+    def pull_monitor_results(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> PullMonitorResponseDto:
+        """
+        Retrieve aggregated results from all jobs executed by a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PullMonitorResponseDto
+            Monitor results retrieved successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.pull_monitor_results(
+            monitor_id="monitor_id",
+        )
+        """
+        _response = self._raw_client.pull_monitor_results(monitor_id, request_options=request_options)
+        return _response.data
+
+    def list_monitor_jobs(
+        self,
+        monitor_id: str,
+        *,
+        sort: typing.Optional[ListMonitorJobsRequestSort] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListMonitorJobsResponse:
+        """
+        Return all jobs executed by a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        sort : typing.Optional[ListMonitorJobsRequestSort]
+            Sort by start_date (asc or desc).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListMonitorJobsResponse
+            List of monitor jobs
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.list_monitor_jobs(
+            monitor_id="monitor_id",
+        )
+        """
+        _response = self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
+        return _response.data
+
+    def enable_monitor(
+        self,
+        monitor_id: str,
+        *,
+        backfill: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> EnableMonitorResponse:
+        """
+        Resume scheduled job execution for a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EnableMonitorResponse
+            Monitor enabled successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.enable_monitor(
+            monitor_id="monitor_id",
+            backfill=True,
+        )
+        """
+        _response = self._raw_client.enable_monitor(monitor_id, backfill=backfill, request_options=request_options)
+        return _response.data
+
+    def disable_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DisableMonitorResponse:
+        """
+        Stop scheduled job execution for a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DisableMonitorResponse
+            Monitor disabled successfully
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.disable_monitor(
+            monitor_id="monitor_id",
+        )
+        """
+        _response = self._raw_client.disable_monitor(monitor_id, request_options=request_options)
+        return _response.data
+
     def update_monitor(
         self,
         monitor_id: str,
@@ -158,156 +345,23 @@ class MonitorsClient:
         )
         return _response.data
 
-    def list_monitor_jobs(
-        self,
-        monitor_id: str,
-        *,
-        sort: typing.Optional[ListMonitorJobsRequestSort] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListMonitorJobsResponse:
+
+class AsyncMonitorsClient:
+    def __init__(self, *, client_wrapper: AsyncClientWrapper):
+        self._raw_client = AsyncRawMonitorsClient(client_wrapper=client_wrapper)
+
+    @property
+    def with_raw_response(self) -> AsyncRawMonitorsClient:
         """
-        Return all jobs executed by a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        sort : typing.Optional[ListMonitorJobsRequestSort]
-            Sort by start_date (asc or desc).
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
+        Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        ListMonitorJobsResponse
-            List of monitor jobs
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.monitors.list_monitor_jobs(
-            monitor_id="monitor_id",
-        )
+        AsyncRawMonitorsClient
         """
-        _response = self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
-        return _response.data
+        return self._raw_client
 
-    def pull_monitor_results(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> PullMonitorResponseDto:
-        """
-        Retrieve aggregated results from all jobs executed by a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        PullMonitorResponseDto
-            Monitor results retrieved successfully
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.monitors.pull_monitor_results(
-            monitor_id="monitor_id",
-        )
-        """
-        _response = self._raw_client.pull_monitor_results(monitor_id, request_options=request_options)
-        return _response.data
-
-    def disable_monitor(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DisableMonitorResponse:
-        """
-        Stop scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DisableMonitorResponse
-            Monitor disabled successfully
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.monitors.disable_monitor(
-            monitor_id="monitor_id",
-        )
-        """
-        _response = self._raw_client.disable_monitor(monitor_id, request_options=request_options)
-        return _response.data
-
-    def enable_monitor(
-        self,
-        monitor_id: str,
-        *,
-        backfill: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EnableMonitorResponse:
-        """
-        Resume scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        backfill : typing.Optional[bool]
-            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
-
-            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        EnableMonitorResponse
-            Monitor enabled successfully
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.monitors.enable_monitor(
-            monitor_id="monitor_id",
-            backfill=True,
-        )
-        """
-        _response = self._raw_client.enable_monitor(monitor_id, backfill=backfill, request_options=request_options)
-        return _response.data
-
-    def list_monitors(
+    async def list_monitors(
         self,
         *,
         page: typing.Optional[int] = None,
@@ -335,31 +389,25 @@ class MonitorsClient:
 
         Examples
         --------
-        from newscatcher_catchall import CatchAllApi
+        import asyncio
 
-        client = CatchAllApi(
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.list_monitors()
+
+
+        async def main() -> None:
+            await client.monitors.list_monitors()
+
+
+        asyncio.run(main())
         """
-        _response = self._raw_client.list_monitors(page=page, page_size=page_size, request_options=request_options)
+        _response = await self._raw_client.list_monitors(
+            page=page, page_size=page_size, request_options=request_options
+        )
         return _response.data
-
-
-class AsyncMonitorsClient:
-    def __init__(self, *, client_wrapper: AsyncClientWrapper):
-        self._raw_client = AsyncRawMonitorsClient(client_wrapper=client_wrapper)
-
-    @property
-    def with_raw_response(self) -> AsyncRawMonitorsClient:
-        """
-        Retrieves a raw implementation of this client that returns raw responses.
-
-        Returns
-        -------
-        AsyncRawMonitorsClient
-        """
-        return self._raw_client
 
     async def create_monitor(
         self,
@@ -442,6 +490,189 @@ class AsyncMonitorsClient:
         )
         return _response.data
 
+    async def pull_monitor_results(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> PullMonitorResponseDto:
+        """
+        Retrieve aggregated results from all jobs executed by a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PullMonitorResponseDto
+            Monitor results retrieved successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.pull_monitor_results(
+                monitor_id="monitor_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.pull_monitor_results(monitor_id, request_options=request_options)
+        return _response.data
+
+    async def list_monitor_jobs(
+        self,
+        monitor_id: str,
+        *,
+        sort: typing.Optional[ListMonitorJobsRequestSort] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListMonitorJobsResponse:
+        """
+        Return all jobs executed by a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        sort : typing.Optional[ListMonitorJobsRequestSort]
+            Sort by start_date (asc or desc).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListMonitorJobsResponse
+            List of monitor jobs
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.list_monitor_jobs(
+                monitor_id="monitor_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
+        return _response.data
+
+    async def enable_monitor(
+        self,
+        monitor_id: str,
+        *,
+        backfill: typing.Optional[bool] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> EnableMonitorResponse:
+        """
+        Resume scheduled job execution for a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        backfill : typing.Optional[bool]
+            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
+
+            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EnableMonitorResponse
+            Monitor enabled successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.enable_monitor(
+                monitor_id="monitor_id",
+                backfill=True,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.enable_monitor(
+            monitor_id, backfill=backfill, request_options=request_options
+        )
+        return _response.data
+
+    async def disable_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DisableMonitorResponse:
+        """
+        Stop scheduled job execution for a monitor.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DisableMonitorResponse
+            Monitor disabled successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.disable_monitor(
+                monitor_id="monitor_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.disable_monitor(monitor_id, request_options=request_options)
+        return _response.data
+
     async def update_monitor(
         self,
         monitor_id: str,
@@ -498,236 +729,5 @@ class AsyncMonitorsClient:
         """
         _response = await self._raw_client.update_monitor(
             monitor_id, webhook=webhook, limit=limit, request_options=request_options
-        )
-        return _response.data
-
-    async def list_monitor_jobs(
-        self,
-        monitor_id: str,
-        *,
-        sort: typing.Optional[ListMonitorJobsRequestSort] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListMonitorJobsResponse:
-        """
-        Return all jobs executed by a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        sort : typing.Optional[ListMonitorJobsRequestSort]
-            Sort by start_date (asc or desc).
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ListMonitorJobsResponse
-            List of monitor jobs
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.monitors.list_monitor_jobs(
-                monitor_id="monitor_id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
-        return _response.data
-
-    async def pull_monitor_results(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> PullMonitorResponseDto:
-        """
-        Retrieve aggregated results from all jobs executed by a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        PullMonitorResponseDto
-            Monitor results retrieved successfully
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.monitors.pull_monitor_results(
-                monitor_id="monitor_id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.pull_monitor_results(monitor_id, request_options=request_options)
-        return _response.data
-
-    async def disable_monitor(
-        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DisableMonitorResponse:
-        """
-        Stop scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DisableMonitorResponse
-            Monitor disabled successfully
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.monitors.disable_monitor(
-                monitor_id="monitor_id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.disable_monitor(monitor_id, request_options=request_options)
-        return _response.data
-
-    async def enable_monitor(
-        self,
-        monitor_id: str,
-        *,
-        backfill: typing.Optional[bool] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> EnableMonitorResponse:
-        """
-        Resume scheduled job execution for a monitor.
-
-        Parameters
-        ----------
-        monitor_id : str
-            Monitor identifier.
-
-        backfill : typing.Optional[bool]
-            If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
-
-            If false, no gap filling occurs and the first run uses the current cron window only — the last job's age does not matter.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        EnableMonitorResponse
-            Monitor enabled successfully
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.monitors.enable_monitor(
-                monitor_id="monitor_id",
-                backfill=True,
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.enable_monitor(
-            monitor_id, backfill=backfill, request_options=request_options
-        )
-        return _response.data
-
-    async def list_monitors(
-        self,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListMonitorsResponseDto:
-        """
-        Returns all monitors created by the authenticated user.
-
-        Parameters
-        ----------
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of records per page.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ListMonitorsResponseDto
-            List of user monitors
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.monitors.list_monitors()
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.list_monitors(
-            page=page, page_size=page_size, request_options=request_options
         )
         return _response.data
