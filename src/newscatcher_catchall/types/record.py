@@ -6,12 +6,19 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from .base_record import BaseRecord
 from .citation import Citation
+from .connected_entity import ConnectedEntity
 
 
 class Record(BaseRecord):
     citations: typing.List[Citation] = pydantic.Field()
     """
     Source documents that were used to extract this record.
+    """
+
+    connected_entities: typing.Optional[typing.List[ConnectedEntity]] = pydantic.Field(default=None)
+    """
+    Entities from the connected dataset that are relevant to this record.
+    Only present when the job was submitted with `connected_dataset_ids`.
     """
 
     if IS_PYDANTIC_V2:
