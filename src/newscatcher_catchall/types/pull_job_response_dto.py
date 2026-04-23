@@ -7,6 +7,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .pull_job_response_dto_date_range import PullJobResponseDtoDateRange
 from .pull_job_response_dto_mode import PullJobResponseDtoMode
 from .record import Record
+from .sharing_info import SharingInfo
 
 
 class PullJobResponseDto(UniversalBaseModel):
@@ -91,6 +92,11 @@ class PullJobResponseDto(UniversalBaseModel):
     mode: typing.Optional[PullJobResponseDtoMode] = pydantic.Field(default=None)
     """
     Processing mode used for this job.
+    """
+
+    sharing_info: typing.Optional[SharingInfo] = pydantic.Field(default=None)
+    """
+    Present when the job was shared with the authenticated user by another organization member. `null` when the user owns the job.
     """
 
     all_records: typing.Optional[typing.List[Record]] = pydantic.Field(default=None)

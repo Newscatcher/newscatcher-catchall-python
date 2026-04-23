@@ -67,6 +67,22 @@ client.jobs.get_user_jobs()
 <dl>
 <dd>
 
+**search:** `typing.Optional[str]` — Filter results by text (case-insensitive substring match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ownership:** `typing.Optional[OwnershipFilter]` — Filter results by ownership. Defaults to `all`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -299,7 +315,7 @@ Job processing mode.
 
 **connected_dataset_ids:** `typing.Optional[typing.List[str]]` 
 
-Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+Dataset IDs to connect to this job. When provided, activates Company Watchlist mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
 
 The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
     
@@ -565,6 +581,85 @@ client.jobs.continue_job(
 </dl>
 </details>
 
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">delete_job</a>(...) -> DeleteJobResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Soft-deletes a job. The job is flagged as deleted and no longer
+appears in list results. The underlying data is retained.
+
+Only the job owner can delete a job. Returns `404` if the job is not
+found or does not belong to the authenticated user.
+
+Deleting an already-deleted job returns `200`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.jobs.delete_job(
+    job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**job_id:** `str` — Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Monitors
 <details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitors</a>(...) -> ListMonitorsResponseDto</code></summary>
 <dl>
@@ -626,6 +721,22 @@ client.monitors.list_monitors()
 <dd>
 
 **page_size:** `typing.Optional[int]` — Number of records per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Filter results by text (case-insensitive substring match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ownership:** `typing.Optional[OwnershipFilter]` — Filter results by ownership. Defaults to `all`.
     
 </dd>
 </dl>
@@ -926,6 +1037,79 @@ client.monitors.list_monitor_jobs(
 </dl>
 </details>
 
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">get_monitor_status_history</a>(...) -> MonitorStatusHistoryResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.monitors.get_monitor_status_history(
+    monitor_id="monitor_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**monitor_id:** `str` — Monitor identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">enable_monitor</a>(...) -> EnableMonitorResponse</code></summary>
 <dl>
 <dd>
@@ -1048,6 +1232,86 @@ client = CatchAllApi(
 )
 
 client.monitors.disable_monitor(
+    monitor_id="monitor_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**monitor_id:** `str` — Monitor identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">delete_monitor</a>(...) -> DeleteMonitorResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Soft-deletes a monitor. The monitor is flagged as deleted, stops
+executing scheduled jobs immediately, and no longer appears in list
+results.
+
+Only the monitor owner can delete a monitor. Returns `404` if the
+monitor is not found or does not belong to the authenticated user.
+
+Deleting an already-deleted monitor returns `200`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.monitors.delete_monitor(
     monitor_id="monitor_id",
 )
 
@@ -1860,6 +2124,14 @@ client.datasets.list_datasets(
 <dd>
 
 **sort_order:** `typing.Optional[SortOrder]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ownership:** `typing.Optional[OwnershipFilter]` — Filter results by ownership. Defaults to `all`.
     
 </dd>
 </dl>
