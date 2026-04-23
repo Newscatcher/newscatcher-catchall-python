@@ -16,6 +16,7 @@ from ..types.entity_sort_by import EntitySortBy
 from ..types.entity_status import EntityStatus
 from ..types.entity_type import EntityType
 from ..types.manage_entities_response import ManageEntitiesResponse
+from ..types.ownership_filter import OwnershipFilter
 from ..types.sort_order import SortOrder
 from ..types.upload_csv_to_dataset_response import UploadCsvToDatasetResponse
 from .raw_client import AsyncRawDatasetsClient, RawDatasetsClient
@@ -48,6 +49,7 @@ class DatasetsClient:
         latest_status: typing.Optional[DatasetStatus] = None,
         sort_by: typing.Optional[DatasetSortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetListResponse:
         """
@@ -72,6 +74,9 @@ class DatasetsClient:
         sort_by : typing.Optional[DatasetSortBy]
 
         sort_order : typing.Optional[SortOrder]
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -99,6 +104,7 @@ class DatasetsClient:
             latest_status=latest_status,
             sort_by=sort_by,
             sort_order=sort_order,
+            ownership=ownership,
             request_options=request_options,
         )
         return _response.data
@@ -590,6 +596,7 @@ class AsyncDatasetsClient:
         latest_status: typing.Optional[DatasetStatus] = None,
         sort_by: typing.Optional[DatasetSortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetListResponse:
         """
@@ -614,6 +621,9 @@ class AsyncDatasetsClient:
         sort_by : typing.Optional[DatasetSortBy]
 
         sort_order : typing.Optional[SortOrder]
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -649,6 +659,7 @@ class AsyncDatasetsClient:
             latest_status=latest_status,
             sort_by=sort_by,
             sort_order=sort_order,
+            ownership=ownership,
             request_options=request_options,
         )
         return _response.data

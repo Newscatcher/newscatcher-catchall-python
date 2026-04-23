@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class ConnectedEntity(UniversalBaseModel):
     """
-    A company entity matched to a record in a Company Search job, with
+    A company entity matched to a record in a Company Watchlist job, with
     a relevance score and explanation.
 
     Only entities with `ed_score` ≥ 1 appear in results. Entities scored

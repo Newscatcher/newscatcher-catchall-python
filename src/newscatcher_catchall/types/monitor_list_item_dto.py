@@ -5,6 +5,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .sharing_info import SharingInfo
 from .webhook_dto import WebhookDto
 
 
@@ -57,6 +58,11 @@ class MonitorListItemDto(UniversalBaseModel):
     user_key: typing.Optional[str] = pydantic.Field(default=None)
     """
     Masked API key associated with this monitor.
+    """
+
+    sharing_info: typing.Optional[SharingInfo] = pydantic.Field(default=None)
+    """
+    Present when this monitor was shared with the authenticated user. Omitted when the user owns the monitor.
     """
 
     if IS_PYDANTIC_V2:

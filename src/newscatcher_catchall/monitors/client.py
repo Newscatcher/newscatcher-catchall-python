@@ -5,7 +5,10 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.create_monitor_response_dto import CreateMonitorResponseDto
+from ..types.delete_monitor_response_dto import DeleteMonitorResponseDto
 from ..types.list_monitors_response_dto import ListMonitorsResponseDto
+from ..types.monitor_status_history_response_dto import MonitorStatusHistoryResponseDto
+from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
 from ..types.webhook_dto import WebhookDto
@@ -39,6 +42,8 @@ class MonitorsClient:
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorsResponseDto:
         """
@@ -51,6 +56,12 @@ class MonitorsClient:
 
         page_size : typing.Optional[int]
             Number of records per page.
+
+        search : typing.Optional[str]
+            Filter results by text (case-insensitive substring match).
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -69,7 +80,9 @@ class MonitorsClient:
         )
         client.monitors.list_monitors()
         """
-        _response = self._raw_client.list_monitors(page=page, page_size=page_size, request_options=request_options)
+        _response = self._raw_client.list_monitors(
+            page=page, page_size=page_size, search=search, ownership=ownership, request_options=request_options
+        )
         return _response.data
 
     def create_monitor(
@@ -218,6 +231,39 @@ class MonitorsClient:
         _response = self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
         return _response.data
 
+    def get_monitor_status_history(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> MonitorStatusHistoryResponseDto:
+        """
+        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        MonitorStatusHistoryResponseDto
+            Monitor status history retrieved successfully.
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.get_monitor_status_history(
+            monitor_id="monitor_id",
+        )
+        """
+        _response = self._raw_client.get_monitor_status_history(monitor_id, request_options=request_options)
+        return _response.data
+
     def enable_monitor(
         self,
         monitor_id: str,
@@ -294,6 +340,46 @@ class MonitorsClient:
         _response = self._raw_client.disable_monitor(monitor_id, request_options=request_options)
         return _response.data
 
+    def delete_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteMonitorResponseDto:
+        """
+        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        executing scheduled jobs immediately, and no longer appears in list
+        results.
+
+        Only the monitor owner can delete a monitor. Returns `404` if the
+        monitor is not found or does not belong to the authenticated user.
+
+        Deleting an already-deleted monitor returns `200`.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteMonitorResponseDto
+            Monitor deleted successfully (or already deleted).
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.delete_monitor(
+            monitor_id="monitor_id",
+        )
+        """
+        _response = self._raw_client.delete_monitor(monitor_id, request_options=request_options)
+        return _response.data
+
     def update_monitor(
         self,
         monitor_id: str,
@@ -366,6 +452,8 @@ class AsyncMonitorsClient:
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorsResponseDto:
         """
@@ -378,6 +466,12 @@ class AsyncMonitorsClient:
 
         page_size : typing.Optional[int]
             Number of records per page.
+
+        search : typing.Optional[str]
+            Filter results by text (case-insensitive substring match).
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -405,7 +499,7 @@ class AsyncMonitorsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.list_monitors(
-            page=page, page_size=page_size, request_options=request_options
+            page=page, page_size=page_size, search=search, ownership=ownership, request_options=request_options
         )
         return _response.data
 
@@ -579,6 +673,47 @@ class AsyncMonitorsClient:
         _response = await self._raw_client.list_monitor_jobs(monitor_id, sort=sort, request_options=request_options)
         return _response.data
 
+    async def get_monitor_status_history(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> MonitorStatusHistoryResponseDto:
+        """
+        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        MonitorStatusHistoryResponseDto
+            Monitor status history retrieved successfully.
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.get_monitor_status_history(
+                monitor_id="monitor_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_monitor_status_history(monitor_id, request_options=request_options)
+        return _response.data
+
     async def enable_monitor(
         self,
         monitor_id: str,
@@ -671,6 +806,54 @@ class AsyncMonitorsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.disable_monitor(monitor_id, request_options=request_options)
+        return _response.data
+
+    async def delete_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteMonitorResponseDto:
+        """
+        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        executing scheduled jobs immediately, and no longer appears in list
+        results.
+
+        Only the monitor owner can delete a monitor. Returns `404` if the
+        monitor is not found or does not belong to the authenticated user.
+
+        Deleting an already-deleted monitor returns `200`.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteMonitorResponseDto
+            Monitor deleted successfully (or already deleted).
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.delete_monitor(
+                monitor_id="monitor_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_monitor(monitor_id, request_options=request_options)
         return _response.data
 
     async def update_monitor(

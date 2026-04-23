@@ -13,10 +13,14 @@ from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
+from ..errors.unauthorized_error import UnauthorizedError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.create_monitor_response_dto import CreateMonitorResponseDto
+from ..types.delete_monitor_response_dto import DeleteMonitorResponseDto
 from ..types.error import Error
 from ..types.list_monitors_response_dto import ListMonitorsResponseDto
+from ..types.monitor_status_history_response_dto import MonitorStatusHistoryResponseDto
+from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
@@ -40,6 +44,8 @@ class RawMonitorsClient:
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListMonitorsResponseDto]:
         """
@@ -52,6 +58,12 @@ class RawMonitorsClient:
 
         page_size : typing.Optional[int]
             Number of records per page.
+
+        search : typing.Optional[str]
+            Filter results by text (case-insensitive substring match).
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -67,6 +79,8 @@ class RawMonitorsClient:
             params={
                 "page": page,
                 "page_size": page_size,
+                "search": search,
+                "ownership": ownership,
             },
             request_options=request_options,
         )
@@ -343,6 +357,71 @@ class RawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def get_monitor_status_history(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[MonitorStatusHistoryResponseDto]:
+        """
+        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[MonitorStatusHistoryResponseDto]
+            Monitor status history retrieved successfully.
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/status",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    MonitorStatusHistoryResponseDto,
+                    parse_obj_as(
+                        type_=MonitorStatusHistoryResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def enable_monitor(
         self,
         monitor_id: str,
@@ -511,6 +590,78 @@ class RawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def delete_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[DeleteMonitorResponseDto]:
+        """
+        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        executing scheduled jobs immediately, and no longer appears in list
+        results.
+
+        Only the monitor owner can delete a monitor. Returns `404` if the
+        monitor is not found or does not belong to the authenticated user.
+
+        Deleting an already-deleted monitor returns `200`.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[DeleteMonitorResponseDto]
+            Monitor deleted successfully (or already deleted).
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DeleteMonitorResponseDto,
+                    parse_obj_as(
+                        type_=DeleteMonitorResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def update_monitor(
         self,
         monitor_id: str,
@@ -618,6 +769,8 @@ class AsyncRawMonitorsClient:
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListMonitorsResponseDto]:
         """
@@ -630,6 +783,12 @@ class AsyncRawMonitorsClient:
 
         page_size : typing.Optional[int]
             Number of records per page.
+
+        search : typing.Optional[str]
+            Filter results by text (case-insensitive substring match).
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -645,6 +804,8 @@ class AsyncRawMonitorsClient:
             params={
                 "page": page,
                 "page_size": page_size,
+                "search": search,
+                "ownership": ownership,
             },
             request_options=request_options,
         )
@@ -921,6 +1082,71 @@ class AsyncRawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    async def get_monitor_status_history(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[MonitorStatusHistoryResponseDto]:
+        """
+        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[MonitorStatusHistoryResponseDto]
+            Monitor status history retrieved successfully.
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}/status",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    MonitorStatusHistoryResponseDto,
+                    parse_obj_as(
+                        type_=MonitorStatusHistoryResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def enable_monitor(
         self,
         monitor_id: str,
@@ -1076,6 +1302,78 @@ class AsyncRawMonitorsClient:
                         ValidationErrorResponse,
                         parse_obj_as(
                             type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def delete_monitor(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[DeleteMonitorResponseDto]:
+        """
+        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        executing scheduled jobs immediately, and no longer appears in list
+        results.
+
+        Only the monitor owner can delete a monitor. Returns `404` if the
+        monitor is not found or does not belong to the authenticated user.
+
+        Deleting an already-deleted monitor returns `200`.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[DeleteMonitorResponseDto]
+            Monitor deleted successfully (or already deleted).
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/{encode_path_param(monitor_id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DeleteMonitorResponseDto,
+                    parse_obj_as(
+                        type_=DeleteMonitorResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

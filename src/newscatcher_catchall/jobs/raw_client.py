@@ -14,15 +14,18 @@ from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
+from ..errors.unauthorized_error import UnauthorizedError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.context import Context
 from ..types.continue_response_dto import ContinueResponseDto
+from ..types.delete_job_response_dto import DeleteJobResponseDto
 from ..types.end_date import EndDate
 from ..types.enrichment_schema import EnrichmentSchema
 from ..types.error import Error
 from ..types.initialize_response_dto import InitializeResponseDto
 from ..types.limit import Limit
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
+from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_job_response_dto import PullJobResponseDto
 from ..types.query import Query
 from ..types.start_date import StartDate
@@ -46,6 +49,8 @@ class RawJobsClient:
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListUserJobsResponseDto]:
         """
@@ -58,6 +63,12 @@ class RawJobsClient:
 
         page_size : typing.Optional[int]
             Number of records per page.
+
+        search : typing.Optional[str]
+            Filter results by text (case-insensitive substring match).
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -73,6 +84,8 @@ class RawJobsClient:
             params={
                 "page": page,
                 "page_size": page_size,
+                "search": search,
+                "ownership": ownership,
             },
             request_options=request_options,
         )
@@ -230,7 +243,7 @@ class RawJobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+            Dataset IDs to connect to this job. When provided, activates Company Watchlist mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
@@ -554,6 +567,77 @@ class RawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def delete_job(
+        self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[DeleteJobResponseDto]:
+        """
+        Soft-deletes a job. The job is flagged as deleted and no longer
+        appears in list results. The underlying data is retained.
+
+        Only the job owner can delete a job. Returns `404` if the job is not
+        found or does not belong to the authenticated user.
+
+        Deleting an already-deleted job returns `200`.
+
+        Parameters
+        ----------
+        job_id : str
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[DeleteJobResponseDto]
+            Job deleted successfully (or already deleted).
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/jobs/{encode_path_param(job_id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DeleteJobResponseDto,
+                    parse_obj_as(
+                        type_=DeleteJobResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawJobsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -564,6 +648,8 @@ class AsyncRawJobsClient:
         *,
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
+        search: typing.Optional[str] = None,
+        ownership: typing.Optional[OwnershipFilter] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListUserJobsResponseDto]:
         """
@@ -576,6 +662,12 @@ class AsyncRawJobsClient:
 
         page_size : typing.Optional[int]
             Number of records per page.
+
+        search : typing.Optional[str]
+            Filter results by text (case-insensitive substring match).
+
+        ownership : typing.Optional[OwnershipFilter]
+            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -591,6 +683,8 @@ class AsyncRawJobsClient:
             params={
                 "page": page,
                 "page_size": page_size,
+                "search": search,
+                "ownership": ownership,
             },
             request_options=request_options,
         )
@@ -748,7 +842,7 @@ class AsyncRawJobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to this job. When provided, activates Company Search mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+            Dataset IDs to connect to this job. When provided, activates Company Watchlist mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
@@ -1059,6 +1153,77 @@ class AsyncRawJobsClient:
                         ValidationErrorResponse,
                         parse_obj_as(
                             type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def delete_job(
+        self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[DeleteJobResponseDto]:
+        """
+        Soft-deletes a job. The job is flagged as deleted and no longer
+        appears in list results. The underlying data is retained.
+
+        Only the job owner can delete a job. Returns `404` if the job is not
+        found or does not belong to the authenticated user.
+
+        Deleting an already-deleted job returns `200`.
+
+        Parameters
+        ----------
+        job_id : str
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[DeleteJobResponseDto]
+            Job deleted successfully (or already deleted).
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/jobs/{encode_path_param(job_id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DeleteJobResponseDto,
+                    parse_obj_as(
+                        type_=DeleteJobResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
