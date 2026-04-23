@@ -33,6 +33,8 @@ if typing.TYPE_CHECKING:
     from .dataset_status import DatasetStatus
     from .dataset_status_entry import DatasetStatusEntry
     from .dataset_status_history_response import DatasetStatusHistoryResponse
+    from .delete_job_response_dto import DeleteJobResponseDto
+    from .delete_monitor_response_dto import DeleteMonitorResponseDto
     from .end_date import EndDate
     from .enrichment_schema import EnrichmentSchema
     from .enrichment_type import EnrichmentType
@@ -55,6 +57,10 @@ if typing.TYPE_CHECKING:
     from .monitor_job_item import MonitorJobItem
     from .monitor_list_item_dto import MonitorListItemDto
     from .monitor_record import MonitorRecord
+    from .monitor_status_entry import MonitorStatusEntry
+    from .monitor_status_entry_status import MonitorStatusEntryStatus
+    from .monitor_status_history_response_dto import MonitorStatusHistoryResponseDto
+    from .ownership_filter import OwnershipFilter
     from .plan_feature import PlanFeature
     from .public_job_status import PublicJobStatus
     from .pull_job_response_dto import PullJobResponseDto
@@ -65,6 +71,8 @@ if typing.TYPE_CHECKING:
     from .query import Query
     from .record import Record
     from .reference_job import ReferenceJob
+    from .sharing_info import SharingInfo
+    from .sharing_info_permission import SharingInfoPermission
     from .skipped_row import SkippedRow
     from .sort_order import SortOrder
     from .start_date import StartDate
@@ -108,6 +116,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DatasetStatus": ".dataset_status",
     "DatasetStatusEntry": ".dataset_status_entry",
     "DatasetStatusHistoryResponse": ".dataset_status_history_response",
+    "DeleteJobResponseDto": ".delete_job_response_dto",
+    "DeleteMonitorResponseDto": ".delete_monitor_response_dto",
     "EndDate": ".end_date",
     "EnrichmentSchema": ".enrichment_schema",
     "EnrichmentType": ".enrichment_type",
@@ -130,6 +140,10 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MonitorJobItem": ".monitor_job_item",
     "MonitorListItemDto": ".monitor_list_item_dto",
     "MonitorRecord": ".monitor_record",
+    "MonitorStatusEntry": ".monitor_status_entry",
+    "MonitorStatusEntryStatus": ".monitor_status_entry_status",
+    "MonitorStatusHistoryResponseDto": ".monitor_status_history_response_dto",
+    "OwnershipFilter": ".ownership_filter",
     "PlanFeature": ".plan_feature",
     "PublicJobStatus": ".public_job_status",
     "PullJobResponseDto": ".pull_job_response_dto",
@@ -140,6 +154,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Query": ".query",
     "Record": ".record",
     "ReferenceJob": ".reference_job",
+    "SharingInfo": ".sharing_info",
+    "SharingInfoPermission": ".sharing_info_permission",
     "SkippedRow": ".skipped_row",
     "SortOrder": ".sort_order",
     "StartDate": ".start_date",
@@ -207,6 +223,8 @@ __all__ = [
     "DatasetStatus",
     "DatasetStatusEntry",
     "DatasetStatusHistoryResponse",
+    "DeleteJobResponseDto",
+    "DeleteMonitorResponseDto",
     "EndDate",
     "EnrichmentSchema",
     "EnrichmentType",
@@ -229,6 +247,10 @@ __all__ = [
     "MonitorJobItem",
     "MonitorListItemDto",
     "MonitorRecord",
+    "MonitorStatusEntry",
+    "MonitorStatusEntryStatus",
+    "MonitorStatusHistoryResponseDto",
+    "OwnershipFilter",
     "PlanFeature",
     "PublicJobStatus",
     "PullJobResponseDto",
@@ -239,6 +261,8 @@ __all__ = [
     "Query",
     "Record",
     "ReferenceJob",
+    "SharingInfo",
+    "SharingInfoPermission",
     "SkippedRow",
     "SortOrder",
     "StartDate",

@@ -5,6 +5,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .sharing_info import SharingInfo
 from .user_job_mode import UserJobMode
 
 
@@ -32,6 +33,11 @@ class UserJob(UniversalBaseModel):
     mode: typing.Optional[UserJobMode] = pydantic.Field(default=None)
     """
     Processing mode used for this job.
+    """
+
+    sharing_info: typing.Optional[SharingInfo] = pydantic.Field(default=None)
+    """
+    Present when this job is shared with the authenticated user. Omitted when the user owns the job.
     """
 
     user_key: typing.Optional[str] = pydantic.Field(default=None)
