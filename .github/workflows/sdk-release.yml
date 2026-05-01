@@ -8,8 +8,44 @@ on:
       - main
 
 jobs:
-  release:
+  compile:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Bootstrap poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+      - name: Install dependencies
+        run: poetry install
+      - name: Compile
+        run: poetry run mypy .
+
+  test:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Bootstrap poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+      - name: Install dependencies
+        run: poetry install
+      - name: Test
+        run: poetry run pytest -rP .
+
+  release:
+    needs: [compile, test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -51,14 +87,36 @@ jobs:
             echo "New version detected: $TAG (previous: $LATEST)"
           fi
 
+      - name: Set up python
+        if: steps.check.outputs.bumped == 'true'
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Bootstrap poetry
+        if: steps.check.outputs.bumped == 'true'
+        run: |
+          curl -sSL https://install.python-poetry.org | python - -y --version 1.5.1
+
+      - name: Install dependencies
+        if: steps.check.outputs.bumped == 'true'
+        run: poetry install
+
       - name: Create and push tag
         if: steps.check.outputs.bumped == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
           git tag "${{ steps.version.outputs.TAG }}"
           git push origin "${{ steps.version.outputs.TAG }}"
+
+      - name: Publish to PyPI
+        if: steps.check.outputs.bumped == 'true'
+        run: |
+          poetry config pypi-token.pypi "$PYPI_TOKEN"
+          poetry --no-interaction -v publish --build
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
       - name: Create GitHub release with generated notes
         if: steps.check.outputs.bumped == 'true'
