@@ -1,3 +1,16 @@
+## 2.0.0 - 2026-05-19
+### Breaking Changes
+* **`DatasetsClient.list_entities_in_dataset()`** — now issues a POST to `.../entities/list` instead of a GET to `.../entities`; filter parameters are sent as a JSON body instead of query parameters, and optional filter params now default to `OMIT` (omitted entirely) instead of `None`; remove any `None` arguments and update any code that inspects raw HTTP requests.
+* **`DatasetsClient.add_entities_to_dataset()`** and **`DatasetsClient.remove_entities_from_dataset()`** — HTTP verbs were swapped and are now corrected: `add_entities_to_dataset()` issues POST and `remove_entities_from_dataset()` issues DELETE; callers who worked around the previous bug must revert their workarounds.
+### Added
+* **`JobsClient.submit()` / `submit_job()` `ed_score_min` parameter** — new optional integer parameter that sets a minimum relevance score threshold for connected entities in Company Watchlist jobs; records where no entity meets the threshold are excluded.
+* **`create_monitor()` `timezone` parameter** — new optional IANA timezone identifier used as a fallback when the `schedule` string does not include an explicit timezone.
+* **`ConnectedEntity.type` and `ConnectedEntity.company`** — new fields on `ConnectedEntity`; `type` is a required string identifying the entity type and `company` is an optional `CompanyAttributes` object with stored entity attributes.
+* **`max_retries` constructor parameter** — new optional `max_retries: int = 2` parameter on `CatchAllApi`, `AsyncCatchAllApi`, `BaseClientWrapper`, `SyncClientWrapper`, and `AsyncClientWrapper` to configure the default maximum number of retries for failed requests; per-request `max_retries` in `RequestOptions` still takes precedence.
+### Changed
+* **`pydantic-core` dependency** — upper bound widened from `<2.44.0` to `<3.0.0`, allowing installation alongside newer pydantic-core releases.
+* **`create_dataset_csv()` documentation** — updated to reflect that both `name` and `domain` columns are required in the uploaded CSV (previously only `name` was documented as required).
+
 ## 1.5.1 - 2026-04-30
 * fix: improve SSE line-ending normalization and incremental decoding
 * Refactor the SSE event-source parser to correctly handle all line-ending

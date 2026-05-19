@@ -61,7 +61,6 @@ class MonitorsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -90,6 +89,7 @@ class MonitorsClient:
         *,
         reference_job_id: str,
         schedule: str,
+        timezone: typing.Optional[str] = OMIT,
         webhook: typing.Optional[WebhookDto] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
@@ -106,9 +106,12 @@ class MonitorsClient:
             If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
+            Monitor schedule in plain text format. Minimum frequency depends on your plan.
 
-            Minimum frequency depends on your plan.
+        timezone : typing.Optional[str]
+            The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
+
+            If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
         webhook : typing.Optional[WebhookDto]
             Optional webhook to receive notifications when jobs complete.
@@ -138,7 +141,8 @@ class MonitorsClient:
         )
         client.monitors.create_monitor(
             reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
-            schedule="every day at 12 PM UTC",
+            schedule="every day at 12 PM",
+            timezone="UTC",
             webhook=WebhookDto(
                 url="https://your-endpoint.com/webhook",
                 method="POST",
@@ -151,6 +155,7 @@ class MonitorsClient:
         _response = self._raw_client.create_monitor(
             reference_job_id=reference_job_id,
             schedule=schedule,
+            timezone=timezone,
             webhook=webhook,
             limit=limit,
             backfill=backfill,
@@ -471,7 +476,6 @@ class AsyncMonitorsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -508,6 +512,7 @@ class AsyncMonitorsClient:
         *,
         reference_job_id: str,
         schedule: str,
+        timezone: typing.Optional[str] = OMIT,
         webhook: typing.Optional[WebhookDto] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
@@ -524,9 +529,12 @@ class AsyncMonitorsClient:
             If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
+            Monitor schedule in plain text format. Minimum frequency depends on your plan.
 
-            Minimum frequency depends on your plan.
+        timezone : typing.Optional[str]
+            The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
+
+            If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
         webhook : typing.Optional[WebhookDto]
             Optional webhook to receive notifications when jobs complete.
@@ -561,7 +569,8 @@ class AsyncMonitorsClient:
         async def main() -> None:
             await client.monitors.create_monitor(
                 reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
-                schedule="every day at 12 PM UTC",
+                schedule="every day at 12 PM",
+                timezone="UTC",
                 webhook=WebhookDto(
                     url="https://your-endpoint.com/webhook",
                     method="POST",
@@ -577,6 +586,7 @@ class AsyncMonitorsClient:
         _response = await self._raw_client.create_monitor(
             reference_job_id=reference_job_id,
             schedule=schedule,
+            timezone=timezone,
             webhook=webhook,
             limit=limit,
             backfill=backfill,

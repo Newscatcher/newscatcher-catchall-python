@@ -65,7 +65,6 @@ class JobsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -140,6 +139,7 @@ class JobsClient:
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        ed_score_min: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -174,9 +174,14 @@ class JobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to this job. When provided, activates Company Watchlist mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+            Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
+
+        ed_score_min : typing.Optional[int]
+            The minimum relevance score a connected entity must reach for its record to be included in results.
+
+            Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -218,6 +223,7 @@ class JobsClient:
             enrichments=enrichments,
             mode=mode,
             connected_dataset_ids=connected_dataset_ids,
+            ed_score_min=ed_score_min,
             request_options=request_options,
         )
         return _response.data
@@ -346,11 +352,9 @@ class JobsClient:
         self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteJobResponseDto:
         """
-        Soft-deletes a job. The job is flagged as deleted and no longer
-        appears in list results. The underlying data is retained.
+        Soft-deletes a job. The job is flagged as deleted and no longer appears in list results. The underlying data is retained.
 
-        Only the job owner can delete a job. Returns `404` if the job is not
-        found or does not belong to the authenticated user.
+        Only the job owner can delete a job. Returns `404` if the job is not found or does not belong to the authenticated user.
 
         Deleting an already-deleted job returns `200`.
 
@@ -421,7 +425,6 @@ class AsyncJobsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -512,6 +515,7 @@ class AsyncJobsClient:
         enrichments: typing.Optional[typing.Sequence[EnrichmentSchema]] = OMIT,
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        ed_score_min: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -546,9 +550,14 @@ class AsyncJobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to this job. When provided, activates Company Watchlist mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+            Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
+
+        ed_score_min : typing.Optional[int]
+            The minimum relevance score a connected entity must reach for its record to be included in results.
+
+            Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -597,6 +606,7 @@ class AsyncJobsClient:
             enrichments=enrichments,
             mode=mode,
             connected_dataset_ids=connected_dataset_ids,
+            ed_score_min=ed_score_min,
             request_options=request_options,
         )
         return _response.data
@@ -751,11 +761,9 @@ class AsyncJobsClient:
         self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteJobResponseDto:
         """
-        Soft-deletes a job. The job is flagged as deleted and no longer
-        appears in list results. The underlying data is retained.
+        Soft-deletes a job. The job is flagged as deleted and no longer appears in list results. The underlying data is retained.
 
-        Only the job owner can delete a job. Returns `404` if the job is not
-        found or does not belong to the authenticated user.
+        Only the job owner can delete a job. Returns `404` if the job is not found or does not belong to the authenticated user.
 
         Deleting an already-deleted job returns `200`.
 

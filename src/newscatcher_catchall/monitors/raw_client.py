@@ -63,7 +63,6 @@ class RawMonitorsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -130,6 +129,7 @@ class RawMonitorsClient:
         *,
         reference_job_id: str,
         schedule: str,
+        timezone: typing.Optional[str] = OMIT,
         webhook: typing.Optional[WebhookDto] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
@@ -146,9 +146,12 @@ class RawMonitorsClient:
             If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
+            Monitor schedule in plain text format. Minimum frequency depends on your plan.
 
-            Minimum frequency depends on your plan.
+        timezone : typing.Optional[str]
+            The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
+
+            If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
         webhook : typing.Optional[WebhookDto]
             Optional webhook to receive notifications when jobs complete.
@@ -175,6 +178,7 @@ class RawMonitorsClient:
             json={
                 "reference_job_id": reference_job_id,
                 "schedule": schedule,
+                "timezone": timezone,
                 "webhook": convert_and_respect_annotation_metadata(
                     object_=webhook, annotation=WebhookDto, direction="write"
                 ),
@@ -788,7 +792,6 @@ class AsyncRawMonitorsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -855,6 +858,7 @@ class AsyncRawMonitorsClient:
         *,
         reference_job_id: str,
         schedule: str,
+        timezone: typing.Optional[str] = OMIT,
         webhook: typing.Optional[WebhookDto] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
@@ -871,9 +875,12 @@ class AsyncRawMonitorsClient:
             If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
+            Monitor schedule in plain text format. Minimum frequency depends on your plan.
 
-            Minimum frequency depends on your plan.
+        timezone : typing.Optional[str]
+            The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
+
+            If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
         webhook : typing.Optional[WebhookDto]
             Optional webhook to receive notifications when jobs complete.
@@ -900,6 +907,7 @@ class AsyncRawMonitorsClient:
             json={
                 "reference_job_id": reference_job_id,
                 "schedule": schedule,
+                "timezone": timezone,
                 "webhook": convert_and_respect_annotation_metadata(
                     object_=webhook, annotation=WebhookDto, direction="write"
                 ),

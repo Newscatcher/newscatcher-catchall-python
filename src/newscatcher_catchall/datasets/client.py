@@ -53,9 +53,7 @@ class DatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetListResponse:
         """
-        Returns a paginated list of datasets belonging to the authenticated
-        organization. Supports filtering by status and sorting by name,
-        status, or creation date.
+        Returns a paginated list of datasets belonging to the authenticated organization. Supports filtering by status and sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -76,7 +74,6 @@ class DatasetsClient:
         sort_order : typing.Optional[SortOrder]
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -176,9 +173,7 @@ class DatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDatasetCsvResponse:
         """
-        Creates a new dataset by uploading a CSV file. Each row in the CSV
-        becomes an entity. The `name` column is required; all other columns
-        are optional.
+        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
 
         **CSV format:**
         ```csv
@@ -339,76 +334,6 @@ class DatasetsClient:
         )
         return _response.data
 
-    def list_entities_in_dataset(
-        self,
-        dataset_id: str,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
-        status: typing.Optional[EntityStatus] = None,
-        entity_type: typing.Optional[EntityType] = None,
-        sort_by: typing.Optional[EntitySortBy] = None,
-        sort_order: typing.Optional[SortOrder] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> DatasetEntityListResponse:
-        """
-        Returns a paginated list of entities in a dataset. Supports filtering by status and entity type.
-
-        Parameters
-        ----------
-        dataset_id : str
-            Unique dataset identifier.
-
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of entities per page.
-
-        search : typing.Optional[str]
-            Filter entities by name.
-
-        status : typing.Optional[EntityStatus]
-
-        entity_type : typing.Optional[EntityType]
-
-        sort_by : typing.Optional[EntitySortBy]
-
-        sort_order : typing.Optional[SortOrder]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DatasetEntityListResponse
-            Paginated list of entities in a dataset.
-
-        Examples
-        --------
-        from newscatcher_catchall import CatchAllApi
-
-        client = CatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-        client.datasets.list_entities_in_dataset(
-            dataset_id="ccabb755-afc2-4047-b84c-78d1f23d49b2",
-        )
-        """
-        _response = self._raw_client.list_entities_in_dataset(
-            dataset_id,
-            page=page,
-            page_size=page_size,
-            search=search,
-            status=status,
-            entity_type=entity_type,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            request_options=request_options,
-        )
-        return _response.data
-
     def add_entities_to_dataset(
         self,
         dataset_id: str,
@@ -460,9 +385,7 @@ class DatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ManageEntitiesResponse:
         """
-        Removes one or more entities from a dataset. The entities themselves
-        are not deleted — they are only removed from this dataset. Returns
-        the number of entities removed.
+        Removes one or more entities from a dataset. The entities themselves are not deleted — they are only removed from this dataset. Returns the number of entities removed.
 
         Parameters
         ----------
@@ -497,12 +420,88 @@ class DatasetsClient:
         )
         return _response.data
 
+    def list_entities_in_dataset(
+        self,
+        dataset_id: str,
+        *,
+        page: typing.Optional[int] = OMIT,
+        page_size: typing.Optional[int] = OMIT,
+        search: typing.Optional[str] = OMIT,
+        status: typing.Optional[EntityStatus] = OMIT,
+        entity_type: typing.Optional[EntityType] = OMIT,
+        sort_by: typing.Optional[EntitySortBy] = OMIT,
+        sort_order: typing.Optional[SortOrder] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> DatasetEntityListResponse:
+        """
+        Returns a paginated list of entities in a dataset. Supports filtering by status, entity type, and name search.
+
+        Parameters
+        ----------
+        dataset_id : str
+            Unique dataset identifier.
+
+        page : typing.Optional[int]
+            The page number to retrieve.
+
+        page_size : typing.Optional[int]
+            The number of entities per page.
+
+        search : typing.Optional[str]
+            Filters entities by name using a case-insensitive substring match.
+
+        status : typing.Optional[EntityStatus]
+
+        entity_type : typing.Optional[EntityType]
+
+        sort_by : typing.Optional[EntitySortBy]
+
+        sort_order : typing.Optional[SortOrder]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetEntityListResponse
+            Paginated list of entities in a dataset.
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.datasets.list_entities_in_dataset(
+            dataset_id="ccabb755-afc2-4047-b84c-78d1f23d49b2",
+            page=1,
+            page_size=100,
+            search="OpenAI",
+            status="ready",
+            entity_type="company",
+            sort_by="created_at",
+            sort_order="desc",
+        )
+        """
+        _response = self._raw_client.list_entities_in_dataset(
+            dataset_id,
+            page=page,
+            page_size=page_size,
+            search=search,
+            status=status,
+            entity_type=entity_type,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            request_options=request_options,
+        )
+        return _response.data
+
     def get_dataset_status_history(
         self, dataset_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DatasetStatusHistoryResponse:
         """
-        Returns the full status change history for a dataset, ordered
-        chronologically from oldest to newest.
+        Returns the full status change history for a dataset, ordered chronologically from oldest to newest.
 
         Parameters
         ----------
@@ -535,11 +534,9 @@ class DatasetsClient:
         self, dataset_id: str, *, file: core.File, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadCsvToDatasetResponse:
         """
-        Appends new companies to an existing dataset by uploading a CSV file.
-        Uses the same CSV format as the dataset creation endpoint.
+        Appends new companies to an existing dataset by uploading a CSV file. Uses the same CSV format as the dataset creation endpoint.
 
-        The response omits `dataset_name` compared to the create-from-CSV
-        endpoint since the dataset already exists.
+        The response omits `dataset_name` compared to the create-from-CSV endpoint since the dataset already exists.
 
         Parameters
         ----------
@@ -600,9 +597,7 @@ class AsyncDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetListResponse:
         """
-        Returns a paginated list of datasets belonging to the authenticated
-        organization. Supports filtering by status and sorting by name,
-        status, or creation date.
+        Returns a paginated list of datasets belonging to the authenticated organization. Supports filtering by status and sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -623,7 +618,6 @@ class AsyncDatasetsClient:
         sort_order : typing.Optional[SortOrder]
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -739,9 +733,7 @@ class AsyncDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDatasetCsvResponse:
         """
-        Creates a new dataset by uploading a CSV file. Each row in the CSV
-        becomes an entity. The `name` column is required; all other columns
-        are optional.
+        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
 
         **CSV format:**
         ```csv
@@ -934,84 +926,6 @@ class AsyncDatasetsClient:
         )
         return _response.data
 
-    async def list_entities_in_dataset(
-        self,
-        dataset_id: str,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
-        status: typing.Optional[EntityStatus] = None,
-        entity_type: typing.Optional[EntityType] = None,
-        sort_by: typing.Optional[EntitySortBy] = None,
-        sort_order: typing.Optional[SortOrder] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> DatasetEntityListResponse:
-        """
-        Returns a paginated list of entities in a dataset. Supports filtering by status and entity type.
-
-        Parameters
-        ----------
-        dataset_id : str
-            Unique dataset identifier.
-
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of entities per page.
-
-        search : typing.Optional[str]
-            Filter entities by name.
-
-        status : typing.Optional[EntityStatus]
-
-        entity_type : typing.Optional[EntityType]
-
-        sort_by : typing.Optional[EntitySortBy]
-
-        sort_order : typing.Optional[SortOrder]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DatasetEntityListResponse
-            Paginated list of entities in a dataset.
-
-        Examples
-        --------
-        import asyncio
-
-        from newscatcher_catchall import AsyncCatchAllApi
-
-        client = AsyncCatchAllApi(
-            api_key="YOUR_API_KEY",
-        )
-
-
-        async def main() -> None:
-            await client.datasets.list_entities_in_dataset(
-                dataset_id="ccabb755-afc2-4047-b84c-78d1f23d49b2",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.list_entities_in_dataset(
-            dataset_id,
-            page=page,
-            page_size=page_size,
-            search=search,
-            status=status,
-            entity_type=entity_type,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            request_options=request_options,
-        )
-        return _response.data
-
     async def add_entities_to_dataset(
         self,
         dataset_id: str,
@@ -1071,9 +985,7 @@ class AsyncDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ManageEntitiesResponse:
         """
-        Removes one or more entities from a dataset. The entities themselves
-        are not deleted — they are only removed from this dataset. Returns
-        the number of entities removed.
+        Removes one or more entities from a dataset. The entities themselves are not deleted — they are only removed from this dataset. Returns the number of entities removed.
 
         Parameters
         ----------
@@ -1116,12 +1028,96 @@ class AsyncDatasetsClient:
         )
         return _response.data
 
+    async def list_entities_in_dataset(
+        self,
+        dataset_id: str,
+        *,
+        page: typing.Optional[int] = OMIT,
+        page_size: typing.Optional[int] = OMIT,
+        search: typing.Optional[str] = OMIT,
+        status: typing.Optional[EntityStatus] = OMIT,
+        entity_type: typing.Optional[EntityType] = OMIT,
+        sort_by: typing.Optional[EntitySortBy] = OMIT,
+        sort_order: typing.Optional[SortOrder] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> DatasetEntityListResponse:
+        """
+        Returns a paginated list of entities in a dataset. Supports filtering by status, entity type, and name search.
+
+        Parameters
+        ----------
+        dataset_id : str
+            Unique dataset identifier.
+
+        page : typing.Optional[int]
+            The page number to retrieve.
+
+        page_size : typing.Optional[int]
+            The number of entities per page.
+
+        search : typing.Optional[str]
+            Filters entities by name using a case-insensitive substring match.
+
+        status : typing.Optional[EntityStatus]
+
+        entity_type : typing.Optional[EntityType]
+
+        sort_by : typing.Optional[EntitySortBy]
+
+        sort_order : typing.Optional[SortOrder]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DatasetEntityListResponse
+            Paginated list of entities in a dataset.
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.datasets.list_entities_in_dataset(
+                dataset_id="ccabb755-afc2-4047-b84c-78d1f23d49b2",
+                page=1,
+                page_size=100,
+                search="OpenAI",
+                status="ready",
+                entity_type="company",
+                sort_by="created_at",
+                sort_order="desc",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_entities_in_dataset(
+            dataset_id,
+            page=page,
+            page_size=page_size,
+            search=search,
+            status=status,
+            entity_type=entity_type,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            request_options=request_options,
+        )
+        return _response.data
+
     async def get_dataset_status_history(
         self, dataset_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DatasetStatusHistoryResponse:
         """
-        Returns the full status change history for a dataset, ordered
-        chronologically from oldest to newest.
+        Returns the full status change history for a dataset, ordered chronologically from oldest to newest.
 
         Parameters
         ----------
@@ -1162,11 +1158,9 @@ class AsyncDatasetsClient:
         self, dataset_id: str, *, file: core.File, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadCsvToDatasetResponse:
         """
-        Appends new companies to an existing dataset by uploading a CSV file.
-        Uses the same CSV format as the dataset creation endpoint.
+        Appends new companies to an existing dataset by uploading a CSV file. Uses the same CSV format as the dataset creation endpoint.
 
-        The response omits `dataset_name` compared to the create-from-CSV
-        endpoint since the dataset already exists.
+        The response omits `dataset_name` compared to the create-from-CSV endpoint since the dataset already exists.
 
         Parameters
         ----------

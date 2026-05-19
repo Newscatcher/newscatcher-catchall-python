@@ -4,15 +4,14 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .company_attributes import CompanyAttributes
 
 
 class ConnectedEntity(UniversalBaseModel):
     """
-    A company entity matched to a record in a Company Watchlist job, with
-    a relevance score and explanation.
+    A company entity matched to a record in a Company Watchlist job, with a relevance score and explanation.
 
-    Only entities with `ed_score` ≥ 1 appear in results. Entities scored
-    0 are filtered out before the response is returned.
+    Only entities with `ed_score` ≥ 1 appear in results. Entities scored 0 are filtered out before the response is returned. When `ed_score_min` is set at submission time, entities below that threshold are excluded.
     """
 
     entity_id: str = pydantic.Field()
@@ -27,8 +26,7 @@ class ConnectedEntity(UniversalBaseModel):
 
     ed_score: int = pydantic.Field()
     """
-    Relevance score indicating how directly the entity is associated
-    with this event.
+    Relevance score indicating how directly the entity is associated with this event.
     
     | Score | Meaning |
     |-------|---------|
@@ -40,8 +38,19 @@ class ConnectedEntity(UniversalBaseModel):
 
     relation: str = pydantic.Field()
     """
-    Short explanation (up to 100 characters) of why this entity is
-    associated with the event.
+    Short explanation (up to 100 characters) of why this entity is associated with the event.
+    """
+
+    type: str = pydantic.Field()
+    """
+    The entity type.
+    """
+
+    company: typing.Optional[CompanyAttributes] = pydantic.Field(default=None)
+    """
+    The stored attributes for this entity. Present only when attributes exist in the database. 
+    
+    The field name matches the value of `type` — for example, `"company"` type entities have a `company` field.
     """
 
     if IS_PYDANTIC_V2:
