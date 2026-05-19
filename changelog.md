@@ -1,3 +1,9 @@
+## 1.6.0 - 2026-05-19
+### Added
+* **`max_retries` parameter on `CatchAllApi` and `AsyncCatchAllApi`** — pass an optional `max_retries` integer to the client constructor to set the default number of HTTP retries for all requests; defaults to 2, and per-request `max_retries` in `RequestOptions` still takes precedence.
+### Changed
+* **`pydantic-core` dependency** — upper bound widened from `<2.44.0` to `<3.0.0`, allowing compatibility with newer `pydantic-core` releases.
+
 ## 1.5.1 - 2026-04-30
 * fix: improve SSE line-ending normalization and incremental decoding
 * Refactor the SSE event-source parser to correctly handle all line-ending
