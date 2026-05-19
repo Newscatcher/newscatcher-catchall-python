@@ -75,7 +75,7 @@ client.jobs.get_user_jobs()
 <dl>
 <dd>
 
-**ownership:** `typing.Optional[OwnershipFilter]` — Filter results by ownership. Defaults to `all`.
+**ownership:** `typing.Optional[OwnershipFilter]` 
     
 </dd>
 </dl>
@@ -315,9 +315,21 @@ Job processing mode.
 
 **connected_dataset_ids:** `typing.Optional[typing.List[str]]` 
 
-Dataset IDs to connect to this job. When provided, activates Company Watchlist mode — the job returns only events relevant to companies in the connected datasets with each record including a `connected_entities` array scored per company.
+Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
 The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ed_score_min:** `typing.Optional[int]` 
+
+The minimum relevance score a connected entity must reach for its record to be included in results.
+
+Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
     
 </dd>
 </dl>
@@ -593,11 +605,9 @@ client.jobs.continue_job(
 <dl>
 <dd>
 
-Soft-deletes a job. The job is flagged as deleted and no longer
-appears in list results. The underlying data is retained.
+Soft-deletes a job. The job is flagged as deleted and no longer appears in list results. The underlying data is retained.
 
-Only the job owner can delete a job. Returns `404` if the job is not
-found or does not belong to the authenticated user.
+Only the job owner can delete a job. Returns `404` if the job is not found or does not belong to the authenticated user.
 
 Deleting an already-deleted job returns `200`.
 </dd>
@@ -736,7 +746,7 @@ client.monitors.list_monitors()
 <dl>
 <dd>
 
-**ownership:** `typing.Optional[OwnershipFilter]` — Filter results by ownership. Defaults to `all`.
+**ownership:** `typing.Optional[OwnershipFilter]` 
     
 </dd>
 </dl>
@@ -793,7 +803,8 @@ client = CatchAllApi(
 
 client.monitors.create_monitor(
     reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
-    schedule="every day at 12 PM UTC",
+    schedule="every day at 12 PM",
+    timezone="UTC",
     webhook=WebhookDto(
         url="https://your-endpoint.com/webhook",
         method="POST",
@@ -831,11 +842,19 @@ If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference
 <dl>
 <dd>
 
-**schedule:** `str` 
+**schedule:** `str` — Monitor schedule in plain text format. Minimum frequency depends on your plan.
+    
+</dd>
+</dl>
 
-Monitor schedule in plain text format (e.g. 'every day at 12 PM UTC', 'every 48 hours').
+<dl>
+<dd>
 
-Minimum frequency depends on your plan.
+**timezone:** `typing.Optional[str]` 
+
+The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
+
+If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored. 
     
 </dd>
 </dl>
@@ -1458,9 +1477,7 @@ client.monitors.update_monitor(
 <dl>
 <dd>
 
-Returns a paginated list of entities belonging to the authenticated
-organization. Supports filtering by status and entity type, and
-sorting by name, status, or creation date.
+Returns a paginated list of entities belonging to the authenticated organization. Supports filtering by status and entity type, and sorting by name, status, or creation date.
 </dd>
 </dl>
 </dd>
@@ -1674,11 +1691,9 @@ client.entities.create_entity(
 <dl>
 <dd>
 
-Creates multiple entities in a single request. Each entity is
-processed independently — a failure in one does not affect others.
+Creates multiple entities in a single request. Each entity is processed independently — a failure in one does not affect others.
 
-Returns an array of `{id, status}` objects in the same order as
-the input array.
+Returns an array of `{id, status}` objects in the same order as the input array.
 </dd>
 </dl>
 </dd>
@@ -2040,9 +2055,7 @@ client.entities.update_entity(
 <dl>
 <dd>
 
-Returns a paginated list of datasets belonging to the authenticated
-organization. Supports filtering by status and sorting by name,
-status, or creation date.
+Returns a paginated list of datasets belonging to the authenticated organization. Supports filtering by status and sorting by name, status, or creation date.
 </dd>
 </dl>
 </dd>
@@ -2131,7 +2144,7 @@ client.datasets.list_datasets(
 <dl>
 <dd>
 
-**ownership:** `typing.Optional[OwnershipFilter]` — Filter results by ownership. Defaults to `all`.
+**ownership:** `typing.Optional[OwnershipFilter]` 
     
 </dd>
 </dl>
@@ -2264,9 +2277,7 @@ client.datasets.create_dataset(
 <dl>
 <dd>
 
-Creates a new dataset by uploading a CSV file. Each row in the CSV
-becomes an entity. The `name` column is required; all other columns
-are optional.
+Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
 
 **CSV format:**
 ```csv
@@ -2594,135 +2605,6 @@ client.datasets.update_dataset(
 </dl>
 </details>
 
-<details><summary><code>client.datasets.<a href="src/newscatcher_catchall/datasets/client.py">list_entities_in_dataset</a>(...) -> DatasetEntityListResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns a paginated list of entities in a dataset. Supports filtering by status and entity type.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from newscatcher_catchall import CatchAllApi
-from newscatcher_catchall.environment import CatchAllApiEnvironment
-
-client = CatchAllApi(
-    api_key="<value>",
-    environment=CatchAllApiEnvironment.DEFAULT,
-)
-
-client.datasets.list_entities_in_dataset(
-    dataset_id="ccabb755-afc2-4047-b84c-78d1f23d49b2",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**dataset_id:** `str` — Unique dataset identifier.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page:** `typing.Optional[int]` — Page number to retrieve.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**page_size:** `typing.Optional[int]` — Number of entities per page.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**search:** `typing.Optional[str]` — Filter entities by name.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**status:** `typing.Optional[EntityStatus]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**entity_type:** `typing.Optional[EntityType]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sort_by:** `typing.Optional[EntitySortBy]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**sort_order:** `typing.Optional[SortOrder]` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 <details><summary><code>client.datasets.<a href="src/newscatcher_catchall/datasets/client.py">add_entities_to_dataset</a>(...) -> ManageEntitiesResponse</code></summary>
 <dl>
 <dd>
@@ -2819,9 +2701,7 @@ client.datasets.add_entities_to_dataset(
 <dl>
 <dd>
 
-Removes one or more entities from a dataset. The entities themselves
-are not deleted — they are only removed from this dataset. Returns
-the number of entities removed.
+Removes one or more entities from a dataset. The entities themselves are not deleted — they are only removed from this dataset. Returns the number of entities removed.
 </dd>
 </dl>
 </dd>
@@ -2893,6 +2773,142 @@ client.datasets.remove_entities_from_dataset(
 </dl>
 </details>
 
+<details><summary><code>client.datasets.<a href="src/newscatcher_catchall/datasets/client.py">list_entities_in_dataset</a>(...) -> DatasetEntityListResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a paginated list of entities in a dataset. Supports filtering by status, entity type, and name search.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.datasets.list_entities_in_dataset(
+    dataset_id="ccabb755-afc2-4047-b84c-78d1f23d49b2",
+    page=1,
+    page_size=100,
+    search="OpenAI",
+    status="ready",
+    entity_type="company",
+    sort_by="created_at",
+    sort_order="desc",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**dataset_id:** `str` — Unique dataset identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — The page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — The number of entities per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Filters entities by name using a case-insensitive substring match.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[EntityStatus]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**entity_type:** `typing.Optional[EntityType]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort_by:** `typing.Optional[EntitySortBy]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sort_order:** `typing.Optional[SortOrder]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.datasets.<a href="src/newscatcher_catchall/datasets/client.py">get_dataset_status_history</a>(...) -> DatasetStatusHistoryResponse</code></summary>
 <dl>
 <dd>
@@ -2905,8 +2921,7 @@ client.datasets.remove_entities_from_dataset(
 <dl>
 <dd>
 
-Returns the full status change history for a dataset, ordered
-chronologically from oldest to newest.
+Returns the full status change history for a dataset, ordered chronologically from oldest to newest.
 </dd>
 </dl>
 </dd>
@@ -2979,11 +2994,9 @@ client.datasets.get_dataset_status_history(
 <dl>
 <dd>
 
-Appends new companies to an existing dataset by uploading a CSV file.
-Uses the same CSV format as the dataset creation endpoint.
+Appends new companies to an existing dataset by uploading a CSV file. Uses the same CSV format as the dataset creation endpoint.
 
-The response omits `dataset_name` compared to the create-from-CSV
-endpoint since the dataset already exists.
+The response omits `dataset_name` compared to the create-from-CSV endpoint since the dataset already exists.
 </dd>
 </dl>
 </dd>

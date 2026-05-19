@@ -48,9 +48,7 @@ class RawEntitiesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[EntityListResponse]:
         """
-        Returns a paginated list of entities belonging to the authenticated
-        organization. Supports filtering by status and entity type, and
-        sorting by name, status, or creation date.
+        Returns a paginated list of entities belonging to the authenticated organization. Supports filtering by status and entity type, and sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -222,11 +220,9 @@ class RawEntitiesClient:
         self, *, entities: typing.Sequence[CreateEntityRequest], request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[CreateEntitiesBatchResponse]:
         """
-        Creates multiple entities in a single request. Each entity is
-        processed independently — a failure in one does not affect others.
+        Creates multiple entities in a single request. Each entity is processed independently — a failure in one does not affect others.
 
-        Returns an array of `{id, status}` objects in the same order as
-        the input array.
+        Returns an array of `{id, status}` objects in the same order as the input array.
 
         Parameters
         ----------
@@ -539,9 +535,7 @@ class AsyncRawEntitiesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[EntityListResponse]:
         """
-        Returns a paginated list of entities belonging to the authenticated
-        organization. Supports filtering by status and entity type, and
-        sorting by name, status, or creation date.
+        Returns a paginated list of entities belonging to the authenticated organization. Supports filtering by status and entity type, and sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -713,11 +707,9 @@ class AsyncRawEntitiesClient:
         self, *, entities: typing.Sequence[CreateEntityRequest], request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[CreateEntitiesBatchResponse]:
         """
-        Creates multiple entities in a single request. Each entity is
-        processed independently — a failure in one does not affect others.
+        Creates multiple entities in a single request. Each entity is processed independently — a failure in one does not affect others.
 
-        Returns an array of `{id, status}` objects in the same order as
-        the input array.
+        Returns an array of `{id, status}` objects in the same order as the input array.
 
         Parameters
         ----------

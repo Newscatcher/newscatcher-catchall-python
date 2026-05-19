@@ -54,9 +54,7 @@ class RawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[DatasetListResponse]:
         """
-        Returns a paginated list of datasets belonging to the authenticated
-        organization. Supports filtering by status and sorting by name,
-        status, or creation date.
+        Returns a paginated list of datasets belonging to the authenticated organization. Supports filtering by status and sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -77,7 +75,6 @@ class RawDatasetsClient:
         sort_order : typing.Optional[SortOrder]
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -243,9 +240,7 @@ class RawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDatasetCsvResponse]:
         """
-        Creates a new dataset by uploading a CSV file. Each row in the CSV
-        becomes an entity. The `name` column is required; all other columns
-        are optional.
+        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
 
         **CSV format:**
         ```csv
@@ -551,107 +546,6 @@ class RawDatasetsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def list_entities_in_dataset(
-        self,
-        dataset_id: str,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
-        status: typing.Optional[EntityStatus] = None,
-        entity_type: typing.Optional[EntityType] = None,
-        sort_by: typing.Optional[EntitySortBy] = None,
-        sort_order: typing.Optional[SortOrder] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[DatasetEntityListResponse]:
-        """
-        Returns a paginated list of entities in a dataset. Supports filtering by status and entity type.
-
-        Parameters
-        ----------
-        dataset_id : str
-            Unique dataset identifier.
-
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of entities per page.
-
-        search : typing.Optional[str]
-            Filter entities by name.
-
-        status : typing.Optional[EntityStatus]
-
-        entity_type : typing.Optional[EntityType]
-
-        sort_by : typing.Optional[EntitySortBy]
-
-        sort_order : typing.Optional[SortOrder]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[DatasetEntityListResponse]
-            Paginated list of entities in a dataset.
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"catchAll/datasets/{encode_path_param(dataset_id)}/entities",
-            method="GET",
-            params={
-                "page": page,
-                "page_size": page_size,
-                "search": search,
-                "status": status,
-                "entity_type": entity_type,
-                "sort_by": sort_by,
-                "sort_order": sort_order,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DatasetEntityListResponse,
-                    parse_obj_as(
-                        type_=DatasetEntityListResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
     def add_entities_to_dataset(
         self,
         dataset_id: str,
@@ -750,9 +644,7 @@ class RawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ManageEntitiesResponse]:
         """
-        Removes one or more entities from a dataset. The entities themselves
-        are not deleted — they are only removed from this dataset. Returns
-        the number of entities removed.
+        Removes one or more entities from a dataset. The entities themselves are not deleted — they are only removed from this dataset. Returns the number of entities removed.
 
         Parameters
         ----------
@@ -834,12 +726,127 @@ class RawDatasetsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def list_entities_in_dataset(
+        self,
+        dataset_id: str,
+        *,
+        page: typing.Optional[int] = OMIT,
+        page_size: typing.Optional[int] = OMIT,
+        search: typing.Optional[str] = OMIT,
+        status: typing.Optional[EntityStatus] = OMIT,
+        entity_type: typing.Optional[EntityType] = OMIT,
+        sort_by: typing.Optional[EntitySortBy] = OMIT,
+        sort_order: typing.Optional[SortOrder] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[DatasetEntityListResponse]:
+        """
+        Returns a paginated list of entities in a dataset. Supports filtering by status, entity type, and name search.
+
+        Parameters
+        ----------
+        dataset_id : str
+            Unique dataset identifier.
+
+        page : typing.Optional[int]
+            The page number to retrieve.
+
+        page_size : typing.Optional[int]
+            The number of entities per page.
+
+        search : typing.Optional[str]
+            Filters entities by name using a case-insensitive substring match.
+
+        status : typing.Optional[EntityStatus]
+
+        entity_type : typing.Optional[EntityType]
+
+        sort_by : typing.Optional[EntitySortBy]
+
+        sort_order : typing.Optional[SortOrder]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[DatasetEntityListResponse]
+            Paginated list of entities in a dataset.
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/datasets/{encode_path_param(dataset_id)}/entities/list",
+            method="POST",
+            json={
+                "page": page,
+                "page_size": page_size,
+                "search": search,
+                "status": status,
+                "entity_type": entity_type,
+                "sort_by": sort_by,
+                "sort_order": sort_order,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DatasetEntityListResponse,
+                    parse_obj_as(
+                        type_=DatasetEntityListResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def get_dataset_status_history(
         self, dataset_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DatasetStatusHistoryResponse]:
         """
-        Returns the full status change history for a dataset, ordered
-        chronologically from oldest to newest.
+        Returns the full status change history for a dataset, ordered chronologically from oldest to newest.
 
         Parameters
         ----------
@@ -904,11 +911,9 @@ class RawDatasetsClient:
         self, dataset_id: str, *, file: core.File, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadCsvToDatasetResponse]:
         """
-        Appends new companies to an existing dataset by uploading a CSV file.
-        Uses the same CSV format as the dataset creation endpoint.
+        Appends new companies to an existing dataset by uploading a CSV file. Uses the same CSV format as the dataset creation endpoint.
 
-        The response omits `dataset_name` compared to the create-from-CSV
-        endpoint since the dataset already exists.
+        The response omits `dataset_name` compared to the create-from-CSV endpoint since the dataset already exists.
 
         Parameters
         ----------
@@ -1007,9 +1012,7 @@ class AsyncRawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[DatasetListResponse]:
         """
-        Returns a paginated list of datasets belonging to the authenticated
-        organization. Supports filtering by status and sorting by name,
-        status, or creation date.
+        Returns a paginated list of datasets belonging to the authenticated organization. Supports filtering by status and sorting by name, status, or creation date.
 
         Parameters
         ----------
@@ -1030,7 +1033,6 @@ class AsyncRawDatasetsClient:
         sort_order : typing.Optional[SortOrder]
 
         ownership : typing.Optional[OwnershipFilter]
-            Filter results by ownership. Defaults to `all`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1196,9 +1198,7 @@ class AsyncRawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDatasetCsvResponse]:
         """
-        Creates a new dataset by uploading a CSV file. Each row in the CSV
-        becomes an entity. The `name` column is required; all other columns
-        are optional.
+        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
 
         **CSV format:**
         ```csv
@@ -1504,107 +1504,6 @@ class AsyncRawDatasetsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def list_entities_in_dataset(
-        self,
-        dataset_id: str,
-        *,
-        page: typing.Optional[int] = None,
-        page_size: typing.Optional[int] = None,
-        search: typing.Optional[str] = None,
-        status: typing.Optional[EntityStatus] = None,
-        entity_type: typing.Optional[EntityType] = None,
-        sort_by: typing.Optional[EntitySortBy] = None,
-        sort_order: typing.Optional[SortOrder] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[DatasetEntityListResponse]:
-        """
-        Returns a paginated list of entities in a dataset. Supports filtering by status and entity type.
-
-        Parameters
-        ----------
-        dataset_id : str
-            Unique dataset identifier.
-
-        page : typing.Optional[int]
-            Page number to retrieve.
-
-        page_size : typing.Optional[int]
-            Number of entities per page.
-
-        search : typing.Optional[str]
-            Filter entities by name.
-
-        status : typing.Optional[EntityStatus]
-
-        entity_type : typing.Optional[EntityType]
-
-        sort_by : typing.Optional[EntitySortBy]
-
-        sort_order : typing.Optional[SortOrder]
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[DatasetEntityListResponse]
-            Paginated list of entities in a dataset.
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"catchAll/datasets/{encode_path_param(dataset_id)}/entities",
-            method="GET",
-            params={
-                "page": page,
-                "page_size": page_size,
-                "search": search,
-                "status": status,
-                "entity_type": entity_type,
-                "sort_by": sort_by,
-                "sort_order": sort_order,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DatasetEntityListResponse,
-                    parse_obj_as(
-                        type_=DatasetEntityListResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
     async def add_entities_to_dataset(
         self,
         dataset_id: str,
@@ -1703,9 +1602,7 @@ class AsyncRawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ManageEntitiesResponse]:
         """
-        Removes one or more entities from a dataset. The entities themselves
-        are not deleted — they are only removed from this dataset. Returns
-        the number of entities removed.
+        Removes one or more entities from a dataset. The entities themselves are not deleted — they are only removed from this dataset. Returns the number of entities removed.
 
         Parameters
         ----------
@@ -1787,12 +1684,127 @@ class AsyncRawDatasetsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    async def list_entities_in_dataset(
+        self,
+        dataset_id: str,
+        *,
+        page: typing.Optional[int] = OMIT,
+        page_size: typing.Optional[int] = OMIT,
+        search: typing.Optional[str] = OMIT,
+        status: typing.Optional[EntityStatus] = OMIT,
+        entity_type: typing.Optional[EntityType] = OMIT,
+        sort_by: typing.Optional[EntitySortBy] = OMIT,
+        sort_order: typing.Optional[SortOrder] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[DatasetEntityListResponse]:
+        """
+        Returns a paginated list of entities in a dataset. Supports filtering by status, entity type, and name search.
+
+        Parameters
+        ----------
+        dataset_id : str
+            Unique dataset identifier.
+
+        page : typing.Optional[int]
+            The page number to retrieve.
+
+        page_size : typing.Optional[int]
+            The number of entities per page.
+
+        search : typing.Optional[str]
+            Filters entities by name using a case-insensitive substring match.
+
+        status : typing.Optional[EntityStatus]
+
+        entity_type : typing.Optional[EntityType]
+
+        sort_by : typing.Optional[EntitySortBy]
+
+        sort_order : typing.Optional[SortOrder]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[DatasetEntityListResponse]
+            Paginated list of entities in a dataset.
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/datasets/{encode_path_param(dataset_id)}/entities/list",
+            method="POST",
+            json={
+                "page": page,
+                "page_size": page_size,
+                "search": search,
+                "status": status,
+                "entity_type": entity_type,
+                "sort_by": sort_by,
+                "sort_order": sort_order,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DatasetEntityListResponse,
+                    parse_obj_as(
+                        type_=DatasetEntityListResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def get_dataset_status_history(
         self, dataset_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DatasetStatusHistoryResponse]:
         """
-        Returns the full status change history for a dataset, ordered
-        chronologically from oldest to newest.
+        Returns the full status change history for a dataset, ordered chronologically from oldest to newest.
 
         Parameters
         ----------
@@ -1857,11 +1869,9 @@ class AsyncRawDatasetsClient:
         self, dataset_id: str, *, file: core.File, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadCsvToDatasetResponse]:
         """
-        Appends new companies to an existing dataset by uploading a CSV file.
-        Uses the same CSV format as the dataset creation endpoint.
+        Appends new companies to an existing dataset by uploading a CSV file. Uses the same CSV format as the dataset creation endpoint.
 
-        The response omits `dataset_name` compared to the create-from-CSV
-        endpoint since the dataset already exists.
+        The response omits `dataset_name` compared to the create-from-CSV endpoint since the dataset already exists.
 
         Parameters
         ----------
