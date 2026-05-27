@@ -9,7 +9,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class DeleteMonitorResponseDto(UniversalBaseModel):
     success: bool = pydantic.Field()
     """
-    Whether the delete operation succeeded.
+    True if the delete operation succeeded; false otherwise.
     """
 
     message: typing.Optional[str] = pydantic.Field(default=None)

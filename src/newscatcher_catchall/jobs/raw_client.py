@@ -31,6 +31,7 @@ from ..types.query import Query
 from ..types.start_date import StartDate
 from ..types.status_response_dto import StatusResponseDto
 from ..types.submit_response_dto import SubmitResponseDto
+from ..types.validate_query_response_dto import ValidateQueryResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
 from ..types.validator_schema import ValidatorSchema
 from .types.submit_request_dto_mode import SubmitRequestDtoMode
@@ -51,6 +52,7 @@ class RawJobsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListUserJobsResponseDto]:
         """
@@ -69,6 +71,9 @@ class RawJobsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -85,6 +90,7 @@ class RawJobsClient:
                 "page_size": page_size,
                 "search": search,
                 "ownership": ownership,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -105,6 +111,80 @@ class RawJobsClient:
                         Error,
                         parse_obj_as(
                             type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def validate_query(
+        self, *, query: str, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[ValidateQueryResponseDto]:
+        """
+        Checks whether a query is well-formed and likely to produce good results before submitting a job.
+
+        Returns a quality assessment with a status level, identified issues, and actionable suggestions.
+
+        Parameters
+        ----------
+        query : str
+            Plain text query to validate.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ValidateQueryResponseDto]
+            Query validation result.
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "catchAll/validate",
+            method="POST",
+            json={
+                "query": query,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ValidateQueryResponseDto,
+                    parse_obj_as(
+                        type_=ValidateQueryResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -209,6 +289,8 @@ class RawJobsClient:
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         ed_score_min: typing.Optional[int] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SubmitResponseDto]:
         """
@@ -252,6 +334,12 @@ class RawJobsClient:
 
             Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
 
+        project_id : typing.Optional[str]
+            Project to assign this job to. The job appears in the project's resource list immediately after submission.
+
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of webhooks to notify when the job completes. Maximum 5 per job.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -278,6 +366,8 @@ class RawJobsClient:
                 "mode": mode,
                 "connected_dataset_ids": connected_dataset_ids,
                 "ed_score_min": ed_score_min,
+                "project_id": project_id,
+                "webhook_ids": webhook_ids,
             },
             headers={
                 "content-type": "application/json",
@@ -654,6 +744,7 @@ class AsyncRawJobsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListUserJobsResponseDto]:
         """
@@ -672,6 +763,9 @@ class AsyncRawJobsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -688,6 +782,7 @@ class AsyncRawJobsClient:
                 "page_size": page_size,
                 "search": search,
                 "ownership": ownership,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -708,6 +803,80 @@ class AsyncRawJobsClient:
                         Error,
                         parse_obj_as(
                             type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def validate_query(
+        self, *, query: str, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[ValidateQueryResponseDto]:
+        """
+        Checks whether a query is well-formed and likely to produce good results before submitting a job.
+
+        Returns a quality assessment with a status level, identified issues, and actionable suggestions.
+
+        Parameters
+        ----------
+        query : str
+            Plain text query to validate.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ValidateQueryResponseDto]
+            Query validation result.
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "catchAll/validate",
+            method="POST",
+            json={
+                "query": query,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ValidateQueryResponseDto,
+                    parse_obj_as(
+                        type_=ValidateQueryResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -812,6 +981,8 @@ class AsyncRawJobsClient:
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         ed_score_min: typing.Optional[int] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SubmitResponseDto]:
         """
@@ -855,6 +1026,12 @@ class AsyncRawJobsClient:
 
             Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
 
+        project_id : typing.Optional[str]
+            Project to assign this job to. The job appears in the project's resource list immediately after submission.
+
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of webhooks to notify when the job completes. Maximum 5 per job.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -881,6 +1058,8 @@ class AsyncRawJobsClient:
                 "mode": mode,
                 "connected_dataset_ids": connected_dataset_ids,
                 "ed_score_min": ed_score_min,
+                "project_id": project_id,
+                "webhook_ids": webhook_ids,
             },
             headers={
                 "content-type": "application/json",

@@ -50,7 +50,7 @@ class ConnectedEntity(UniversalBaseModel):
     """
     The stored attributes for this entity. Present only when attributes exist in the database. 
     
-    The field name matches the value of `type` — for example, `"company"` type entities have a `company` field.
+    The field name matches the value of `type` — for example, `"company"` type entities have a `company`  field.
     """
 
     if IS_PYDANTIC_V2:

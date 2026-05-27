@@ -51,6 +51,7 @@ class RawDatasetsClient:
         sort_by: typing.Optional[DatasetSortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[DatasetListResponse]:
         """
@@ -76,6 +77,9 @@ class RawDatasetsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -95,6 +99,7 @@ class RawDatasetsClient:
                 "sort_by": sort_by,
                 "sort_order": sort_order,
                 "ownership": ownership,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -1009,6 +1014,7 @@ class AsyncRawDatasetsClient:
         sort_by: typing.Optional[DatasetSortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[DatasetListResponse]:
         """
@@ -1034,6 +1040,9 @@ class AsyncRawDatasetsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1053,6 +1062,7 @@ class AsyncRawDatasetsClient:
                 "sort_by": sort_by,
                 "sort_order": sort_order,
                 "ownership": ownership,
+                "project_id": project_id,
             },
             request_options=request_options,
         )

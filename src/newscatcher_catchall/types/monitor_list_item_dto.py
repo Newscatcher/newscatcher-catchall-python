@@ -27,7 +27,7 @@ class MonitorListItemDto(UniversalBaseModel):
 
     enabled: bool = pydantic.Field()
     """
-    Whether the monitor is currently active.
+    True if the monitor is currently active; false otherwise.
     """
 
     schedule: typing.Optional[str] = pydantic.Field(default=None)

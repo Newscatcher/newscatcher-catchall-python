@@ -35,7 +35,9 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.jobs.get_user_jobs()
+client.jobs.get_user_jobs(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
 
 ```
 </dd>
@@ -76,6 +78,89 @@ client.jobs.get_user_jobs()
 <dd>
 
 **ownership:** `typing.Optional[OwnershipFilter]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**project_id:** `typing.Optional[str]` — Filter results to resources belonging to this project.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">validate_query</a>(...) -> ValidateQueryResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Checks whether a query is well-formed and likely to produce good results before submitting a job.
+
+Returns a quality assessment with a status level, identified issues, and actionable suggestions.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.jobs.validate_query(
+    query="Series B funding rounds for SaaS startups",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**query:** `str` — Plain text query to validate.
     
 </dd>
 </dl>
@@ -330,6 +415,22 @@ The dataset must have `latest_status: ready` before the job is submitted. Submit
 The minimum relevance score a connected entity must reach for its record to be included in results.
 
 Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**project_id:** `typing.Optional[str]` — Project to assign this job to. The job appears in the project's resource list immediately after submission.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**webhook_ids:** `typing.Optional[typing.List[str]]` — IDs of webhooks to notify when the job completes. Maximum 5 per job.
     
 </dd>
 </dl>
@@ -706,7 +807,9 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.list_monitors()
+client.monitors.list_monitors(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
 
 ```
 </dd>
@@ -754,6 +857,14 @@ client.monitors.list_monitors()
 <dl>
 <dd>
 
+**project_id:** `typing.Optional[str]` — Filter results to resources belonging to this project.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -793,7 +904,7 @@ Create a scheduled monitor based on a reference job.
 <dd>
 
 ```python
-from newscatcher_catchall import CatchAllApi, WebhookDto
+from newscatcher_catchall import CatchAllApi
 from newscatcher_catchall.environment import CatchAllApiEnvironment
 
 client = CatchAllApi(
@@ -805,13 +916,9 @@ client.monitors.create_monitor(
     reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
     schedule="every day at 12 PM",
     timezone="UTC",
-    webhook=WebhookDto(
-        url="https://your-endpoint.com/webhook",
-        method="POST",
-        headers={
-            "Authorization": "Bearer your_token_here"
-        },
-    ),
+    webhook_ids=[
+        "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    ],
     limit=10,
     backfill=True,
 )
@@ -862,7 +969,12 @@ If the schedule includes a timezone abbreviation (for example, `"every day at 9a
 <dl>
 <dd>
 
-**webhook:** `typing.Optional[WebhookDto]` — Optional webhook to receive notifications when jobs complete.
+**webhook_ids:** `typing.Optional[typing.List[str]]` 
+
+IDs of centralized webhooks to notify on each run completion.
+Passing IDs here is equivalent to calling
+`POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
+Maximum 5 per monitor.
     
 </dd>
 </dl>
@@ -883,6 +995,14 @@ If the schedule includes a timezone abbreviation (for example, `"every day at 9a
 If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days. 
 
 If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**project_id:** `typing.Optional[str]` — Project to assign this monitor to. The monitor appears in the project's resource list after creation.
     
 </dd>
 </dl>
@@ -1395,7 +1515,7 @@ Update the webhook configuration for an existing monitor.
 <dd>
 
 ```python
-from newscatcher_catchall import CatchAllApi, WebhookDto
+from newscatcher_catchall import CatchAllApi
 from newscatcher_catchall.environment import CatchAllApiEnvironment
 
 client = CatchAllApi(
@@ -1405,13 +1525,9 @@ client = CatchAllApi(
 
 client.monitors.update_monitor(
     monitor_id="monitor_id",
-    webhook=WebhookDto(
-        url="https://new-endpoint.com/webhook",
-        method="POST",
-        headers={
-            "Authorization": "Bearer new_token_xyz"
-        },
-    ),
+    webhook_ids=[
+        "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    ],
 )
 
 ```
@@ -1436,7 +1552,11 @@ client.monitors.update_monitor(
 <dl>
 <dd>
 
-**webhook:** `typing.Optional[WebhookDto]` — Updated webhook configuration.
+**webhook_ids:** `typing.Optional[typing.List[str]]` 
+
+Updated list of centralized webhook IDs for this monitor. 
+
+Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
     
 </dd>
 </dl>
@@ -1445,6 +1565,1133 @@ client.monitors.update_monitor(
 <dd>
 
 **limit:** `typing.Optional[int]` — Updated maximum number of records per monitor run.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Webhooks
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">list_webhooks</a>(...) -> ListWebhooksResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a paginated list of webhooks belonging to the organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.list_webhooks()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of webhooks per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Filter results by text (case-insensitive substring match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">create_webhook</a>(...) -> CreateWebhookResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new webhook endpoint for the organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.create_webhook(
+    name="Layoffs Alert",
+    url="https://hooks.slack.com/services/T000/B000/xxx",
+    type="slack",
+    delivery_mode="full",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**name:** `str` — Human-readable label for this webhook.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `str` 
+
+Destination URL that receives the payload. Must use HTTPS. IP addresses are not accepted.
+
+Type-specific URL requirements:
+- `slack`: Must start with `https://hooks.slack.com/`.
+- `teams`: Hostname must match `*.webhook.office.com` or `*.webhook.office365.com`.
+- `generic`: Any valid HTTPS domain.
+- `custom`: Any valid HTTPS domain.
+
+When `type` is omitted, it is auto-detected from the URL.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[WebhookType]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**delivery_mode:** `typing.Optional[DeliveryMode]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**method:** `typing.Optional[HttpMethod]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**headers:** `typing.Optional[typing.Dict[str, str]]` — Custom HTTP headers forwarded with each delivery.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**params:** `typing.Optional[typing.Dict[str, str]]` — Query parameters appended to the webhook URL.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auth:** `typing.Optional[CreateWebhookRequestDtoAuth]` 
+
+Authentication forwarded with each delivery. Supported types:
+- `bearer`: Adds an `Authorization: Bearer <token>` header.
+- `api_key`: Adds a custom header with the specified name and value.
+- `basic`: Adds an `Authorization: Basic <credentials>` header.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**formatter_config:** `typing.Optional[typing.Dict[str, typing.Any]]` — Custom payload transformation configuration. Required only when `type` is `custom`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">get_webhook</a>(...) -> GetWebhookResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the full configuration of a single webhook by ID.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.get_webhook(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">delete_webhook</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently deletes a webhook and removes all resource assignments. 
+
+Assigned jobs and monitors no longer trigger delivery to this webhook. This operation cannot be undone.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.delete_webhook(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">update_webhook</a>(...) -> UpdateWebhookResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates one or more fields of an existing webhook.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.update_webhook(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    name="Layoffs Alert (EU)",
+    is_active=False,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Updated webhook name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `typing.Optional[str]` — Updated destination URL. Must use HTTPS. Type-specific URL rules apply.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[WebhookType]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**delivery_mode:** `typing.Optional[DeliveryMode]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**method:** `typing.Optional[HttpMethod]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**headers:** `typing.Optional[typing.Dict[str, str]]` — Updated HTTP headers. Replaces existing headers entirely.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**params:** `typing.Optional[typing.Dict[str, str]]` — Updated query parameters. Replaces existing params entirely.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auth:** `typing.Optional[UpdateWebhookRequestDtoAuth]` — Updated authentication configuration. Replaces existing auth entirely.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**formatter_config:** `typing.Optional[typing.Dict[str, typing.Any]]` — Updated formatter configuration.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**is_active:** `typing.Optional[bool]` — Set to `false` to disable delivery without deleting the webhook.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">test_webhook</a>(...) -> TestWebhookResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Sends a test HTTP request to the webhook URL using the webhook's configured method, headers, and auth. Returns the response from the target endpoint.
+
+Use this to verify URL reachability and authentication before attaching the webhook to a live job or monitor.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.test_webhook(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    payload={
+        "test": True,
+        "message": "CatchAll webhook test"
+    },
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**payload:** `typing.Optional[typing.Dict[str, typing.Any]]` 
+
+Custom payload to send in the test request. If omitted, a synthetic
+test payload is sent.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">list_webhook_resources</a>(...) -> ListWebhookResourcesResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a paginated list of resources currently assigned to this webhook.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.list_webhook_resources(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_type:** `typing.Optional[MappableResourceType]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of assignments per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">assign_webhook_resource</a>(...) -> AssignWebhookResourceResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Attaches a job, monitor, or monitor group to the webhook. When the
+resource completes, the webhook receives a delivery.
+
+A single webhook can be assigned to multiple resources. Each resource
+can have up to 5 webhooks assigned.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.assign_webhook_resource(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    resource_type="monitor",
+    resource_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_type:** `MappableResourceType` — Type of resource to assign.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_id:** `str` — ID of the resource to assign.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">remove_webhook_resource</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Detaches a resource from this webhook. Completions of the resource no longer trigger delivery to this webhook.
+
+The webhook and the resource itself are not deleted.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.remove_webhook_resource(
+    webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    resource_type="job",
+    resource_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_id:** `str` — Unique webhook identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_type:** `MappableResourceType` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_id:** `str` — Unique resource identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">list_webhooks_for_resource</a>(...) -> ListWebhooksResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns all webhooks currently assigned to the given resource.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.list_webhooks_for_resource(
+    resource_type="job",
+    resource_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resource_type:** `MappableResourceType` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_id:** `str` — Unique resource identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**is_active:** `typing.Optional[bool]` — Filter by active status. Omit to return webhooks regardless of status.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of webhooks per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/newscatcher_catchall/webhooks/client.py">get_webhook_delivery_history</a>(...) -> DeliveryHistoryResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a paginated delivery log for a given resource, ordered by timestamp descending. 
+
+Each record shows the webhook dispatched, the HTTP status code returned, delivery outcome, and any error or warning messages. Use this to debug failed deliveries or audit dispatch activity.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.webhooks.get_webhook_delivery_history(
+    resource_type="job",
+    resource_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resource_type:** `MappableResourceType` — Type of the resource to retrieve delivery history for.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_id:** `str` — Identifier of the resource to retrieve delivery history for.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of records per page.
     
 </dd>
 </dl>
@@ -2080,6 +3327,7 @@ client = CatchAllApi(
 
 client.datasets.list_datasets(
     search="Portfolio",
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
 )
 
 ```
@@ -2145,6 +3393,14 @@ client.datasets.list_datasets(
 <dd>
 
 **ownership:** `typing.Optional[OwnershipFilter]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**project_id:** `typing.Optional[str]` — Filter results to resources belonging to this project.
     
 </dd>
 </dl>
@@ -3047,6 +4303,781 @@ client.datasets.upload_csv_to_dataset(
 <dd>
 
 **file:** `core.File` — The CSV file to upload.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Projects
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">list_projects</a>(...) -> ProjectListResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns all projects visible to the authenticated user.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.list_projects(
+    search="M&A",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of records per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**search:** `typing.Optional[str]` — Filter by project name (case-insensitive substring match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ownership:** `typing.Optional[OwnershipFilter]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">create_project</a>(...) -> CreateProjectResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new project.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.create_project(
+    name="AI M&A Tracking",
+    description="Tracks AI-related M&A activity for our investment team.",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**name:** `str` — Name for the project.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — Optional description.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">get_project</a>(...) -> ProjectResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a single project by ID.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.get_project(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">delete_project</a>(...)</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a project. By default, assigned resources are unassigned but not deleted. 
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.delete_project(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**delete_resources:** `typing.Optional[bool]` — If true, permanently deletes all resources (jobs, monitors, datasets) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">update_project</a>(...) -> UpdateProjectResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates the name or description of an existing project.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.update_project(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+    name="AI M&A Tracking (Q2 2026)",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — New name for the project.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — New description for the project.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">get_project_overview</a>(...) -> ProjectOverviewResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns resource counts for a project, grouped by type and status.
+
+For `jobs` and `monitors`, counts are broken down by status (for example, `completed`, `failed`). For `datasets` and `monitor_groups`, only a `total` count is returned.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.get_project_overview(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">list_project_resources</a>(...) -> ProjectResourceListResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns all resources assigned to a project, with optional filtering by type.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.list_project_resources(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_type:** `typing.Optional[ProjectResourceType]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of records per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">add_resource_to_project</a>(...) -> AddResourceResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Assigns one or more existing resources to a project in a single request.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi, ResourceItemDto
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.add_resource_to_project(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+    resources=[
+        ResourceItemDto(
+            resource_type="job",
+            resource_id="48421e16-1f50-4048-b62c-d3bc0789d30d",
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resources:** `typing.List[ResourceItemDto]` — Resources to assign to the project.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.projects.<a href="src/newscatcher_catchall/projects/client.py">remove_resource_from_project</a>(...) -> RemoveResourceResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Removes a resource from a project. The resource itself is not
+deleted — it becomes unassigned and continues to exist.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.projects.remove_resource_from_project(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+    resource_type="job",
+    resource_id="48421e16-1f50-4048-b62c-d3bc0789d30d",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**project_id:** `str` — Unique project identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_type:** `ProjectResourceType` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**resource_id:** `str` — ID of the resource to remove.
     
 </dd>
 </dl>

@@ -10,7 +10,7 @@ from .monitor_status_entry import MonitorStatusEntry
 class MonitorStatusHistoryResponseDto(UniversalBaseModel):
     success: bool = pydantic.Field()
     """
-    Whether the request succeeded.
+    True if the request succeeded; false otherwise.
     """
 
     message: typing.Optional[str] = pydantic.Field(default=None)

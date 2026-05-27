@@ -15,6 +15,8 @@ if typing.TYPE_CHECKING:
     from .jobs.client import AsyncJobsClient, JobsClient
     from .meta.client import AsyncMetaClient, MetaClient
     from .monitors.client import AsyncMonitorsClient, MonitorsClient
+    from .projects.client import AsyncProjectsClient, ProjectsClient
+    from .webhooks.client import AsyncWebhooksClient, WebhooksClient
 
 
 class CatchAllApi:
@@ -95,8 +97,10 @@ class CatchAllApi:
         )
         self._jobs: typing.Optional[JobsClient] = None
         self._monitors: typing.Optional[MonitorsClient] = None
+        self._webhooks: typing.Optional[WebhooksClient] = None
         self._entities: typing.Optional[EntitiesClient] = None
         self._datasets: typing.Optional[DatasetsClient] = None
+        self._projects: typing.Optional[ProjectsClient] = None
         self._meta: typing.Optional[MetaClient] = None
 
     @property
@@ -116,6 +120,14 @@ class CatchAllApi:
         return self._monitors
 
     @property
+    def webhooks(self):
+        if self._webhooks is None:
+            from .webhooks.client import WebhooksClient  # noqa: E402
+
+            self._webhooks = WebhooksClient(client_wrapper=self._client_wrapper)
+        return self._webhooks
+
+    @property
     def entities(self):
         if self._entities is None:
             from .entities.client import EntitiesClient  # noqa: E402
@@ -130,6 +142,14 @@ class CatchAllApi:
 
             self._datasets = DatasetsClient(client_wrapper=self._client_wrapper)
         return self._datasets
+
+    @property
+    def projects(self):
+        if self._projects is None:
+            from .projects.client import ProjectsClient  # noqa: E402
+
+            self._projects = ProjectsClient(client_wrapper=self._client_wrapper)
+        return self._projects
 
     @property
     def meta(self):
@@ -234,8 +254,10 @@ class AsyncCatchAllApi:
         )
         self._jobs: typing.Optional[AsyncJobsClient] = None
         self._monitors: typing.Optional[AsyncMonitorsClient] = None
+        self._webhooks: typing.Optional[AsyncWebhooksClient] = None
         self._entities: typing.Optional[AsyncEntitiesClient] = None
         self._datasets: typing.Optional[AsyncDatasetsClient] = None
+        self._projects: typing.Optional[AsyncProjectsClient] = None
         self._meta: typing.Optional[AsyncMetaClient] = None
 
     @property
@@ -255,6 +277,14 @@ class AsyncCatchAllApi:
         return self._monitors
 
     @property
+    def webhooks(self):
+        if self._webhooks is None:
+            from .webhooks.client import AsyncWebhooksClient  # noqa: E402
+
+            self._webhooks = AsyncWebhooksClient(client_wrapper=self._client_wrapper)
+        return self._webhooks
+
+    @property
     def entities(self):
         if self._entities is None:
             from .entities.client import AsyncEntitiesClient  # noqa: E402
@@ -269,6 +299,14 @@ class AsyncCatchAllApi:
 
             self._datasets = AsyncDatasetsClient(client_wrapper=self._client_wrapper)
         return self._datasets
+
+    @property
+    def projects(self):
+        if self._projects is None:
+            from .projects.client import AsyncProjectsClient  # noqa: E402
+
+            self._projects = AsyncProjectsClient(client_wrapper=self._client_wrapper)
+        return self._projects
 
     @property
     def meta(self):

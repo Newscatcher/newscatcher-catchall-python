@@ -50,6 +50,7 @@ class DatasetsClient:
         sort_by: typing.Optional[DatasetSortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetListResponse:
         """
@@ -75,6 +76,9 @@ class DatasetsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -92,6 +96,7 @@ class DatasetsClient:
         )
         client.datasets.list_datasets(
             search="Portfolio",
+            project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
         )
         """
         _response = self._raw_client.list_datasets(
@@ -102,6 +107,7 @@ class DatasetsClient:
             sort_by=sort_by,
             sort_order=sort_order,
             ownership=ownership,
+            project_id=project_id,
             request_options=request_options,
         )
         return _response.data
@@ -594,6 +600,7 @@ class AsyncDatasetsClient:
         sort_by: typing.Optional[DatasetSortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DatasetListResponse:
         """
@@ -619,6 +626,9 @@ class AsyncDatasetsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -641,6 +651,7 @@ class AsyncDatasetsClient:
         async def main() -> None:
             await client.datasets.list_datasets(
                 search="Portfolio",
+                project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
             )
 
 
@@ -654,6 +665,7 @@ class AsyncDatasetsClient:
             sort_by=sort_by,
             sort_order=sort_order,
             ownership=ownership,
+            project_id=project_id,
             request_options=request_options,
         )
         return _response.data

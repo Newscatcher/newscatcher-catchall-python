@@ -16,7 +16,7 @@ class JobStep(UniversalBaseModel):
 
     completed: bool = pydantic.Field()
     """
-    Whether this step has finished processing.
+    True if this step has finished processing; false otherwise.
     """
 
     if IS_PYDANTIC_V2:
