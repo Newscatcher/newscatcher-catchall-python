@@ -18,6 +18,7 @@ from ..types.query import Query
 from ..types.start_date import StartDate
 from ..types.status_response_dto import StatusResponseDto
 from ..types.submit_response_dto import SubmitResponseDto
+from ..types.validate_query_response_dto import ValidateQueryResponseDto
 from ..types.validator_schema import ValidatorSchema
 from .raw_client import AsyncRawJobsClient, RawJobsClient
 from .types.submit_request_dto_mode import SubmitRequestDtoMode
@@ -48,6 +49,7 @@ class JobsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListUserJobsResponseDto:
         """
@@ -66,6 +68,9 @@ class JobsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -81,11 +86,53 @@ class JobsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.jobs.get_user_jobs()
+        client.jobs.get_user_jobs(
+            project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+        )
         """
         _response = self._raw_client.get_user_jobs(
-            page=page, page_size=page_size, search=search, ownership=ownership, request_options=request_options
+            page=page,
+            page_size=page_size,
+            search=search,
+            ownership=ownership,
+            project_id=project_id,
+            request_options=request_options,
         )
+        return _response.data
+
+    def validate_query(
+        self, *, query: str, request_options: typing.Optional[RequestOptions] = None
+    ) -> ValidateQueryResponseDto:
+        """
+        Checks whether a query is well-formed and likely to produce good results before submitting a job.
+
+        Returns a quality assessment with a status level, identified issues, and actionable suggestions.
+
+        Parameters
+        ----------
+        query : str
+            Plain text query to validate.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValidateQueryResponseDto
+            Query validation result.
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.validate_query(
+            query="Series B funding rounds for SaaS startups",
+        )
+        """
+        _response = self._raw_client.validate_query(query=query, request_options=request_options)
         return _response.data
 
     def initialize(
@@ -140,6 +187,8 @@ class JobsClient:
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         ed_score_min: typing.Optional[int] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -183,6 +232,12 @@ class JobsClient:
 
             Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
 
+        project_id : typing.Optional[str]
+            Project to assign this job to. The job appears in the project's resource list immediately after submission.
+
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of webhooks to notify when the job completes. Maximum 5 per job.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -224,6 +279,8 @@ class JobsClient:
             mode=mode,
             connected_dataset_ids=connected_dataset_ids,
             ed_score_min=ed_score_min,
+            project_id=project_id,
+            webhook_ids=webhook_ids,
             request_options=request_options,
         )
         return _response.data
@@ -408,6 +465,7 @@ class AsyncJobsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListUserJobsResponseDto:
         """
@@ -425,6 +483,9 @@ class AsyncJobsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
+
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -446,14 +507,64 @@ class AsyncJobsClient:
 
 
         async def main() -> None:
-            await client.jobs.get_user_jobs()
+            await client.jobs.get_user_jobs(
+                project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+            )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.get_user_jobs(
-            page=page, page_size=page_size, search=search, ownership=ownership, request_options=request_options
+            page=page,
+            page_size=page_size,
+            search=search,
+            ownership=ownership,
+            project_id=project_id,
+            request_options=request_options,
         )
+        return _response.data
+
+    async def validate_query(
+        self, *, query: str, request_options: typing.Optional[RequestOptions] = None
+    ) -> ValidateQueryResponseDto:
+        """
+        Checks whether a query is well-formed and likely to produce good results before submitting a job.
+
+        Returns a quality assessment with a status level, identified issues, and actionable suggestions.
+
+        Parameters
+        ----------
+        query : str
+            Plain text query to validate.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValidateQueryResponseDto
+            Query validation result.
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.jobs.validate_query(
+                query="Series B funding rounds for SaaS startups",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.validate_query(query=query, request_options=request_options)
         return _response.data
 
     async def initialize(
@@ -516,6 +627,8 @@ class AsyncJobsClient:
         mode: typing.Optional[SubmitRequestDtoMode] = OMIT,
         connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         ed_score_min: typing.Optional[int] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -558,6 +671,12 @@ class AsyncJobsClient:
             The minimum relevance score a connected entity must reach for its record to be included in results.
 
             Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where no connected entity meets the threshold are excluded entirely.
+
+        project_id : typing.Optional[str]
+            Project to assign this job to. The job appears in the project's resource list immediately after submission.
+
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -607,6 +726,8 @@ class AsyncJobsClient:
             mode=mode,
             connected_dataset_ids=connected_dataset_ids,
             ed_score_min=ed_score_min,
+            project_id=project_id,
+            webhook_ids=webhook_ids,
             request_options=request_options,
         )
         return _response.data

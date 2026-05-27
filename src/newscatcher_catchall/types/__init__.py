@@ -6,10 +6,15 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
+    from .add_resource_response_dto import AddResourceResponseDto
     from .additional_attributes import AdditionalAttributes
+    from .api_key_auth_dto import ApiKeyAuthDto
+    from .assign_webhook_resource_response_dto import AssignWebhookResourceResponseDto
     from .base_record import BaseRecord
     from .base_record_enrichment import BaseRecordEnrichment
     from .base_record_enrichment_enrichment_confidence import BaseRecordEnrichmentEnrichmentConfidence
+    from .basic_auth_dto import BasicAuthDto
+    from .bearer_auth_dto import BearerAuthDto
     from .citation import Citation
     from .company_attributes import CompanyAttributes
     from .company_enrichment_output import CompanyEnrichmentOutput
@@ -25,6 +30,8 @@ if typing.TYPE_CHECKING:
     from .create_entity_request import CreateEntityRequest
     from .create_entity_response import CreateEntityResponse
     from .create_monitor_response_dto import CreateMonitorResponseDto
+    from .create_project_response_dto import CreateProjectResponseDto
+    from .create_webhook_response_dto import CreateWebhookResponseDto
     from .dataset_entity_ids_request import DatasetEntityIdsRequest
     from .dataset_entity_list_response import DatasetEntityListResponse
     from .dataset_list_response import DatasetListResponse
@@ -35,6 +42,10 @@ if typing.TYPE_CHECKING:
     from .dataset_status_history_response import DatasetStatusHistoryResponse
     from .delete_job_response_dto import DeleteJobResponseDto
     from .delete_monitor_response_dto import DeleteMonitorResponseDto
+    from .delivery_history_item_dto import DeliveryHistoryItemDto
+    from .delivery_history_response_dto import DeliveryHistoryResponseDto
+    from .delivery_mode import DeliveryMode
+    from .delivery_status import DeliveryStatus
     from .end_date import EndDate
     from .enrichment_schema import EnrichmentSchema
     from .enrichment_type import EnrichmentType
@@ -47,12 +58,18 @@ if typing.TYPE_CHECKING:
     from .entity_validation_error_body import EntityValidationErrorBody
     from .error import Error
     from .get_plan_limits_response_dto import GetPlanLimitsResponseDto
+    from .get_webhook_response_dto import GetWebhookResponseDto
+    from .http_method import HttpMethod
     from .initialize_response_dto import InitializeResponseDto
+    from .issue_type import IssueType
     from .job_step import JobStep
     from .limit import Limit
     from .list_monitors_response_dto import ListMonitorsResponseDto
     from .list_user_jobs_response_dto import ListUserJobsResponseDto
+    from .list_webhook_resources_response_dto import ListWebhookResourcesResponseDto
+    from .list_webhooks_response_dto import ListWebhooksResponseDto
     from .manage_entities_response import ManageEntitiesResponse
+    from .mappable_resource_type import MappableResourceType
     from .monitor_citation import MonitorCitation
     from .monitor_job_item import MonitorJobItem
     from .monitor_list_item_dto import MonitorListItemDto
@@ -62,6 +79,15 @@ if typing.TYPE_CHECKING:
     from .monitor_status_history_response_dto import MonitorStatusHistoryResponseDto
     from .ownership_filter import OwnershipFilter
     from .plan_feature import PlanFeature
+    from .project_list_response_dto import ProjectListResponseDto
+    from .project_overview_counts_dto import ProjectOverviewCountsDto
+    from .project_overview_response_dto import ProjectOverviewResponseDto
+    from .project_overview_response_dto_overview import ProjectOverviewResponseDtoOverview
+    from .project_resource_dto import ProjectResourceDto
+    from .project_resource_list_response_dto import ProjectResourceListResponseDto
+    from .project_resource_type import ProjectResourceType
+    from .project_response_dto import ProjectResponseDto
+    from .project_summary_dto import ProjectSummaryDto
     from .public_job_status import PublicJobStatus
     from .pull_job_response_dto import PullJobResponseDto
     from .pull_job_response_dto_date_range import PullJobResponseDtoDateRange
@@ -69,8 +95,12 @@ if typing.TYPE_CHECKING:
     from .pull_monitor_response_dto import PullMonitorResponseDto
     from .pull_monitor_response_dto_run_info import PullMonitorResponseDtoRunInfo
     from .query import Query
+    from .query_status import QueryStatus
     from .record import Record
     from .reference_job import ReferenceJob
+    from .remove_resource_response_dto import RemoveResourceResponseDto
+    from .resource_item_dto import ResourceItemDto
+    from .resource_result_dto import ResourceResultDto
     from .sharing_info import SharingInfo
     from .sharing_info_permission import SharingInfoPermission
     from .skipped_row import SkippedRow
@@ -78,10 +108,15 @@ if typing.TYPE_CHECKING:
     from .start_date import StartDate
     from .status_response_dto import StatusResponseDto
     from .submit_response_dto import SubmitResponseDto
+    from .suggestion import Suggestion
+    from .test_webhook_response_dto import TestWebhookResponseDto
     from .update_monitor_response_dto import UpdateMonitorResponseDto
+    from .update_project_response_dto import UpdateProjectResponseDto
+    from .update_webhook_response_dto import UpdateWebhookResponseDto
     from .upload_csv_to_dataset_response import UploadCsvToDatasetResponse
     from .user_job import UserJob
     from .user_job_mode import UserJobMode
+    from .validate_query_response_dto import ValidateQueryResponseDto
     from .validation_error_detail import ValidationErrorDetail
     from .validation_error_detail_loc_item import ValidationErrorDetailLocItem
     from .validation_error_response import ValidationErrorResponse
@@ -90,11 +125,19 @@ if typing.TYPE_CHECKING:
     from .webhook_dto import WebhookDto
     from .webhook_dto_method import WebhookDtoMethod
     from .webhook_payload import WebhookPayload
+    from .webhook_resource_mapping_response_dto import WebhookResourceMappingResponseDto
+    from .webhook_response_dto import WebhookResponseDto
+    from .webhook_type import WebhookType
 _dynamic_imports: typing.Dict[str, str] = {
+    "AddResourceResponseDto": ".add_resource_response_dto",
     "AdditionalAttributes": ".additional_attributes",
+    "ApiKeyAuthDto": ".api_key_auth_dto",
+    "AssignWebhookResourceResponseDto": ".assign_webhook_resource_response_dto",
     "BaseRecord": ".base_record",
     "BaseRecordEnrichment": ".base_record_enrichment",
     "BaseRecordEnrichmentEnrichmentConfidence": ".base_record_enrichment_enrichment_confidence",
+    "BasicAuthDto": ".basic_auth_dto",
+    "BearerAuthDto": ".bearer_auth_dto",
     "Citation": ".citation",
     "CompanyAttributes": ".company_attributes",
     "CompanyEnrichmentOutput": ".company_enrichment_output",
@@ -108,6 +151,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateEntityRequest": ".create_entity_request",
     "CreateEntityResponse": ".create_entity_response",
     "CreateMonitorResponseDto": ".create_monitor_response_dto",
+    "CreateProjectResponseDto": ".create_project_response_dto",
+    "CreateWebhookResponseDto": ".create_webhook_response_dto",
     "DatasetEntityIdsRequest": ".dataset_entity_ids_request",
     "DatasetEntityListResponse": ".dataset_entity_list_response",
     "DatasetListResponse": ".dataset_list_response",
@@ -118,6 +163,10 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DatasetStatusHistoryResponse": ".dataset_status_history_response",
     "DeleteJobResponseDto": ".delete_job_response_dto",
     "DeleteMonitorResponseDto": ".delete_monitor_response_dto",
+    "DeliveryHistoryItemDto": ".delivery_history_item_dto",
+    "DeliveryHistoryResponseDto": ".delivery_history_response_dto",
+    "DeliveryMode": ".delivery_mode",
+    "DeliveryStatus": ".delivery_status",
     "EndDate": ".end_date",
     "EnrichmentSchema": ".enrichment_schema",
     "EnrichmentType": ".enrichment_type",
@@ -130,12 +179,18 @@ _dynamic_imports: typing.Dict[str, str] = {
     "EntityValidationErrorBody": ".entity_validation_error_body",
     "Error": ".error",
     "GetPlanLimitsResponseDto": ".get_plan_limits_response_dto",
+    "GetWebhookResponseDto": ".get_webhook_response_dto",
+    "HttpMethod": ".http_method",
     "InitializeResponseDto": ".initialize_response_dto",
+    "IssueType": ".issue_type",
     "JobStep": ".job_step",
     "Limit": ".limit",
     "ListMonitorsResponseDto": ".list_monitors_response_dto",
     "ListUserJobsResponseDto": ".list_user_jobs_response_dto",
+    "ListWebhookResourcesResponseDto": ".list_webhook_resources_response_dto",
+    "ListWebhooksResponseDto": ".list_webhooks_response_dto",
     "ManageEntitiesResponse": ".manage_entities_response",
+    "MappableResourceType": ".mappable_resource_type",
     "MonitorCitation": ".monitor_citation",
     "MonitorJobItem": ".monitor_job_item",
     "MonitorListItemDto": ".monitor_list_item_dto",
@@ -145,6 +200,15 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MonitorStatusHistoryResponseDto": ".monitor_status_history_response_dto",
     "OwnershipFilter": ".ownership_filter",
     "PlanFeature": ".plan_feature",
+    "ProjectListResponseDto": ".project_list_response_dto",
+    "ProjectOverviewCountsDto": ".project_overview_counts_dto",
+    "ProjectOverviewResponseDto": ".project_overview_response_dto",
+    "ProjectOverviewResponseDtoOverview": ".project_overview_response_dto_overview",
+    "ProjectResourceDto": ".project_resource_dto",
+    "ProjectResourceListResponseDto": ".project_resource_list_response_dto",
+    "ProjectResourceType": ".project_resource_type",
+    "ProjectResponseDto": ".project_response_dto",
+    "ProjectSummaryDto": ".project_summary_dto",
     "PublicJobStatus": ".public_job_status",
     "PullJobResponseDto": ".pull_job_response_dto",
     "PullJobResponseDtoDateRange": ".pull_job_response_dto_date_range",
@@ -152,8 +216,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PullMonitorResponseDto": ".pull_monitor_response_dto",
     "PullMonitorResponseDtoRunInfo": ".pull_monitor_response_dto_run_info",
     "Query": ".query",
+    "QueryStatus": ".query_status",
     "Record": ".record",
     "ReferenceJob": ".reference_job",
+    "RemoveResourceResponseDto": ".remove_resource_response_dto",
+    "ResourceItemDto": ".resource_item_dto",
+    "ResourceResultDto": ".resource_result_dto",
     "SharingInfo": ".sharing_info",
     "SharingInfoPermission": ".sharing_info_permission",
     "SkippedRow": ".skipped_row",
@@ -161,10 +229,15 @@ _dynamic_imports: typing.Dict[str, str] = {
     "StartDate": ".start_date",
     "StatusResponseDto": ".status_response_dto",
     "SubmitResponseDto": ".submit_response_dto",
+    "Suggestion": ".suggestion",
+    "TestWebhookResponseDto": ".test_webhook_response_dto",
     "UpdateMonitorResponseDto": ".update_monitor_response_dto",
+    "UpdateProjectResponseDto": ".update_project_response_dto",
+    "UpdateWebhookResponseDto": ".update_webhook_response_dto",
     "UploadCsvToDatasetResponse": ".upload_csv_to_dataset_response",
     "UserJob": ".user_job",
     "UserJobMode": ".user_job_mode",
+    "ValidateQueryResponseDto": ".validate_query_response_dto",
     "ValidationErrorDetail": ".validation_error_detail",
     "ValidationErrorDetailLocItem": ".validation_error_detail_loc_item",
     "ValidationErrorResponse": ".validation_error_response",
@@ -173,6 +246,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "WebhookDto": ".webhook_dto",
     "WebhookDtoMethod": ".webhook_dto_method",
     "WebhookPayload": ".webhook_payload",
+    "WebhookResourceMappingResponseDto": ".webhook_resource_mapping_response_dto",
+    "WebhookResponseDto": ".webhook_response_dto",
+    "WebhookType": ".webhook_type",
 }
 
 
@@ -198,10 +274,15 @@ def __dir__():
 
 
 __all__ = [
+    "AddResourceResponseDto",
     "AdditionalAttributes",
+    "ApiKeyAuthDto",
+    "AssignWebhookResourceResponseDto",
     "BaseRecord",
     "BaseRecordEnrichment",
     "BaseRecordEnrichmentEnrichmentConfidence",
+    "BasicAuthDto",
+    "BearerAuthDto",
     "Citation",
     "CompanyAttributes",
     "CompanyEnrichmentOutput",
@@ -215,6 +296,8 @@ __all__ = [
     "CreateEntityRequest",
     "CreateEntityResponse",
     "CreateMonitorResponseDto",
+    "CreateProjectResponseDto",
+    "CreateWebhookResponseDto",
     "DatasetEntityIdsRequest",
     "DatasetEntityListResponse",
     "DatasetListResponse",
@@ -225,6 +308,10 @@ __all__ = [
     "DatasetStatusHistoryResponse",
     "DeleteJobResponseDto",
     "DeleteMonitorResponseDto",
+    "DeliveryHistoryItemDto",
+    "DeliveryHistoryResponseDto",
+    "DeliveryMode",
+    "DeliveryStatus",
     "EndDate",
     "EnrichmentSchema",
     "EnrichmentType",
@@ -237,12 +324,18 @@ __all__ = [
     "EntityValidationErrorBody",
     "Error",
     "GetPlanLimitsResponseDto",
+    "GetWebhookResponseDto",
+    "HttpMethod",
     "InitializeResponseDto",
+    "IssueType",
     "JobStep",
     "Limit",
     "ListMonitorsResponseDto",
     "ListUserJobsResponseDto",
+    "ListWebhookResourcesResponseDto",
+    "ListWebhooksResponseDto",
     "ManageEntitiesResponse",
+    "MappableResourceType",
     "MonitorCitation",
     "MonitorJobItem",
     "MonitorListItemDto",
@@ -252,6 +345,15 @@ __all__ = [
     "MonitorStatusHistoryResponseDto",
     "OwnershipFilter",
     "PlanFeature",
+    "ProjectListResponseDto",
+    "ProjectOverviewCountsDto",
+    "ProjectOverviewResponseDto",
+    "ProjectOverviewResponseDtoOverview",
+    "ProjectResourceDto",
+    "ProjectResourceListResponseDto",
+    "ProjectResourceType",
+    "ProjectResponseDto",
+    "ProjectSummaryDto",
     "PublicJobStatus",
     "PullJobResponseDto",
     "PullJobResponseDtoDateRange",
@@ -259,8 +361,12 @@ __all__ = [
     "PullMonitorResponseDto",
     "PullMonitorResponseDtoRunInfo",
     "Query",
+    "QueryStatus",
     "Record",
     "ReferenceJob",
+    "RemoveResourceResponseDto",
+    "ResourceItemDto",
+    "ResourceResultDto",
     "SharingInfo",
     "SharingInfoPermission",
     "SkippedRow",
@@ -268,10 +374,15 @@ __all__ = [
     "StartDate",
     "StatusResponseDto",
     "SubmitResponseDto",
+    "Suggestion",
+    "TestWebhookResponseDto",
     "UpdateMonitorResponseDto",
+    "UpdateProjectResponseDto",
+    "UpdateWebhookResponseDto",
     "UploadCsvToDatasetResponse",
     "UserJob",
     "UserJobMode",
+    "ValidateQueryResponseDto",
     "ValidationErrorDetail",
     "ValidationErrorDetailLocItem",
     "ValidationErrorResponse",
@@ -280,4 +391,7 @@ __all__ = [
     "WebhookDto",
     "WebhookDtoMethod",
     "WebhookPayload",
+    "WebhookResourceMappingResponseDto",
+    "WebhookResponseDto",
+    "WebhookType",
 ]

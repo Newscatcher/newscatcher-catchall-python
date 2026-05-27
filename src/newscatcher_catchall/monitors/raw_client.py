@@ -10,7 +10,6 @@ from ..core.jsonable_encoder import encode_path_param
 from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
-from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
 from ..errors.unauthorized_error import UnauthorizedError
@@ -24,7 +23,6 @@ from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
-from ..types.webhook_dto import WebhookDto
 from .types.disable_monitor_response import DisableMonitorResponse
 from .types.enable_monitor_response import EnableMonitorResponse
 from .types.list_monitor_jobs_request_sort import ListMonitorJobsRequestSort
@@ -46,6 +44,7 @@ class RawMonitorsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListMonitorsResponseDto]:
         """
@@ -64,6 +63,9 @@ class RawMonitorsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -80,6 +82,7 @@ class RawMonitorsClient:
                 "page_size": page_size,
                 "search": search,
                 "ownership": ownership,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -130,9 +133,10 @@ class RawMonitorsClient:
         reference_job_id: str,
         schedule: str,
         timezone: typing.Optional[str] = OMIT,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateMonitorResponseDto]:
         """
@@ -153,8 +157,11 @@ class RawMonitorsClient:
 
             If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
-        webhook : typing.Optional[WebhookDto]
-            Optional webhook to receive notifications when jobs complete.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of centralized webhooks to notify on each run completion.
+            Passing IDs here is equivalent to calling
+            `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
+            Maximum 5 per monitor.
 
         limit : typing.Optional[int]
             Maximum number of records per monitor run. If not provided, defaults to the plan limit.
@@ -163,6 +170,9 @@ class RawMonitorsClient:
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
 
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
+
+        project_id : typing.Optional[str]
+            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -179,11 +189,10 @@ class RawMonitorsClient:
                 "reference_job_id": reference_job_id,
                 "schedule": schedule,
                 "timezone": timezone,
-                "webhook": convert_and_respect_annotation_metadata(
-                    object_=webhook, annotation=WebhookDto, direction="write"
-                ),
+                "webhook_ids": webhook_ids,
                 "limit": limit,
                 "backfill": backfill,
+                "project_id": project_id,
             },
             headers={
                 "content-type": "application/json",
@@ -670,7 +679,7 @@ class RawMonitorsClient:
         self,
         monitor_id: str,
         *,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UpdateMonitorResponseDto]:
@@ -682,8 +691,10 @@ class RawMonitorsClient:
         monitor_id : str
             Monitor identifier.
 
-        webhook : typing.Optional[WebhookDto]
-            Updated webhook configuration.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            Updated list of centralized webhook IDs for this monitor.
+
+            Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
             Updated maximum number of records per monitor run.
@@ -700,9 +711,7 @@ class RawMonitorsClient:
             f"catchAll/monitors/{encode_path_param(monitor_id)}",
             method="PATCH",
             json={
-                "webhook": convert_and_respect_annotation_metadata(
-                    object_=webhook, annotation=WebhookDto, direction="write"
-                ),
+                "webhook_ids": webhook_ids,
                 "limit": limit,
             },
             headers={
@@ -775,6 +784,7 @@ class AsyncRawMonitorsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListMonitorsResponseDto]:
         """
@@ -793,6 +803,9 @@ class AsyncRawMonitorsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -809,6 +822,7 @@ class AsyncRawMonitorsClient:
                 "page_size": page_size,
                 "search": search,
                 "ownership": ownership,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -859,9 +873,10 @@ class AsyncRawMonitorsClient:
         reference_job_id: str,
         schedule: str,
         timezone: typing.Optional[str] = OMIT,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateMonitorResponseDto]:
         """
@@ -882,8 +897,11 @@ class AsyncRawMonitorsClient:
 
             If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
-        webhook : typing.Optional[WebhookDto]
-            Optional webhook to receive notifications when jobs complete.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of centralized webhooks to notify on each run completion.
+            Passing IDs here is equivalent to calling
+            `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
+            Maximum 5 per monitor.
 
         limit : typing.Optional[int]
             Maximum number of records per monitor run. If not provided, defaults to the plan limit.
@@ -892,6 +910,9 @@ class AsyncRawMonitorsClient:
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
 
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
+
+        project_id : typing.Optional[str]
+            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -908,11 +929,10 @@ class AsyncRawMonitorsClient:
                 "reference_job_id": reference_job_id,
                 "schedule": schedule,
                 "timezone": timezone,
-                "webhook": convert_and_respect_annotation_metadata(
-                    object_=webhook, annotation=WebhookDto, direction="write"
-                ),
+                "webhook_ids": webhook_ids,
                 "limit": limit,
                 "backfill": backfill,
+                "project_id": project_id,
             },
             headers={
                 "content-type": "application/json",
@@ -1399,7 +1419,7 @@ class AsyncRawMonitorsClient:
         self,
         monitor_id: str,
         *,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UpdateMonitorResponseDto]:
@@ -1411,8 +1431,10 @@ class AsyncRawMonitorsClient:
         monitor_id : str
             Monitor identifier.
 
-        webhook : typing.Optional[WebhookDto]
-            Updated webhook configuration.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            Updated list of centralized webhook IDs for this monitor.
+
+            Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
             Updated maximum number of records per monitor run.
@@ -1429,9 +1451,7 @@ class AsyncRawMonitorsClient:
             f"catchAll/monitors/{encode_path_param(monitor_id)}",
             method="PATCH",
             json={
-                "webhook": convert_and_respect_annotation_metadata(
-                    object_=webhook, annotation=WebhookDto, direction="write"
-                ),
+                "webhook_ids": webhook_ids,
                 "limit": limit,
             },
             headers={

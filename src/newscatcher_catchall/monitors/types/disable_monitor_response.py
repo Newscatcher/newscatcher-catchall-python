@@ -9,7 +9,7 @@ from ...core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class DisableMonitorResponse(UniversalBaseModel):
     success: bool = pydantic.Field()
     """
-    Whether the operation succeeded.
+    True if the operation succeeded; false otherwise.
     """
 
     message: str = pydantic.Field()

@@ -1,3 +1,14 @@
+## 3.0.0 - 2026-05-27
+### Breaking Changes
+* **`MonitorsClient.create_monitor()` and `MonitorsClient.update_monitor()`** — the `webhook` parameter (type `WebhookDto`) has been replaced by `webhook_ids` (type `list[str]`); rename the argument and pass a list of webhook ID strings instead of a `WebhookDto` object.
+* **`JobsClient.submit()` and `JobsClient.initialize()`** — same `webhook` → `webhook_ids` rename applies; update all callers to pass a list of webhook ID strings.
+### Added
+* **`client.webhooks` (`WebhooksClient` / `AsyncWebhooksClient`)** — new client for full webhook lifecycle management: `list_webhooks()`, `create_webhook()`, `get_webhook()`, `update_webhook()`, `delete_webhook()`, `test_webhook()`, `assign_webhook_resource()`, `remove_webhook_resource()`, `list_webhook_resources()`, `list_webhooks_for_resource()`, and `get_webhook_delivery_history()` (sync and async).
+* **`client.projects` (`ProjectsClient` / `AsyncProjectsClient`)** — new client for project lifecycle management: `list_projects()`, `create_project()`, `get_project()`, `update_project()`, `delete_project()`, `get_project_overview()`, `list_project_resources()`, `add_resource_to_project()`, and `remove_resource_from_project()` (sync and async).
+* **`JobsClient.validate_query()`** — new method (sync and async) that checks whether a query is well-formed before job submission, returning a `ValidateQueryResponseDto` with a status level, issues, and suggestions.
+* **`project_id` and `webhook_ids` optional parameters** — added to `get_user_jobs()`, `list_monitors()`, `list_datasets()`, `submit()`, `initialize()`, and `create_monitor()` to filter or assign resources to a project and attach webhook notifications.
+* See full changelog for all changes
+
 ## 2.0.0 - 2026-05-19
 ### Breaking Changes
 * **`DatasetsClient.list_entities_in_dataset()`** — now issues a POST to `.../entities/list` instead of a GET to `.../entities`; filter parameters are sent as a JSON body instead of query parameters, and optional filter params now default to `OMIT` (omitted entirely) instead of `None`; remove any `None` arguments and update any code that inspects raw HTTP requests.

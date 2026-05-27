@@ -11,7 +11,6 @@ from ..types.monitor_status_history_response_dto import MonitorStatusHistoryResp
 from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
-from ..types.webhook_dto import WebhookDto
 from .raw_client import AsyncRawMonitorsClient, RawMonitorsClient
 from .types.disable_monitor_response import DisableMonitorResponse
 from .types.enable_monitor_response import EnableMonitorResponse
@@ -44,6 +43,7 @@ class MonitorsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorsResponseDto:
         """
@@ -62,6 +62,9 @@ class MonitorsClient:
 
         ownership : typing.Optional[OwnershipFilter]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -77,10 +80,17 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.list_monitors()
+        client.monitors.list_monitors(
+            project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+        )
         """
         _response = self._raw_client.list_monitors(
-            page=page, page_size=page_size, search=search, ownership=ownership, request_options=request_options
+            page=page,
+            page_size=page_size,
+            search=search,
+            ownership=ownership,
+            project_id=project_id,
+            request_options=request_options,
         )
         return _response.data
 
@@ -90,9 +100,10 @@ class MonitorsClient:
         reference_job_id: str,
         schedule: str,
         timezone: typing.Optional[str] = OMIT,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateMonitorResponseDto:
         """
@@ -113,8 +124,11 @@ class MonitorsClient:
 
             If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
-        webhook : typing.Optional[WebhookDto]
-            Optional webhook to receive notifications when jobs complete.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of centralized webhooks to notify on each run completion.
+            Passing IDs here is equivalent to calling
+            `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
+            Maximum 5 per monitor.
 
         limit : typing.Optional[int]
             Maximum number of records per monitor run. If not provided, defaults to the plan limit.
@@ -123,6 +137,9 @@ class MonitorsClient:
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
 
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
+
+        project_id : typing.Optional[str]
+            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -134,7 +151,7 @@ class MonitorsClient:
 
         Examples
         --------
-        from newscatcher_catchall import CatchAllApi, WebhookDto
+        from newscatcher_catchall import CatchAllApi
 
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
@@ -143,11 +160,7 @@ class MonitorsClient:
             reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
             schedule="every day at 12 PM",
             timezone="UTC",
-            webhook=WebhookDto(
-                url="https://your-endpoint.com/webhook",
-                method="POST",
-                headers={"Authorization": "Bearer your_token_here"},
-            ),
+            webhook_ids=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
             limit=10,
             backfill=True,
         )
@@ -156,9 +169,10 @@ class MonitorsClient:
             reference_job_id=reference_job_id,
             schedule=schedule,
             timezone=timezone,
-            webhook=webhook,
+            webhook_ids=webhook_ids,
             limit=limit,
             backfill=backfill,
+            project_id=project_id,
             request_options=request_options,
         )
         return _response.data
@@ -389,7 +403,7 @@ class MonitorsClient:
         self,
         monitor_id: str,
         *,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateMonitorResponseDto:
@@ -401,8 +415,10 @@ class MonitorsClient:
         monitor_id : str
             Monitor identifier.
 
-        webhook : typing.Optional[WebhookDto]
-            Updated webhook configuration.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            Updated list of centralized webhook IDs for this monitor.
+
+            Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
             Updated maximum number of records per monitor run.
@@ -417,22 +433,18 @@ class MonitorsClient:
 
         Examples
         --------
-        from newscatcher_catchall import CatchAllApi, WebhookDto
+        from newscatcher_catchall import CatchAllApi
 
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
         client.monitors.update_monitor(
             monitor_id="monitor_id",
-            webhook=WebhookDto(
-                url="https://new-endpoint.com/webhook",
-                method="POST",
-                headers={"Authorization": "Bearer new_token_xyz"},
-            ),
+            webhook_ids=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
         )
         """
         _response = self._raw_client.update_monitor(
-            monitor_id, webhook=webhook, limit=limit, request_options=request_options
+            monitor_id, webhook_ids=webhook_ids, limit=limit, request_options=request_options
         )
         return _response.data
 
@@ -459,6 +471,7 @@ class AsyncMonitorsClient:
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorsResponseDto:
         """
@@ -476,6 +489,9 @@ class AsyncMonitorsClient:
             Filter results by text (case-insensitive substring match).
 
         ownership : typing.Optional[OwnershipFilter]
+
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -497,13 +513,20 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.list_monitors()
+            await client.monitors.list_monitors(
+                project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+            )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.list_monitors(
-            page=page, page_size=page_size, search=search, ownership=ownership, request_options=request_options
+            page=page,
+            page_size=page_size,
+            search=search,
+            ownership=ownership,
+            project_id=project_id,
+            request_options=request_options,
         )
         return _response.data
 
@@ -513,9 +536,10 @@ class AsyncMonitorsClient:
         reference_job_id: str,
         schedule: str,
         timezone: typing.Optional[str] = OMIT,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         backfill: typing.Optional[bool] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateMonitorResponseDto:
         """
@@ -536,8 +560,11 @@ class AsyncMonitorsClient:
 
             If the schedule includes a timezone abbreviation (for example, `"every day at 9am EST"`), the parsed timezone takes priority and this value is ignored.
 
-        webhook : typing.Optional[WebhookDto]
-            Optional webhook to receive notifications when jobs complete.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            IDs of centralized webhooks to notify on each run completion.
+            Passing IDs here is equivalent to calling
+            `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
+            Maximum 5 per monitor.
 
         limit : typing.Optional[int]
             Maximum number of records per monitor run. If not provided, defaults to the plan limit.
@@ -546,6 +573,9 @@ class AsyncMonitorsClient:
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
 
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
+
+        project_id : typing.Optional[str]
+            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -559,7 +589,7 @@ class AsyncMonitorsClient:
         --------
         import asyncio
 
-        from newscatcher_catchall import AsyncCatchAllApi, WebhookDto
+        from newscatcher_catchall import AsyncCatchAllApi
 
         client = AsyncCatchAllApi(
             api_key="YOUR_API_KEY",
@@ -571,11 +601,7 @@ class AsyncMonitorsClient:
                 reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
                 schedule="every day at 12 PM",
                 timezone="UTC",
-                webhook=WebhookDto(
-                    url="https://your-endpoint.com/webhook",
-                    method="POST",
-                    headers={"Authorization": "Bearer your_token_here"},
-                ),
+                webhook_ids=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
                 limit=10,
                 backfill=True,
             )
@@ -587,9 +613,10 @@ class AsyncMonitorsClient:
             reference_job_id=reference_job_id,
             schedule=schedule,
             timezone=timezone,
-            webhook=webhook,
+            webhook_ids=webhook_ids,
             limit=limit,
             backfill=backfill,
+            project_id=project_id,
             request_options=request_options,
         )
         return _response.data
@@ -870,7 +897,7 @@ class AsyncMonitorsClient:
         self,
         monitor_id: str,
         *,
-        webhook: typing.Optional[WebhookDto] = OMIT,
+        webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateMonitorResponseDto:
@@ -882,8 +909,10 @@ class AsyncMonitorsClient:
         monitor_id : str
             Monitor identifier.
 
-        webhook : typing.Optional[WebhookDto]
-            Updated webhook configuration.
+        webhook_ids : typing.Optional[typing.Sequence[str]]
+            Updated list of centralized webhook IDs for this monitor.
+
+            Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
             Updated maximum number of records per monitor run.
@@ -900,7 +929,7 @@ class AsyncMonitorsClient:
         --------
         import asyncio
 
-        from newscatcher_catchall import AsyncCatchAllApi, WebhookDto
+        from newscatcher_catchall import AsyncCatchAllApi
 
         client = AsyncCatchAllApi(
             api_key="YOUR_API_KEY",
@@ -910,17 +939,13 @@ class AsyncMonitorsClient:
         async def main() -> None:
             await client.monitors.update_monitor(
                 monitor_id="monitor_id",
-                webhook=WebhookDto(
-                    url="https://new-endpoint.com/webhook",
-                    method="POST",
-                    headers={"Authorization": "Bearer new_token_xyz"},
-                ),
+                webhook_ids=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.update_monitor(
-            monitor_id, webhook=webhook, limit=limit, request_options=request_options
+            monitor_id, webhook_ids=webhook_ids, limit=limit, request_options=request_options
         )
         return _response.data

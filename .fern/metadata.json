@@ -1,7 +1,7 @@
 {
-  "cliVersion": "5.28.2",
+  "cliVersion": "5.38.0",
   "generatorName": "fernapi/fern-python-sdk",
-  "generatorVersion": "5.12.12",
+  "generatorVersion": "5.12.11",
   "generatorConfig": {
     "package_name": "newscatcher_catchall",
     "client": {
@@ -9,10 +9,10 @@
       "filename": "client.py"
     }
   },
-  "originGitCommit": "22c183ea79ae5db44081d7400064d8907991d81b",
+  "originGitCommit": "de5cbc2ed91fe4cad1702c385a0b0b6b986006f6",
   "originGitCommitIsDirty": true,
   "invokedBy": "ci",
   "requestedVersion": "AUTO",
   "ciProvider": "unknown",
-  "sdkVersion": "2.0.0"
+  "sdkVersion": "3.0.0"
 }

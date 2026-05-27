@@ -169,9 +169,6 @@ class RawEntitiesClient:
                     object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
                 ),
             },
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
             omit=OMIT,
         )
@@ -655,9 +652,6 @@ class AsyncRawEntitiesClient:
                 "additional_attributes": convert_and_respect_annotation_metadata(
                     object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
                 ),
-            },
-            headers={
-                "content-type": "application/json",
             },
             request_options=request_options,
             omit=OMIT,
