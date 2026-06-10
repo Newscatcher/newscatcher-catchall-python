@@ -250,6 +250,25 @@ client.jobs.initialize(
 <dl>
 <dd>
 
+**connected_dataset_ids:** `typing.Optional[typing.List[str]]` — Optional list of watchlist dataset IDs connected to this job.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**fetch_all_watchlist_news:** `typing.Optional[bool]` 
+
+When true, returns generic news validators and enrichments suitable for
+watchlist-based article collection instead of query-specific fields.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -431,6 +450,30 @@ Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where
 <dd>
 
 **webhook_ids:** `typing.Optional[typing.List[str]]` — IDs of webhooks to notify when the job completes. Maximum 5 per job.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**fetch_all_watchlist_news:** `typing.Optional[bool]` 
+
+When true, retrieves all news for connected Company Watchlist entities
+without topic filtering. Requires connected_dataset_ids to be set.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ed_association_type:** `typing.Optional[EntityAssociationType]` 
+
+Filter events by entity association type. `event_associated` keeps only
+events where the entity is a direct actor. `mention` keeps only events
+where the entity is merely referenced. Only relevant when
+connected_dataset_ids is set.
     
 </dd>
 </dl>

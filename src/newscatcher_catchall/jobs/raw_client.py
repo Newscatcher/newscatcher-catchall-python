@@ -21,6 +21,7 @@ from ..types.continue_response_dto import ContinueResponseDto
 from ..types.delete_job_response_dto import DeleteJobResponseDto
 from ..types.end_date import EndDate
 from ..types.enrichment_schema import EnrichmentSchema
+from ..types.entity_association_type import EntityAssociationType
 from ..types.error import Error
 from ..types.initialize_response_dto import InitializeResponseDto
 from ..types.limit import Limit
@@ -203,6 +204,8 @@ class RawJobsClient:
         *,
         query: Query,
         context: typing.Optional[Context] = OMIT,
+        connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[InitializeResponseDto]:
         """
@@ -213,6 +216,13 @@ class RawJobsClient:
         query : Query
 
         context : typing.Optional[Context]
+
+        connected_dataset_ids : typing.Optional[typing.Sequence[str]]
+            Optional list of watchlist dataset IDs connected to this job.
+
+        fetch_all_watchlist_news : typing.Optional[bool]
+            When true, returns generic news validators and enrichments suitable for
+            watchlist-based article collection instead of query-specific fields.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -228,6 +238,8 @@ class RawJobsClient:
             json={
                 "query": query,
                 "context": context,
+                "connected_dataset_ids": connected_dataset_ids,
+                "fetch_all_watchlist_news": fetch_all_watchlist_news,
             },
             headers={
                 "content-type": "application/json",
@@ -291,6 +303,8 @@ class RawJobsClient:
         ed_score_min: typing.Optional[int] = OMIT,
         project_id: typing.Optional[str] = OMIT,
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
+        ed_association_type: typing.Optional[EntityAssociationType] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SubmitResponseDto]:
         """
@@ -340,6 +354,16 @@ class RawJobsClient:
         webhook_ids : typing.Optional[typing.Sequence[str]]
             IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
+        fetch_all_watchlist_news : typing.Optional[bool]
+            When true, retrieves all news for connected Company Watchlist entities
+            without topic filtering. Requires connected_dataset_ids to be set.
+
+        ed_association_type : typing.Optional[EntityAssociationType]
+            Filter events by entity association type. `event_associated` keeps only
+            events where the entity is a direct actor. `mention` keeps only events
+            where the entity is merely referenced. Only relevant when
+            connected_dataset_ids is set.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -368,6 +392,8 @@ class RawJobsClient:
                 "ed_score_min": ed_score_min,
                 "project_id": project_id,
                 "webhook_ids": webhook_ids,
+                "fetch_all_watchlist_news": fetch_all_watchlist_news,
+                "ed_association_type": ed_association_type,
             },
             headers={
                 "content-type": "application/json",
@@ -895,6 +921,8 @@ class AsyncRawJobsClient:
         *,
         query: Query,
         context: typing.Optional[Context] = OMIT,
+        connected_dataset_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[InitializeResponseDto]:
         """
@@ -905,6 +933,13 @@ class AsyncRawJobsClient:
         query : Query
 
         context : typing.Optional[Context]
+
+        connected_dataset_ids : typing.Optional[typing.Sequence[str]]
+            Optional list of watchlist dataset IDs connected to this job.
+
+        fetch_all_watchlist_news : typing.Optional[bool]
+            When true, returns generic news validators and enrichments suitable for
+            watchlist-based article collection instead of query-specific fields.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -920,6 +955,8 @@ class AsyncRawJobsClient:
             json={
                 "query": query,
                 "context": context,
+                "connected_dataset_ids": connected_dataset_ids,
+                "fetch_all_watchlist_news": fetch_all_watchlist_news,
             },
             headers={
                 "content-type": "application/json",
@@ -983,6 +1020,8 @@ class AsyncRawJobsClient:
         ed_score_min: typing.Optional[int] = OMIT,
         project_id: typing.Optional[str] = OMIT,
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
+        ed_association_type: typing.Optional[EntityAssociationType] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SubmitResponseDto]:
         """
@@ -1032,6 +1071,16 @@ class AsyncRawJobsClient:
         webhook_ids : typing.Optional[typing.Sequence[str]]
             IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
+        fetch_all_watchlist_news : typing.Optional[bool]
+            When true, retrieves all news for connected Company Watchlist entities
+            without topic filtering. Requires connected_dataset_ids to be set.
+
+        ed_association_type : typing.Optional[EntityAssociationType]
+            Filter events by entity association type. `event_associated` keeps only
+            events where the entity is a direct actor. `mention` keeps only events
+            where the entity is merely referenced. Only relevant when
+            connected_dataset_ids is set.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1060,6 +1109,8 @@ class AsyncRawJobsClient:
                 "ed_score_min": ed_score_min,
                 "project_id": project_id,
                 "webhook_ids": webhook_ids,
+                "fetch_all_watchlist_news": fetch_all_watchlist_news,
+                "ed_association_type": ed_association_type,
             },
             headers={
                 "content-type": "application/json",

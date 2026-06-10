@@ -49,6 +49,7 @@ if typing.TYPE_CHECKING:
     from .end_date import EndDate
     from .enrichment_schema import EnrichmentSchema
     from .enrichment_type import EnrichmentType
+    from .entity_association_type import EntityAssociationType
     from .entity_list_response import EntityListResponse
     from .entity_response import EntityResponse
     from .entity_sort_by import EntitySortBy
@@ -170,6 +171,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "EndDate": ".end_date",
     "EnrichmentSchema": ".enrichment_schema",
     "EnrichmentType": ".enrichment_type",
+    "EntityAssociationType": ".entity_association_type",
     "EntityListResponse": ".entity_list_response",
     "EntityResponse": ".entity_response",
     "EntitySortBy": ".entity_sort_by",
@@ -315,6 +317,7 @@ __all__ = [
     "EndDate",
     "EnrichmentSchema",
     "EnrichmentType",
+    "EntityAssociationType",
     "EntityListResponse",
     "EntityResponse",
     "EntitySortBy",
