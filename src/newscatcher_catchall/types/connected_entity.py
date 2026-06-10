@@ -41,6 +41,11 @@ class ConnectedEntity(UniversalBaseModel):
     Short explanation (up to 100 characters) of why this entity is associated with the event.
     """
 
+    association_type: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    How the entity relates to the event: `event_associated` if the entity is a direct actor, `mention` if merely referenced.
+    """
+
     type: str = pydantic.Field()
     """
     The entity type.
