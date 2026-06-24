@@ -51,9 +51,14 @@ class ConnectedEntity(UniversalBaseModel):
     The entity type.
     """
 
+    external_entity_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    External identifier for this entity. Null when not set.
+    """
+
     company: typing.Optional[CompanyAttributes] = pydantic.Field(default=None)
     """
-    The stored attributes for this entity. Present only when attributes exist in the database. 
+    The stored attributes for this entity. Present only when attributes exist in the database.
     
     The field name matches the value of `type` — for example, `"company"` type entities have a `company`  field.
     """

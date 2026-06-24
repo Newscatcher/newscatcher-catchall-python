@@ -127,6 +127,7 @@ class RawEntitiesClient:
         name: str,
         entity_type: typing.Optional[EntityType] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateEntityResponse]:
@@ -148,6 +149,9 @@ class RawEntitiesClient:
         description : typing.Optional[str]
             Free-text description of the entity used for disambiguation when similar names exist.
 
+        external_entity_id : typing.Optional[str]
+            Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
+
         additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
@@ -165,6 +169,7 @@ class RawEntitiesClient:
                 "name": name,
                 "entity_type": entity_type,
                 "description": description,
+                "external_entity_id": external_entity_id,
                 "additional_attributes": convert_and_respect_annotation_metadata(
                     object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
                 ),
@@ -419,6 +424,7 @@ class RawEntitiesClient:
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[EntityResponse]:
@@ -436,6 +442,9 @@ class RawEntitiesClient:
         description : typing.Optional[str]
             Updated description.
 
+        external_entity_id : typing.Optional[str]
+            Updated external identifier for this entity.
+
         additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
@@ -452,6 +461,7 @@ class RawEntitiesClient:
             json={
                 "name": name,
                 "description": description,
+                "external_entity_id": external_entity_id,
                 "additional_attributes": convert_and_respect_annotation_metadata(
                     object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
                 ),
@@ -611,6 +621,7 @@ class AsyncRawEntitiesClient:
         name: str,
         entity_type: typing.Optional[EntityType] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateEntityResponse]:
@@ -632,6 +643,9 @@ class AsyncRawEntitiesClient:
         description : typing.Optional[str]
             Free-text description of the entity used for disambiguation when similar names exist.
 
+        external_entity_id : typing.Optional[str]
+            Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
+
         additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
@@ -649,6 +663,7 @@ class AsyncRawEntitiesClient:
                 "name": name,
                 "entity_type": entity_type,
                 "description": description,
+                "external_entity_id": external_entity_id,
                 "additional_attributes": convert_and_respect_annotation_metadata(
                     object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
                 ),
@@ -903,6 +918,7 @@ class AsyncRawEntitiesClient:
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[EntityResponse]:
@@ -920,6 +936,9 @@ class AsyncRawEntitiesClient:
         description : typing.Optional[str]
             Updated description.
 
+        external_entity_id : typing.Optional[str]
+            Updated external identifier for this entity.
+
         additional_attributes : typing.Optional[AdditionalAttributes]
 
         request_options : typing.Optional[RequestOptions]
@@ -936,6 +955,7 @@ class AsyncRawEntitiesClient:
             json={
                 "name": name,
                 "description": description,
+                "external_entity_id": external_entity_id,
                 "additional_attributes": convert_and_respect_annotation_metadata(
                     object_=additional_attributes, annotation=AdditionalAttributes, direction="write"
                 ),

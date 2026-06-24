@@ -4,6 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .connected_dataset import ConnectedDataset
 from .pull_job_response_dto_date_range import PullJobResponseDtoDateRange
 from .pull_job_response_dto_mode import PullJobResponseDtoMode
 from .record import Record
@@ -92,6 +93,16 @@ class PullJobResponseDto(UniversalBaseModel):
     mode: typing.Optional[PullJobResponseDtoMode] = pydantic.Field(default=None)
     """
     Processing mode used for this job.
+    """
+
+    connected_datasets: typing.Optional[typing.List[ConnectedDataset]] = pydantic.Field(default=None)
+    """
+    Datasets used to narrow retrieval scope, each with `id` and `name`.
+    """
+
+    is_all_news_query: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    True when the query was submitted as an all-news (watchlist-generic) query.
     """
 
     sharing_info: typing.Optional[SharingInfo] = pydantic.Field(default=None)

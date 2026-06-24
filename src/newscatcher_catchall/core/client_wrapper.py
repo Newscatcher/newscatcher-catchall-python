@@ -29,12 +29,12 @@ class BaseClientWrapper:
         import platform
 
         headers: typing.Dict[str, str] = {
-            "User-Agent": "newscatcher-catchall-sdk/3.0.1",
+            "User-Agent": "newscatcher-catchall-sdk/0.0.0.dev0",
             "X-Fern-Language": "Python",
             "X-Fern-Runtime": f"python/{platform.python_version()}",
             "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
             "X-Fern-SDK-Name": "newscatcher-catchall-sdk",
-            "X-Fern-SDK-Version": "3.0.1",
+            "X-Fern-SDK-Version": "0.0.0.dev0",
             **(self.get_custom_headers() or {}),
         }
         headers["x-api-key"] = self.api_key

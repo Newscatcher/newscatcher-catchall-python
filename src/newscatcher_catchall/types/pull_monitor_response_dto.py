@@ -4,6 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .connected_dataset import ConnectedDataset
 from .monitor_record import MonitorRecord
 from .pull_monitor_response_dto_run_info import PullMonitorResponseDtoRunInfo
 from .reference_job import ReferenceJob
@@ -51,6 +52,16 @@ class PullMonitorResponseDto(UniversalBaseModel):
     limit: typing.Optional[int] = pydantic.Field(default=None)
     """
     Record limit applied to this monitor's jobs.
+    """
+
+    connected_datasets: typing.Optional[typing.List[ConnectedDataset]] = pydantic.Field(default=None)
+    """
+    Datasets used to narrow retrieval scope, each with `id` and `name`.
+    """
+
+    is_all_news_query: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    True when the reference job was submitted as an all-news (watchlist-generic) query.
     """
 
     if IS_PYDANTIC_V2:

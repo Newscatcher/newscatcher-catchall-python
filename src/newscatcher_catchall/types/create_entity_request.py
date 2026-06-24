@@ -25,6 +25,11 @@ class CreateEntityRequest(UniversalBaseModel):
     Free-text description of the entity used for disambiguation when similar names exist.
     """
 
+    external_entity_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
+    """
+
     additional_attributes: typing.Optional[AdditionalAttributes] = None
 
     if IS_PYDANTIC_V2:

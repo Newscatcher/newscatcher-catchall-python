@@ -22,6 +22,7 @@ if typing.TYPE_CHECKING:
     from .company_enrichment_output_metadata_domain_url_confidence import (
         CompanyEnrichmentOutputMetadataDomainUrlConfidence,
     )
+    from .connected_dataset import ConnectedDataset
     from .connected_entity import ConnectedEntity
     from .context import Context
     from .continue_response_dto import ContinueResponseDto
@@ -144,6 +145,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CompanyEnrichmentOutput": ".company_enrichment_output",
     "CompanyEnrichmentOutputMetadata": ".company_enrichment_output_metadata",
     "CompanyEnrichmentOutputMetadataDomainUrlConfidence": ".company_enrichment_output_metadata_domain_url_confidence",
+    "ConnectedDataset": ".connected_dataset",
     "ConnectedEntity": ".connected_entity",
     "Context": ".context",
     "ContinueResponseDto": ".continue_response_dto",
@@ -290,6 +292,7 @@ __all__ = [
     "CompanyEnrichmentOutput",
     "CompanyEnrichmentOutputMetadata",
     "CompanyEnrichmentOutputMetadataDomainUrlConfidence",
+    "ConnectedDataset",
     "ConnectedEntity",
     "Context",
     "ContinueResponseDto",

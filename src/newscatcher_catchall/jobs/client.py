@@ -394,6 +394,37 @@ class JobsClient:
         )
         return _response.data
 
+    def get_job_results_csv(self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> str:
+        """
+        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+
+        Parameters
+        ----------
+        job_id : str
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        str
+            CSV export of job results.
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.get_job_results_csv(
+            job_id="job_id",
+        )
+        """
+        _response = self._raw_client.get_job_results_csv(job_id, request_options=request_options)
+        return _response.data
+
     def continue_job(
         self,
         *,
@@ -884,6 +915,45 @@ class AsyncJobsClient:
         _response = await self._raw_client.get_job_results(
             job_id, page=page, page_size=page_size, request_options=request_options
         )
+        return _response.data
+
+    async def get_job_results_csv(self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> str:
+        """
+        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+
+        Parameters
+        ----------
+        job_id : str
+            Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        str
+            CSV export of job results.
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.jobs.get_job_results_csv(
+                job_id="job_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_job_results_csv(job_id, request_options=request_options)
         return _response.data
 
     async def continue_job(
