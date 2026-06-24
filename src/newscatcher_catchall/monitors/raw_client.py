@@ -295,6 +295,64 @@ class RawMonitorsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def pull_monitor_results_csv(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[str]:
+        """
+        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[str]
+            CSV export of the latest monitor run.
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/pull/{encode_path_param(monitor_id)}/csv",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return HttpResponse(response=_response, data=_response.text)  # type: ignore
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def list_monitor_jobs(
         self,
         monitor_id: str,
@@ -1022,6 +1080,64 @@ class AsyncRawMonitorsClient:
                         ValidationErrorResponse,
                         parse_obj_as(
                             type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def pull_monitor_results_csv(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[str]:
+        """
+        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[str]
+            CSV export of the latest monitor run.
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/monitors/pull/{encode_path_param(monitor_id)}/csv",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return AsyncHttpResponse(response=_response, data=_response.text)  # type: ignore
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

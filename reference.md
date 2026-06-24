@@ -655,6 +655,79 @@ client.jobs.get_job_results(
 </dl>
 </details>
 
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">get_job_results_csv</a>(...) -> str</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.jobs.get_job_results_csv(
+    job_id="job_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**job_id:** `str` — Unique job identifier returned from [`POST /catchAll/submit`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/create-job).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">continue_job</a>(...) -> ContinueResponseDto</code></summary>
 <dl>
 <dd>
@@ -1101,6 +1174,79 @@ client = CatchAllApi(
 )
 
 client.monitors.pull_monitor_results(
+    monitor_id="monitor_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**monitor_id:** `str` — Monitor identifier.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results_csv</a>(...) -> str</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.monitors.pull_monitor_results_csv(
     monitor_id="monitor_id",
 )
 
@@ -3305,6 +3451,14 @@ client.entities.update_entity(
 <dd>
 
 **description:** `typing.Optional[str]` — Updated description.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_entity_id:** `typing.Optional[str]` — Updated external identifier for this entity.
     
 </dd>
 </dl>

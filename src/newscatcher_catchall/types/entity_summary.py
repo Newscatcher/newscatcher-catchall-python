@@ -34,6 +34,11 @@ class EntitySummary(UniversalBaseModel):
     Free-text description.
     """
 
+    external_entity_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    External identifier for this entity. Null when not set.
+    """
+
     attributes: typing.Optional[CompanyAttributes] = None
 
     if IS_PYDANTIC_V2:

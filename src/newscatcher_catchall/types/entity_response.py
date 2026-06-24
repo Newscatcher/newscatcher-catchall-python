@@ -32,6 +32,11 @@ class EntityResponse(UniversalBaseModel):
     Free-text description.
     """
 
+    external_entity_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    External identifier for this entity. Null when not set.
+    """
+
     additional_attributes: typing.Optional[AdditionalAttributes] = None
     status: EntityStatus
     created_by_user_id: typing.Optional[str] = pydantic.Field(default=None)

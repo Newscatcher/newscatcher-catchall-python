@@ -210,6 +210,39 @@ class MonitorsClient:
         _response = self._raw_client.pull_monitor_results(monitor_id, request_options=request_options)
         return _response.data
 
+    def pull_monitor_results_csv(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> str:
+        """
+        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        str
+            CSV export of the latest monitor run.
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.monitors.pull_monitor_results_csv(
+            monitor_id="monitor_id",
+        )
+        """
+        _response = self._raw_client.pull_monitor_results_csv(monitor_id, request_options=request_options)
+        return _response.data
+
     def list_monitor_jobs(
         self,
         monitor_id: str,
@@ -660,6 +693,47 @@ class AsyncMonitorsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.pull_monitor_results(monitor_id, request_options=request_options)
+        return _response.data
+
+    async def pull_monitor_results_csv(
+        self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> str:
+        """
+        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+
+        Parameters
+        ----------
+        monitor_id : str
+            Monitor identifier.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        str
+            CSV export of the latest monitor run.
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.monitors.pull_monitor_results_csv(
+                monitor_id="monitor_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.pull_monitor_results_csv(monitor_id, request_options=request_options)
         return _response.data
 
     async def list_monitor_jobs(

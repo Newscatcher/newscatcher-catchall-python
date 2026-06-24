@@ -106,6 +106,7 @@ class EntitiesClient:
         name: str,
         entity_type: typing.Optional[EntityType] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateEntityResponse:
@@ -126,6 +127,9 @@ class EntitiesClient:
 
         description : typing.Optional[str]
             Free-text description of the entity used for disambiguation when similar names exist.
+
+        external_entity_id : typing.Optional[str]
+            Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
 
         additional_attributes : typing.Optional[AdditionalAttributes]
 
@@ -165,6 +169,7 @@ class EntitiesClient:
             name=name,
             entity_type=entity_type,
             description=description,
+            external_entity_id=external_entity_id,
             additional_attributes=additional_attributes,
             request_options=request_options,
         )
@@ -303,6 +308,7 @@ class EntitiesClient:
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EntityResponse:
@@ -319,6 +325,9 @@ class EntitiesClient:
 
         description : typing.Optional[str]
             Updated description.
+
+        external_entity_id : typing.Optional[str]
+            Updated external identifier for this entity.
 
         additional_attributes : typing.Optional[AdditionalAttributes]
 
@@ -355,6 +364,7 @@ class EntitiesClient:
             entity_id,
             name=name,
             description=description,
+            external_entity_id=external_entity_id,
             additional_attributes=additional_attributes,
             request_options=request_options,
         )
@@ -455,6 +465,7 @@ class AsyncEntitiesClient:
         name: str,
         entity_type: typing.Optional[EntityType] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateEntityResponse:
@@ -475,6 +486,9 @@ class AsyncEntitiesClient:
 
         description : typing.Optional[str]
             Free-text description of the entity used for disambiguation when similar names exist.
+
+        external_entity_id : typing.Optional[str]
+            Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
 
         additional_attributes : typing.Optional[AdditionalAttributes]
 
@@ -522,6 +536,7 @@ class AsyncEntitiesClient:
             name=name,
             entity_type=entity_type,
             description=description,
+            external_entity_id=external_entity_id,
             additional_attributes=additional_attributes,
             request_options=request_options,
         )
@@ -686,6 +701,7 @@ class AsyncEntitiesClient:
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
+        external_entity_id: typing.Optional[str] = OMIT,
         additional_attributes: typing.Optional[AdditionalAttributes] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EntityResponse:
@@ -702,6 +718,9 @@ class AsyncEntitiesClient:
 
         description : typing.Optional[str]
             Updated description.
+
+        external_entity_id : typing.Optional[str]
+            Updated external identifier for this entity.
 
         additional_attributes : typing.Optional[AdditionalAttributes]
 
@@ -746,6 +765,7 @@ class AsyncEntitiesClient:
             entity_id,
             name=name,
             description=description,
+            external_entity_id=external_entity_id,
             additional_attributes=additional_attributes,
             request_options=request_options,
         )
