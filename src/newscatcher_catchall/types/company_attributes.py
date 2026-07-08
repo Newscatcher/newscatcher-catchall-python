@@ -18,11 +18,6 @@ class CompanyAttributes(UniversalBaseModel):
     The most reliable identifier — strongly recommended when available.
     """
 
-    description: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Detailed description of the company used for matching.
-    """
-
     key_persons: typing.Optional[typing.List[str]] = pydantic.Field(default=None)
     """
     Names of key people associated with the company (founders, executives, etc.). Improves matching for articles that mention people rather than the company name.

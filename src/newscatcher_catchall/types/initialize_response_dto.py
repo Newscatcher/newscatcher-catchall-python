@@ -23,7 +23,10 @@ class InitializeResponseDto(UniversalBaseModel):
 
     validators: typing.List[ValidatorSchema] = pydantic.Field()
     """
-    Suggested validators for filtering relevant web pages.
+    Suggested validators for filtering relevant web pages. When the job is
+    submitted, the system may inject additional validators during the `analyzing`
+    stage — check the returned `validators[]` in the job status to see the
+    complete applied set.
     """
 
     enrichments: typing.List[EnrichmentSchema] = pydantic.Field()

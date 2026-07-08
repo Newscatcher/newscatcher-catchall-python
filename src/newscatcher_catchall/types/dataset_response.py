@@ -34,6 +34,24 @@ class DatasetResponse(UniversalBaseModel):
     Total number of entities in this dataset.
     """
 
+    entity_status_breakdown: typing.Optional[typing.Dict[str, int]] = pydantic.Field(default=None)
+    """
+    Count of entities grouped by processing status. Keys are status values
+    (`ready`, `pending`, `enriching`, `failed`); values are entity counts.
+    """
+
+    health_score: typing.Optional[float] = pydantic.Field(default=None)
+    """
+    Overall health score of the dataset, from 0 to 100. Reflects how many
+    entities have sufficient identifying information for reliable matching.
+    """
+
+    health_breakdown: typing.Optional[typing.Dict[str, float]] = pydantic.Field(default=None)
+    """
+    Health scores broken down by entity type. Keys are entity types
+    (e.g. `company`); values are scores from 0 to 100.
+    """
+
     latest_status: typing.Optional[DatasetStatus] = None
     created_by_user_id: typing.Optional[str] = pydantic.Field(default=None)
     """
