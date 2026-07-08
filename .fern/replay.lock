@@ -12,5 +12,291 @@ generations:
     cli_version: unknown
     generator_versions:
       fernapi/fern-python-sdk: 5.14.21
-current_generation: e6179f9ae1194808b56ce70363413efa8fb470f4
-patches: []
+  - commit_sha: 6ec633406e1f68e6db1f5d63e3b422d7ee24da28
+    tree_hash: aa67e54c05e34792ab3896cf901d9cd97a7d111e
+    timestamp: 2026-07-08T09:47:47.377Z
+    cli_version: unknown
+    generator_versions:
+      fernapi/fern-python-sdk: 5.17.0
+current_generation: 6ec633406e1f68e6db1f5d63e3b422d7ee24da28
+patches:
+  - id: patch-7c34ccca
+    content_hash: sha256:8985648436261cded14f5dab01d668399cfbcda46ccd199918ffad9e37882f02
+    original_commit: 7c34ccca9dc9cf1a117dcf162f8108e9210e4de8
+    original_message: "chore(pyproject): Manually increase the package version"
+    original_author: kizy25 <maksym@newscatcherapi.com>
+    base_generation: 129023272cad7c50e64ea9081d2a8b4a76a9f9e7
+    files:
+      - pyproject.toml
+      - src/newscatcher_catchall/core/client_wrapper.py
+    patch_content: |+
+      From 7c34ccca9dc9cf1a117dcf162f8108e9210e4de8 Mon Sep 17 00:00:00 2001
+      From: kizy25 <maksym@newscatcherapi.com>
+      Date: Thu, 25 Jun 2026 10:48:17 +0200
+      Subject: [PATCH] chore(pyproject): Manually increase the package version
+
+      ---
+       pyproject.toml                                  | 2 +-
+       src/newscatcher_catchall/core/client_wrapper.py | 4 ++--
+       2 files changed, 3 insertions(+), 3 deletions(-)
+
+      diff --git a/pyproject.toml b/pyproject.toml
+      index c6579e4..958beb2 100644
+      --- a/pyproject.toml
+      +++ b/pyproject.toml
+      @@ -4,7 +4,7 @@ dynamic = ["version"]
+       
+       [tool.poetry]
+       name = "newscatcher-catchall-sdk"
+      -version = "0.0.0.dev0"
+      +version = "3.1.0"
+       description = ""
+       readme = "README.md"
+       authors = []
+      diff --git a/src/newscatcher_catchall/core/client_wrapper.py b/src/newscatcher_catchall/core/client_wrapper.py
+      index 4841652..aeb35d6 100644
+      --- a/src/newscatcher_catchall/core/client_wrapper.py
+      +++ b/src/newscatcher_catchall/core/client_wrapper.py
+      @@ -29,12 +29,12 @@ class BaseClientWrapper:
+               import platform
+       
+               headers: typing.Dict[str, str] = {
+      -            "User-Agent": "newscatcher-catchall-sdk/0.0.0.dev0",
+      +            "User-Agent": "newscatcher-catchall-sdk/3.1.0",
+                   "X-Fern-Language": "Python",
+                   "X-Fern-Runtime": f"python/{platform.python_version()}",
+                   "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
+                   "X-Fern-SDK-Name": "newscatcher-catchall-sdk",
+      -            "X-Fern-SDK-Version": "0.0.0.dev0",
+      +            "X-Fern-SDK-Version": "3.1.0",
+                   **(self.get_custom_headers() or {}),
+               }
+               headers["x-api-key"] = self.api_key
+      -- 
+      2.52.0
+
+    theirs_snapshot:
+      pyproject.toml: |
+        [project]
+        name = "newscatcher-catchall-sdk"
+        dynamic = ["version"]
+
+        [tool.poetry]
+        name = "newscatcher-catchall-sdk"
+        version = "3.1.0"
+        description = ""
+        readme = "README.md"
+        authors = []
+        keywords = []
+        license = "MIT"
+        classifiers = [
+            "Intended Audience :: Developers",
+            "Programming Language :: Python",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+            "Programming Language :: Python :: 3.15",
+            "Operating System :: OS Independent",
+            "Operating System :: POSIX",
+            "Operating System :: MacOS",
+            "Operating System :: POSIX :: Linux",
+            "Operating System :: Microsoft :: Windows",
+            "Topic :: Software Development :: Libraries :: Python Modules",
+            "Typing :: Typed",
+            "License :: OSI Approved :: MIT License"
+        ]
+        packages = [
+            { include = "newscatcher_catchall", from = "src"}
+        ]
+
+        [tool.poetry.urls]
+        Repository = 'https://github.com/Newscatcher/newscatcher-catchall-python'
+
+        [tool.poetry.dependencies]
+        python = "^3.10"
+        aiohttp = { version = ">=3.14.1,<4", optional = true, python = ">=3.10"}
+        httpx = ">=0.21.2"
+        httpx-aiohttp = { version = "0.1.8", optional = true, python = ">=3.10"}
+        pydantic = ">= 1.9.2"
+        pydantic-core = ">=2.18.2,<3.0.0"
+        typing_extensions = ">= 4.0.0"
+
+        [tool.poetry.group.dev.dependencies]
+        mypy = "==1.13.0"
+        pytest = "^9.0.3"
+        pytest-asyncio = "^1.0.0"
+        pytest-xdist = "^3.6.1"
+        python-dateutil = "^2.9.0"
+        types-python-dateutil = "^2.9.0.20240316"
+        urllib3 = ">=2.6.3,<3.0.0"
+        ruff = "==0.11.5"
+
+        [tool.pytest.ini_options]
+        testpaths = [ "tests" ]
+        asyncio_mode = "auto"
+        norecursedirs = [ "src" ]
+        markers = [
+            "aiohttp: tests that require httpx_aiohttp to be installed",
+        ]
+
+        [tool.mypy]
+        plugins = ["pydantic.mypy"]
+
+        [tool.ruff]
+        line-length = 120
+
+        [tool.ruff.lint]
+        select = [
+            "E",  # pycodestyle errors
+            "F",  # pyflakes
+            "I",  # isort
+        ]
+        ignore = [
+            "E402",  # Module level import not at top of file
+            "E501",  # Line too long
+            "E711",  # Comparison to `None` should be `cond is not None`
+            "E712",  # Avoid equality comparisons to `True`; use `if ...:` checks
+            "E721",  # Use `is` and `is not` for type comparisons, or `isinstance()` for insinstance checks
+            "E722",  # Do not use bare `except`
+            "E731",  # Do not assign a `lambda` expression, use a `def`
+            "F821",  # Undefined name
+            "F841"   # Local variable ... is assigned to but never used
+        ]
+
+        [tool.ruff.lint.isort]
+        section-order = ["future", "standard-library", "third-party", "first-party"]
+
+        [build-system]
+        requires = ["poetry-core"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry.extras]
+        aiohttp=["aiohttp", "httpx-aiohttp"]
+      src/newscatcher_catchall/core/client_wrapper.py: |
+        # This file was auto-generated by Fern from our API Definition.
+
+        import typing
+
+        import httpx
+        from .http_client import AsyncHttpClient, HttpClient
+        from .logging import LogConfig, Logger
+
+
+        class BaseClientWrapper:
+            def __init__(
+                self,
+                *,
+                api_key: str,
+                headers: typing.Optional[typing.Dict[str, str]] = None,
+                base_url: str,
+                timeout: typing.Optional[float] = None,
+                max_retries: int = 2,
+                logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
+            ):
+                self.api_key = api_key
+                self._headers = headers
+                self._base_url = base_url
+                self._timeout = timeout
+                self._max_retries = max_retries
+                self._logging = logging
+
+            def get_headers(self) -> typing.Dict[str, str]:
+                import platform
+
+                headers: typing.Dict[str, str] = {
+                    "User-Agent": "newscatcher-catchall-sdk/3.1.0",
+                    "X-Fern-Language": "Python",
+                    "X-Fern-Runtime": f"python/{platform.python_version()}",
+                    "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
+                    "X-Fern-SDK-Name": "newscatcher-catchall-sdk",
+                    "X-Fern-SDK-Version": "3.1.0",
+                    **(self.get_custom_headers() or {}),
+                }
+                headers["x-api-key"] = self.api_key
+                return headers
+
+            def get_custom_headers(self) -> typing.Optional[typing.Dict[str, str]]:
+                return self._headers
+
+            def get_base_url(self) -> str:
+                return self._base_url
+
+            def get_timeout(self) -> typing.Optional[float]:
+                return self._timeout
+
+            def get_max_retries(self) -> int:
+                return self._max_retries
+
+
+        class SyncClientWrapper(BaseClientWrapper):
+            def __init__(
+                self,
+                *,
+                api_key: str,
+                headers: typing.Optional[typing.Dict[str, str]] = None,
+                base_url: str,
+                timeout: typing.Optional[float] = None,
+                max_retries: int = 2,
+                logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
+                httpx_client: httpx.Client,
+            ):
+                super().__init__(
+                    api_key=api_key,
+                    headers=headers,
+                    base_url=base_url,
+                    timeout=timeout,
+                    max_retries=max_retries,
+                    logging=logging,
+                )
+                self.httpx_client = HttpClient(
+                    httpx_client=httpx_client,
+                    base_headers=self.get_headers,
+                    base_timeout=self.get_timeout,
+                    base_url=self.get_base_url,
+                    base_max_retries=self.get_max_retries(),
+                    logging_config=self._logging,
+                )
+
+
+        class AsyncClientWrapper(BaseClientWrapper):
+            def __init__(
+                self,
+                *,
+                api_key: str,
+                headers: typing.Optional[typing.Dict[str, str]] = None,
+                base_url: str,
+                timeout: typing.Optional[float] = None,
+                max_retries: int = 2,
+                logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
+                async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
+                httpx_client: httpx.AsyncClient,
+            ):
+                super().__init__(
+                    api_key=api_key,
+                    headers=headers,
+                    base_url=base_url,
+                    timeout=timeout,
+                    max_retries=max_retries,
+                    logging=logging,
+                )
+                self._async_token = async_token
+                self.httpx_client = AsyncHttpClient(
+                    httpx_client=httpx_client,
+                    base_headers=self.get_headers,
+                    base_timeout=self.get_timeout,
+                    base_url=self.get_base_url,
+                    base_max_retries=self.get_max_retries(),
+                    async_base_headers=self.async_get_headers,
+                    logging_config=self._logging,
+                )
+
+            async def async_get_headers(self) -> typing.Dict[str, str]:
+                headers = self.get_headers()
+                if self._async_token is not None:
+                    token = await self._async_token()
+                    headers["Authorization"] = f"Bearer {token}"
+                return headers
+    status: unresolved
