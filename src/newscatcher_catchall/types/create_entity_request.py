@@ -10,7 +10,9 @@ from .entity_type import EntityType
 
 class CreateEntityRequest(UniversalBaseModel):
     """
-    Request body for creating a single entity. Only `name` is required.
+    Request body for creating a single entity. The `name` field is required.
+    You must also provide at least one of: a top-level `description` or a `domain`
+    inside `additional_attributes.company_attributes`.
     The more fields you provide, the better the matching quality.
     """
 
@@ -22,7 +24,7 @@ class CreateEntityRequest(UniversalBaseModel):
     entity_type: typing.Optional[EntityType] = None
     description: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Free-text description of the entity used for disambiguation when similar names exist.
+    Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
     """
 
     external_entity_id: typing.Optional[str] = pydantic.Field(default=None)

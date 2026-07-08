@@ -142,7 +142,9 @@ class RawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[DatasetResponse]:
         """
-        Creates a new dataset from a list of existing entity IDs.
+        Creates a new dataset from a list of existing entity IDs. The optional `description` field here describes the dataset itself — it is separate from the entity-level `description` used for matching.
+
+        Entities must be created before adding them to a dataset. Each entity requires a `name` plus at least one of: a `description` or a `domain`. Use [Create entity](https://www.newscatcherapi.com/docs/web-search-api/api-reference/entities/create-entity) or [Create entities batch](https://www.newscatcherapi.com/docs/web-search-api/api-reference/entities/create-entities-batch) to create entities first.
 
         If any of the provided entity IDs do not exist or do not belong to
         your organization, the request fails with `400`. All entity IDs must
@@ -245,12 +247,12 @@ class RawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDatasetCsvResponse]:
         """
-        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
+        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. Each row requires a `name` plus at least one of: a `description` or a `domain`; all other columns are optional. Note: `description` in the CSV is the entity's matching description — it is separate from the dataset-level `description` field in the form data.
 
         **CSV format:**
         ```csv
         name,description,domain,alternative_names,key_persons
-        NewsCatcher,"AI-powered news data provider",newscatcherapi.com,"NC;NewsCatcher API","Artem Bugara;Maksym Sugonyaka"
+        NewsCatcher,"NewsCatcher is a data-as-a-service company providing news intelligence APIs including the CatchAll Web Search API (2B+ web pages indexed) and News API (140,000+ sources, 100+ countries).",newscatcherapi.com,"NewsCatcher CatchAll;NewsCatcher API","Artem Bugara;Maksym Sugonyaka"
         OpenAI,"Artificial intelligence research company",openai.com,"Open AI","Sam Altman"
         ```
 
@@ -1105,7 +1107,9 @@ class AsyncRawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[DatasetResponse]:
         """
-        Creates a new dataset from a list of existing entity IDs.
+        Creates a new dataset from a list of existing entity IDs. The optional `description` field here describes the dataset itself — it is separate from the entity-level `description` used for matching.
+
+        Entities must be created before adding them to a dataset. Each entity requires a `name` plus at least one of: a `description` or a `domain`. Use [Create entity](https://www.newscatcherapi.com/docs/web-search-api/api-reference/entities/create-entity) or [Create entities batch](https://www.newscatcherapi.com/docs/web-search-api/api-reference/entities/create-entities-batch) to create entities first.
 
         If any of the provided entity IDs do not exist or do not belong to
         your organization, the request fails with `400`. All entity IDs must
@@ -1208,12 +1212,12 @@ class AsyncRawDatasetsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDatasetCsvResponse]:
         """
-        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. The `name` and `domain`columns are required; all other columns are optional.
+        Creates a new dataset by uploading a CSV file. Each row in the CSV becomes an entity. Each row requires a `name` plus at least one of: a `description` or a `domain`; all other columns are optional. Note: `description` in the CSV is the entity's matching description — it is separate from the dataset-level `description` field in the form data.
 
         **CSV format:**
         ```csv
         name,description,domain,alternative_names,key_persons
-        NewsCatcher,"AI-powered news data provider",newscatcherapi.com,"NC;NewsCatcher API","Artem Bugara;Maksym Sugonyaka"
+        NewsCatcher,"NewsCatcher is a data-as-a-service company providing news intelligence APIs including the CatchAll Web Search API (2B+ web pages indexed) and News API (140,000+ sources, 100+ countries).",newscatcherapi.com,"NewsCatcher CatchAll;NewsCatcher API","Artem Bugara;Maksym Sugonyaka"
         OpenAI,"Artificial intelligence research company",openai.com,"Open AI","Sam Altman"
         ```
 

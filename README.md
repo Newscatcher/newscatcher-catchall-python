@@ -173,7 +173,7 @@ client = CatchAllApi(..., timeout=20.0)
 
 # Override timeout for a specific method
 client.jobs.create_job(..., request_options={
-    "timeout_in_seconds": 1
+    "timeout": 1
 })
 ```
 
@@ -208,6 +208,7 @@ On the other hand, contributions to the README are always very welcome!
 
 - Documentation: [newscatcherapi.com/docs/web-search-api](https://www.newscatcherapi.com/docs/web-search-api/get-started/introduction)
 - Support: <support@newscatcherapi.com>
+
 
 
 

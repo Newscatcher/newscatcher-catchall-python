@@ -6,6 +6,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .delivery_mode import DeliveryMode
+from .formatter_config_dto import FormatterConfigDto
 from .http_method import HttpMethod
 from .webhook_type import WebhookType
 
@@ -39,9 +40,9 @@ class WebhookResponseDto(UniversalBaseModel):
     Query parameters appended to the webhook URL.
     """
 
-    formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
+    formatter_config: typing.Optional[FormatterConfigDto] = pydantic.Field(default=None)
     """
-    Custom payload transformation configuration. Used only when `type` is `custom`.
+    Custom payload formatter. Set only when `type` is `custom`.
     """
 
     is_active: bool = pydantic.Field()

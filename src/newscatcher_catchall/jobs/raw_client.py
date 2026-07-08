@@ -326,6 +326,10 @@ class RawJobsClient:
             Custom validators for filtering web page clusters.
 
             If not provided, validators are generated automatically based on the query.
+            The system may also inject validators during the `analyzing` stage — for
+            example, converting a relative time qualifier into an explicit event-date
+            gate. The returned `validators[]` in the job status shows the complete
+            applied set, including any system-added ones.
 
         enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
             Custom enrichment fields for data extraction.
@@ -1101,6 +1105,10 @@ class AsyncRawJobsClient:
             Custom validators for filtering web page clusters.
 
             If not provided, validators are generated automatically based on the query.
+            The system may also inject validators during the `analyzing` stage — for
+            example, converting a relative time qualifier into an explicit event-date
+            gate. The returned `validators[]` in the job status shows the complete
+            applied set, including any system-added ones.
 
         enrichments : typing.Optional[typing.Sequence[EnrichmentSchema]]
             Custom enrichment fields for data extraction.

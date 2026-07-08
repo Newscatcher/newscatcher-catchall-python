@@ -8,6 +8,7 @@ from ..types.assign_webhook_resource_response_dto import AssignWebhookResourceRe
 from ..types.create_webhook_response_dto import CreateWebhookResponseDto
 from ..types.delivery_history_response_dto import DeliveryHistoryResponseDto
 from ..types.delivery_mode import DeliveryMode
+from ..types.formatter_config_dto import FormatterConfigDto
 from ..types.get_webhook_response_dto import GetWebhookResponseDto
 from ..types.http_method import HttpMethod
 from ..types.list_webhook_resources_response_dto import ListWebhookResourcesResponseDto
@@ -94,7 +95,7 @@ class WebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[CreateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateWebhookResponseDto:
         """
@@ -134,8 +135,8 @@ class WebhooksClient:
             - `api_key`: Adds a custom header with the specified name and value.
             - `basic`: Adds an `Authorization: Basic <credentials>` header.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Custom payload transformation configuration. Required only when `type` is `custom`.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Custom payload formatter. Required when `type` is `custom`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -250,7 +251,7 @@ class WebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[UpdateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         is_active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateWebhookResponseDto:
@@ -283,8 +284,8 @@ class WebhooksClient:
         auth : typing.Optional[UpdateWebhookRequestDtoAuth]
             Updated authentication configuration. Replaces existing auth entirely.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Updated formatter configuration.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Updated custom payload formatter. Set only when `type` is `custom`.
 
         is_active : typing.Optional[bool]
             Set to `false` to disable delivery without deleting the webhook.
@@ -578,6 +579,64 @@ class WebhooksClient:
         )
         return _response.data
 
+    def trigger_webhook(
+        self,
+        resource_type: MappableResourceType,
+        resource_id: str,
+        *,
+        webhook_id: str,
+        job_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> None:
+        """
+        Manually dispatches a webhook delivery for a resource on demand, without
+        waiting for the next job or monitor cycle.
+
+        Use this to re-deliver results after a failed delivery, replay a specific
+        job's results, or validate a webhook against live data. The webhook must
+        already be assigned to the resource.
+
+        Parameters
+        ----------
+        resource_type : MappableResourceType
+
+        resource_id : str
+            Unique resource identifier.
+
+        webhook_id : str
+            Identifier of the webhook to trigger. Must be assigned to the resource.
+
+        job_id : typing.Optional[str]
+            Specific job run to deliver. Optional for `job` resources; for
+            `monitor` and `monitor_group` resources, selects a past run to replay.
+            When omitted, the latest available results are delivered.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.webhooks.trigger_webhook(
+            resource_type="job",
+            resource_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+            webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            job_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+        )
+        """
+        _response = self._raw_client.trigger_webhook(
+            resource_type, resource_id, webhook_id=webhook_id, job_id=job_id, request_options=request_options
+        )
+        return _response.data
+
     def get_webhook_delivery_history(
         self,
         *,
@@ -714,7 +773,7 @@ class AsyncWebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[CreateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateWebhookResponseDto:
         """
@@ -754,8 +813,8 @@ class AsyncWebhooksClient:
             - `api_key`: Adds a custom header with the specified name and value.
             - `basic`: Adds an `Authorization: Basic <credentials>` header.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Custom payload transformation configuration. Required only when `type` is `custom`.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Custom payload formatter. Required when `type` is `custom`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -894,7 +953,7 @@ class AsyncWebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[UpdateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         is_active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateWebhookResponseDto:
@@ -927,8 +986,8 @@ class AsyncWebhooksClient:
         auth : typing.Optional[UpdateWebhookRequestDtoAuth]
             Updated authentication configuration. Replaces existing auth entirely.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Updated formatter configuration.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Updated custom payload formatter. Set only when `type` is `custom`.
 
         is_active : typing.Optional[bool]
             Set to `false` to disable delivery without deleting the webhook.
@@ -1267,6 +1326,72 @@ class AsyncWebhooksClient:
             page=page,
             page_size=page_size,
             request_options=request_options,
+        )
+        return _response.data
+
+    async def trigger_webhook(
+        self,
+        resource_type: MappableResourceType,
+        resource_id: str,
+        *,
+        webhook_id: str,
+        job_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> None:
+        """
+        Manually dispatches a webhook delivery for a resource on demand, without
+        waiting for the next job or monitor cycle.
+
+        Use this to re-deliver results after a failed delivery, replay a specific
+        job's results, or validate a webhook against live data. The webhook must
+        already be assigned to the resource.
+
+        Parameters
+        ----------
+        resource_type : MappableResourceType
+
+        resource_id : str
+            Unique resource identifier.
+
+        webhook_id : str
+            Identifier of the webhook to trigger. Must be assigned to the resource.
+
+        job_id : typing.Optional[str]
+            Specific job run to deliver. Optional for `job` resources; for
+            `monitor` and `monitor_group` resources, selects a past run to replay.
+            When omitted, the latest available results are delivered.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.webhooks.trigger_webhook(
+                resource_type="job",
+                resource_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+                webhook_id="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                job_id="3fec5b07-8786-46d7-9486-d43ff67eccd4",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.trigger_webhook(
+            resource_type, resource_id, webhook_id=webhook_id, job_id=job_id, request_options=request_options
         )
         return _response.data
 
