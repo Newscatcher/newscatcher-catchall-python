@@ -59,6 +59,7 @@ if typing.TYPE_CHECKING:
     from .entity_type import EntityType
     from .entity_validation_error_body import EntityValidationErrorBody
     from .error import Error
+    from .formatter_config_dto import FormatterConfigDto
     from .get_plan_limits_response_dto import GetPlanLimitsResponseDto
     from .get_webhook_response_dto import GetWebhookResponseDto
     from .http_method import HttpMethod
@@ -182,6 +183,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "EntityType": ".entity_type",
     "EntityValidationErrorBody": ".entity_validation_error_body",
     "Error": ".error",
+    "FormatterConfigDto": ".formatter_config_dto",
     "GetPlanLimitsResponseDto": ".get_plan_limits_response_dto",
     "GetWebhookResponseDto": ".get_webhook_response_dto",
     "HttpMethod": ".http_method",
@@ -329,6 +331,7 @@ __all__ = [
     "EntityType",
     "EntityValidationErrorBody",
     "Error",
+    "FormatterConfigDto",
     "GetPlanLimitsResponseDto",
     "GetWebhookResponseDto",
     "HttpMethod",

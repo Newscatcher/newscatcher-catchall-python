@@ -134,10 +134,10 @@ class RawEntitiesClient:
         """
         Creates a new company entity and begins background enrichment.
 
+        Each entity requires a `name` plus at least one of: a `description` or a `domain`. Providing both is recommended — `domain` is the highest-signal identifier because it is unambiguous; a well-written `description` is the best alternative when no domain is available.
+
         The entity status starts as `pending` and transitions to `ready` once
-        enrichment completes. Provide as much identifying information as
-        possible — `domain` is the highest-signal field because it is
-        unambiguous.
+        enrichment completes.
 
         Parameters
         ----------
@@ -147,7 +147,7 @@ class RawEntitiesClient:
         entity_type : typing.Optional[EntityType]
 
         description : typing.Optional[str]
-            Free-text description of the entity used for disambiguation when similar names exist.
+            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
 
         external_entity_id : typing.Optional[str]
             Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
@@ -223,6 +223,8 @@ class RawEntitiesClient:
     ) -> HttpResponse[CreateEntitiesBatchResponse]:
         """
         Creates multiple entities in a single request. Each entity is processed independently — a failure in one does not affect others.
+
+        Each entity requires a `name` plus at least one of: a `description` or a `domain`. See [Create entity](https://www.newscatcherapi.com/docs/web-search-api/api-reference/entities/create-entity) for the full field reference.
 
         Returns an array of `{id, status}` objects in the same order as the input array.
 
@@ -628,10 +630,10 @@ class AsyncRawEntitiesClient:
         """
         Creates a new company entity and begins background enrichment.
 
+        Each entity requires a `name` plus at least one of: a `description` or a `domain`. Providing both is recommended — `domain` is the highest-signal identifier because it is unambiguous; a well-written `description` is the best alternative when no domain is available.
+
         The entity status starts as `pending` and transitions to `ready` once
-        enrichment completes. Provide as much identifying information as
-        possible — `domain` is the highest-signal field because it is
-        unambiguous.
+        enrichment completes.
 
         Parameters
         ----------
@@ -641,7 +643,7 @@ class AsyncRawEntitiesClient:
         entity_type : typing.Optional[EntityType]
 
         description : typing.Optional[str]
-            Free-text description of the entity used for disambiguation when similar names exist.
+            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
 
         external_entity_id : typing.Optional[str]
             Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
@@ -717,6 +719,8 @@ class AsyncRawEntitiesClient:
     ) -> AsyncHttpResponse[CreateEntitiesBatchResponse]:
         """
         Creates multiple entities in a single request. Each entity is processed independently — a failure in one does not affect others.
+
+        Each entity requires a `name` plus at least one of: a `description` or a `domain`. See [Create entity](https://www.newscatcherapi.com/docs/web-search-api/api-reference/entities/create-entity) for the full field reference.
 
         Returns an array of `{id, status}` objects in the same order as the input array.
 

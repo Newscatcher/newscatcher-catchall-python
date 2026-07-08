@@ -20,6 +20,7 @@ from ..types.create_webhook_response_dto import CreateWebhookResponseDto
 from ..types.delivery_history_response_dto import DeliveryHistoryResponseDto
 from ..types.delivery_mode import DeliveryMode
 from ..types.error import Error
+from ..types.formatter_config_dto import FormatterConfigDto
 from ..types.get_webhook_response_dto import GetWebhookResponseDto
 from ..types.http_method import HttpMethod
 from ..types.list_webhook_resources_response_dto import ListWebhookResourcesResponseDto
@@ -133,7 +134,7 @@ class RawWebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[CreateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateWebhookResponseDto]:
         """
@@ -173,8 +174,8 @@ class RawWebhooksClient:
             - `api_key`: Adds a custom header with the specified name and value.
             - `basic`: Adds an `Authorization: Basic <credentials>` header.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Custom payload transformation configuration. Required only when `type` is `custom`.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Custom payload formatter. Required when `type` is `custom`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -198,7 +199,9 @@ class RawWebhooksClient:
                 "auth": convert_and_respect_annotation_metadata(
                     object_=auth, annotation=CreateWebhookRequestDtoAuth, direction="write"
                 ),
-                "formatter_config": formatter_config,
+                "formatter_config": convert_and_respect_annotation_metadata(
+                    object_=formatter_config, annotation=typing.Optional[FormatterConfigDto], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -394,7 +397,7 @@ class RawWebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[UpdateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         is_active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UpdateWebhookResponseDto]:
@@ -427,8 +430,8 @@ class RawWebhooksClient:
         auth : typing.Optional[UpdateWebhookRequestDtoAuth]
             Updated authentication configuration. Replaces existing auth entirely.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Updated formatter configuration.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Updated custom payload formatter. Set only when `type` is `custom`.
 
         is_active : typing.Optional[bool]
             Set to `false` to disable delivery without deleting the webhook.
@@ -455,7 +458,9 @@ class RawWebhooksClient:
                 "auth": convert_and_respect_annotation_metadata(
                     object_=auth, annotation=UpdateWebhookRequestDtoAuth, direction="write"
                 ),
-                "formatter_config": formatter_config,
+                "formatter_config": convert_and_respect_annotation_metadata(
+                    object_=formatter_config, annotation=typing.Optional[FormatterConfigDto], direction="write"
+                ),
                 "is_active": is_active,
             },
             headers={
@@ -982,6 +987,99 @@ class RawWebhooksClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def trigger_webhook(
+        self,
+        resource_type: MappableResourceType,
+        resource_id: str,
+        *,
+        webhook_id: str,
+        job_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[None]:
+        """
+        Manually dispatches a webhook delivery for a resource on demand, without
+        waiting for the next job or monitor cycle.
+
+        Use this to re-deliver results after a failed delivery, replay a specific
+        job's results, or validate a webhook against live data. The webhook must
+        already be assigned to the resource.
+
+        Parameters
+        ----------
+        resource_type : MappableResourceType
+
+        resource_id : str
+            Unique resource identifier.
+
+        webhook_id : str
+            Identifier of the webhook to trigger. Must be assigned to the resource.
+
+        job_id : typing.Optional[str]
+            Specific job run to deliver. Optional for `job` resources; for
+            `monitor` and `monitor_group` resources, selects a past run to replay.
+            When omitted, the latest available results are delivered.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[None]
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"catchAll/webhook/trigger/{encode_path_param(resource_type)}/{encode_path_param(resource_id)}",
+            method="POST",
+            params={
+                "webhook_id": webhook_id,
+                "job_id": job_id,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return HttpResponse(response=_response, data=None)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def get_webhook_delivery_history(
         self,
         *,
@@ -1178,7 +1276,7 @@ class AsyncRawWebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[CreateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateWebhookResponseDto]:
         """
@@ -1218,8 +1316,8 @@ class AsyncRawWebhooksClient:
             - `api_key`: Adds a custom header with the specified name and value.
             - `basic`: Adds an `Authorization: Basic <credentials>` header.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Custom payload transformation configuration. Required only when `type` is `custom`.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Custom payload formatter. Required when `type` is `custom`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1243,7 +1341,9 @@ class AsyncRawWebhooksClient:
                 "auth": convert_and_respect_annotation_metadata(
                     object_=auth, annotation=CreateWebhookRequestDtoAuth, direction="write"
                 ),
-                "formatter_config": formatter_config,
+                "formatter_config": convert_and_respect_annotation_metadata(
+                    object_=formatter_config, annotation=typing.Optional[FormatterConfigDto], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -1439,7 +1539,7 @@ class AsyncRawWebhooksClient:
         headers: typing.Optional[typing.Dict[str, str]] = OMIT,
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[UpdateWebhookRequestDtoAuth] = OMIT,
-        formatter_config: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
         is_active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UpdateWebhookResponseDto]:
@@ -1472,8 +1572,8 @@ class AsyncRawWebhooksClient:
         auth : typing.Optional[UpdateWebhookRequestDtoAuth]
             Updated authentication configuration. Replaces existing auth entirely.
 
-        formatter_config : typing.Optional[typing.Dict[str, typing.Any]]
-            Updated formatter configuration.
+        formatter_config : typing.Optional[FormatterConfigDto]
+            Updated custom payload formatter. Set only when `type` is `custom`.
 
         is_active : typing.Optional[bool]
             Set to `false` to disable delivery without deleting the webhook.
@@ -1500,7 +1600,9 @@ class AsyncRawWebhooksClient:
                 "auth": convert_and_respect_annotation_metadata(
                     object_=auth, annotation=UpdateWebhookRequestDtoAuth, direction="write"
                 ),
-                "formatter_config": formatter_config,
+                "formatter_config": convert_and_respect_annotation_metadata(
+                    object_=formatter_config, annotation=typing.Optional[FormatterConfigDto], direction="write"
+                ),
                 "is_active": is_active,
             },
             headers={
@@ -1985,6 +2087,99 @@ class AsyncRawWebhooksClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def trigger_webhook(
+        self,
+        resource_type: MappableResourceType,
+        resource_id: str,
+        *,
+        webhook_id: str,
+        job_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[None]:
+        """
+        Manually dispatches a webhook delivery for a resource on demand, without
+        waiting for the next job or monitor cycle.
+
+        Use this to re-deliver results after a failed delivery, replay a specific
+        job's results, or validate a webhook against live data. The webhook must
+        already be assigned to the resource.
+
+        Parameters
+        ----------
+        resource_type : MappableResourceType
+
+        resource_id : str
+            Unique resource identifier.
+
+        webhook_id : str
+            Identifier of the webhook to trigger. Must be assigned to the resource.
+
+        job_id : typing.Optional[str]
+            Specific job run to deliver. Optional for `job` resources; for
+            `monitor` and `monitor_group` resources, selects a past run to replay.
+            When omitted, the latest available results are delivered.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[None]
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"catchAll/webhook/trigger/{encode_path_param(resource_type)}/{encode_path_param(resource_id)}",
+            method="POST",
+            params={
+                "webhook_id": webhook_id,
+                "job_id": job_id,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return AsyncHttpResponse(response=_response, data=None)
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
