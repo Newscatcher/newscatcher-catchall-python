@@ -4,19 +4,22 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .project_overview_counts_dto import ProjectOverviewCountsDto
 
 
-class ProjectOverviewResponseDtoOverview(UniversalBaseModel):
+class BasicAuthResponseDto(UniversalBaseModel):
     """
-    Resource counts grouped by type.
+    Basic authentication as returned in webhook responses. The password is masked.
     """
 
-    jobs: ProjectOverviewCountsDto
-    monitors: ProjectOverviewCountsDto
-    datasets: ProjectOverviewCountsDto
-    monitor_groups: ProjectOverviewCountsDto
-    webhooks: ProjectOverviewCountsDto
+    username: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Basic auth username. Returned in full.
+    """
+
+    password: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Masked password. Never returned in full.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -135,10 +135,13 @@ class RawWebhooksClient:
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[CreateWebhookRequestDtoAuth] = OMIT,
         formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateWebhookResponseDto]:
         """
         Creates a new webhook endpoint for the organization.
+
+        Optionally pass `project_id` to attach the webhook to a project in the same request.
 
         Parameters
         ----------
@@ -177,6 +180,14 @@ class RawWebhooksClient:
         formatter_config : typing.Optional[FormatterConfigDto]
             Custom payload formatter. Required when `type` is `custom`.
 
+        project_id : typing.Optional[str]
+            Optional project to attach this webhook to at creation time. Equivalent
+            to creating the webhook and then calling
+            [`POST /catchAll/projects/{project_id}/resources`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/projects/add-resource)
+            with `resource_type: webhook`.
+
+            The project must belong to your organization.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -202,6 +213,7 @@ class RawWebhooksClient:
                 "formatter_config": convert_and_respect_annotation_metadata(
                     object_=formatter_config, annotation=typing.Optional[FormatterConfigDto], direction="write"
                 ),
+                "project_id": project_id,
             },
             headers={
                 "content-type": "application/json",
@@ -221,6 +233,17 @@ class RawWebhooksClient:
                 return HttpResponse(response=_response, data=_data)
             if _response.status_code == 403:
                 raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         Error,
@@ -1277,10 +1300,13 @@ class AsyncRawWebhooksClient:
         params: typing.Optional[typing.Dict[str, str]] = OMIT,
         auth: typing.Optional[CreateWebhookRequestDtoAuth] = OMIT,
         formatter_config: typing.Optional[FormatterConfigDto] = OMIT,
+        project_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateWebhookResponseDto]:
         """
         Creates a new webhook endpoint for the organization.
+
+        Optionally pass `project_id` to attach the webhook to a project in the same request.
 
         Parameters
         ----------
@@ -1319,6 +1345,14 @@ class AsyncRawWebhooksClient:
         formatter_config : typing.Optional[FormatterConfigDto]
             Custom payload formatter. Required when `type` is `custom`.
 
+        project_id : typing.Optional[str]
+            Optional project to attach this webhook to at creation time. Equivalent
+            to creating the webhook and then calling
+            [`POST /catchAll/projects/{project_id}/resources`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/projects/add-resource)
+            with `resource_type: webhook`.
+
+            The project must belong to your organization.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1344,6 +1378,7 @@ class AsyncRawWebhooksClient:
                 "formatter_config": convert_and_respect_annotation_metadata(
                     object_=formatter_config, annotation=typing.Optional[FormatterConfigDto], direction="write"
                 ),
+                "project_id": project_id,
             },
             headers={
                 "content-type": "application/json",
@@ -1363,6 +1398,17 @@ class AsyncRawWebhooksClient:
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 403:
                 raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         Error,

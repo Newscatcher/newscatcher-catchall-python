@@ -8,6 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .delivery_mode import DeliveryMode
 from .formatter_config_dto import FormatterConfigDto
 from .http_method import HttpMethod
+from .webhook_response_dto_auth import WebhookResponseDtoAuth
 from .webhook_type import WebhookType
 
 
@@ -38,6 +39,13 @@ class WebhookResponseDto(UniversalBaseModel):
     params: typing.Optional[typing.Dict[str, str]] = pydantic.Field(default=None)
     """
     Query parameters appended to the webhook URL.
+    """
+
+    auth: typing.Optional[WebhookResponseDtoAuth] = pydantic.Field(default=None)
+    """
+    Authentication configured for this webhook, discriminated by `type`.
+    Secret values (`token`, `value`, `password`) are masked — the full
+    credentials are never returned. Null when no authentication is set.
     """
 
     formatter_config: typing.Optional[FormatterConfigDto] = pydantic.Field(default=None)

@@ -6,8 +6,12 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
+    from .get_user_jobs_request_mode import GetUserJobsRequestMode
     from .submit_request_dto_mode import SubmitRequestDtoMode
-_dynamic_imports: typing.Dict[str, str] = {"SubmitRequestDtoMode": ".submit_request_dto_mode"}
+_dynamic_imports: typing.Dict[str, str] = {
+    "GetUserJobsRequestMode": ".get_user_jobs_request_mode",
+    "SubmitRequestDtoMode": ".submit_request_dto_mode",
+}
 
 
 def __getattr__(attr_name: str) -> typing.Any:
@@ -31,4 +35,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["SubmitRequestDtoMode"]
+__all__ = ["GetUserJobsRequestMode", "SubmitRequestDtoMode"]

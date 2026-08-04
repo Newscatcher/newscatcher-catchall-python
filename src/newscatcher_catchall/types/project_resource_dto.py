@@ -22,7 +22,7 @@ class ProjectResourceDto(UniversalBaseModel):
     name: typing.Optional[str] = pydantic.Field(default=None)
     """
     Resource display name. For jobs, this is the original query
-    string. For monitors and datasets, this is the resource name.
+    string. For monitors, datasets, and webhooks, this is the resource name.
     """
 
     created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)

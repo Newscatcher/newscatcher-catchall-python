@@ -2,4 +2,4 @@
 
 import typing
 
-ProjectResourceType = typing.Union[typing.Literal["job", "monitor", "dataset", "monitor_group"], typing.Any]
+ProjectResourceType = typing.Union[typing.Literal["job", "monitor", "dataset", "monitor_group", "webhook"], typing.Any]
