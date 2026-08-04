@@ -22,6 +22,7 @@ from ..types.submit_response_dto import SubmitResponseDto
 from ..types.validate_query_response_dto import ValidateQueryResponseDto
 from ..types.validator_schema import ValidatorSchema
 from .raw_client import AsyncRawJobsClient, RawJobsClient
+from .types.get_user_jobs_request_mode import GetUserJobsRequestMode
 from .types.submit_request_dto_mode import SubmitRequestDtoMode
 
 # this is used as the default value for optional parameters
@@ -51,6 +52,7 @@ class JobsClient:
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
         project_id: typing.Optional[str] = None,
+        mode: typing.Optional[GetUserJobsRequestMode] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListUserJobsResponseDto:
         """
@@ -71,6 +73,9 @@ class JobsClient:
 
         project_id : typing.Optional[str]
             Filter results to resources belonging to this project.
+
+        mode : typing.Optional[GetUserJobsRequestMode]
+            Filter results by processing mode. Returns only jobs that ran in the specified mode.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -97,6 +102,7 @@ class JobsClient:
             search=search,
             ownership=ownership,
             project_id=project_id,
+            mode=mode,
             request_options=request_options,
         )
         return _response.data
@@ -400,7 +406,9 @@ class JobsClient:
 
     def get_job_results_csv(self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> str:
         """
-        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
+
+        If the job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
@@ -531,6 +539,7 @@ class AsyncJobsClient:
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
         project_id: typing.Optional[str] = None,
+        mode: typing.Optional[GetUserJobsRequestMode] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListUserJobsResponseDto:
         """
@@ -551,6 +560,9 @@ class AsyncJobsClient:
 
         project_id : typing.Optional[str]
             Filter results to resources belonging to this project.
+
+        mode : typing.Optional[GetUserJobsRequestMode]
+            Filter results by processing mode. Returns only jobs that ran in the specified mode.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -585,6 +597,7 @@ class AsyncJobsClient:
             search=search,
             ownership=ownership,
             project_id=project_id,
+            mode=mode,
             request_options=request_options,
         )
         return _response.data
@@ -927,7 +940,9 @@ class AsyncJobsClient:
 
     async def get_job_results_csv(self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> str:
         """
-        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
+
+        If the job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------

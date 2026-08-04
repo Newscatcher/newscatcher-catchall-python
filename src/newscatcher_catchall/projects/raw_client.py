@@ -278,13 +278,17 @@ class RawProjectsClient:
         """
         Deletes a project. By default, assigned resources are unassigned but not deleted.
 
+        Webhooks are an exception: they are never deleted by this operation, even when `delete_resources` is `true`. Any attached webhook is detached from the project and continues to exist and deliver, because the same webhook may be attached to other projects.
+
         Parameters
         ----------
         project_id : str
             Unique project identifier.
 
         delete_resources : typing.Optional[bool]
-            If true, permanently deletes all resources (jobs, monitors, datasets) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+            If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+
+            Webhooks are never deleted by either setting — they are only detached from the project.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -436,7 +440,7 @@ class RawProjectsClient:
         """
         Returns resource counts for a project, grouped by type and status.
 
-        For `jobs` and `monitors`, counts are broken down by status (for example, `completed`, `failed`). For `datasets` and `monitor_groups`, only a `total` count is returned.
+        For `jobs` and `monitors`, counts are broken down by status (for example, `completed`, `failed`). For `datasets`, `monitor_groups`, and `webhooks`, only a `total` count is returned.
 
         Parameters
         ----------
@@ -1005,13 +1009,17 @@ class AsyncRawProjectsClient:
         """
         Deletes a project. By default, assigned resources are unassigned but not deleted.
 
+        Webhooks are an exception: they are never deleted by this operation, even when `delete_resources` is `true`. Any attached webhook is detached from the project and continues to exist and deliver, because the same webhook may be attached to other projects.
+
         Parameters
         ----------
         project_id : str
             Unique project identifier.
 
         delete_resources : typing.Optional[bool]
-            If true, permanently deletes all resources (jobs, monitors, datasets) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+            If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+
+            Webhooks are never deleted by either setting — they are only detached from the project.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1163,7 +1171,7 @@ class AsyncRawProjectsClient:
         """
         Returns resource counts for a project, grouped by type and status.
 
-        For `jobs` and `monitors`, counts are broken down by status (for example, `completed`, `failed`). For `datasets` and `monitor_groups`, only a `total` count is returned.
+        For `jobs` and `monitors`, counts are broken down by status (for example, `completed`, `failed`). For `datasets`, `monitor_groups`, and `webhooks`, only a `total` count is returned.
 
         Parameters
         ----------

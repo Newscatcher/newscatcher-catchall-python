@@ -6,7 +6,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .delivery_status import DeliveryStatus
-from .mappable_resource_type import MappableResourceType
+from .webhook_history_resource_type import WebhookHistoryResourceType
 
 
 class DeliveryHistoryItemDto(UniversalBaseModel):
@@ -20,9 +20,9 @@ class DeliveryHistoryItemDto(UniversalBaseModel):
     Identifier of the webhook that was dispatched.
     """
 
-    resource_type: MappableResourceType = pydantic.Field()
+    resource_type: WebhookHistoryResourceType = pydantic.Field()
     """
-    Type of the resource that triggered the delivery.
+    Type of the resource that triggered the delivery. `test` indicates a manual test delivery not tied to a real resource.
     """
 
     resource_id: str = pydantic.Field()

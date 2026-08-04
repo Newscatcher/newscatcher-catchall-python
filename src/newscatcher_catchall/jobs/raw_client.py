@@ -35,6 +35,7 @@ from ..types.submit_response_dto import SubmitResponseDto
 from ..types.validate_query_response_dto import ValidateQueryResponseDto
 from ..types.validation_error_response import ValidationErrorResponse
 from ..types.validator_schema import ValidatorSchema
+from .types.get_user_jobs_request_mode import GetUserJobsRequestMode
 from .types.submit_request_dto_mode import SubmitRequestDtoMode
 from pydantic import ValidationError
 
@@ -54,6 +55,7 @@ class RawJobsClient:
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
         project_id: typing.Optional[str] = None,
+        mode: typing.Optional[GetUserJobsRequestMode] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListUserJobsResponseDto]:
         """
@@ -75,6 +77,9 @@ class RawJobsClient:
         project_id : typing.Optional[str]
             Filter results to resources belonging to this project.
 
+        mode : typing.Optional[GetUserJobsRequestMode]
+            Filter results by processing mode. Returns only jobs that ran in the specified mode.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -92,6 +97,7 @@ class RawJobsClient:
                 "search": search,
                 "ownership": ownership,
                 "project_id": project_id,
+                "mode": mode,
             },
             request_options=request_options,
         )
@@ -606,7 +612,9 @@ class RawJobsClient:
         self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[str]:
         """
-        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
+
+        If the job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
@@ -833,6 +841,7 @@ class AsyncRawJobsClient:
         search: typing.Optional[str] = None,
         ownership: typing.Optional[OwnershipFilter] = None,
         project_id: typing.Optional[str] = None,
+        mode: typing.Optional[GetUserJobsRequestMode] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListUserJobsResponseDto]:
         """
@@ -854,6 +863,9 @@ class AsyncRawJobsClient:
         project_id : typing.Optional[str]
             Filter results to resources belonging to this project.
 
+        mode : typing.Optional[GetUserJobsRequestMode]
+            Filter results by processing mode. Returns only jobs that ran in the specified mode.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -871,6 +883,7 @@ class AsyncRawJobsClient:
                 "search": search,
                 "ownership": ownership,
                 "project_id": project_id,
+                "mode": mode,
             },
             request_options=request_options,
         )
@@ -1385,7 +1398,9 @@ class AsyncRawJobsClient:
         self, job_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[str]:
         """
-        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+        Returns a completed job's result records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
+
+        If the job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------

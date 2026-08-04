@@ -9,12 +9,15 @@ if typing.TYPE_CHECKING:
     from .add_resource_response_dto import AddResourceResponseDto
     from .additional_attributes import AdditionalAttributes
     from .api_key_auth_dto import ApiKeyAuthDto
+    from .api_key_auth_response_dto import ApiKeyAuthResponseDto
     from .assign_webhook_resource_response_dto import AssignWebhookResourceResponseDto
     from .base_record import BaseRecord
     from .base_record_enrichment import BaseRecordEnrichment
     from .base_record_enrichment_enrichment_confidence import BaseRecordEnrichmentEnrichmentConfidence
     from .basic_auth_dto import BasicAuthDto
+    from .basic_auth_response_dto import BasicAuthResponseDto
     from .bearer_auth_dto import BearerAuthDto
+    from .bearer_auth_response_dto import BearerAuthResponseDto
     from .citation import Citation
     from .company_attributes import CompanyAttributes
     from .company_enrichment_output import CompanyEnrichmentOutput
@@ -127,20 +130,30 @@ if typing.TYPE_CHECKING:
     from .validator_schema import ValidatorSchema
     from .webhook_dto import WebhookDto
     from .webhook_dto_method import WebhookDtoMethod
+    from .webhook_history_resource_type import WebhookHistoryResourceType
     from .webhook_payload import WebhookPayload
     from .webhook_resource_mapping_response_dto import WebhookResourceMappingResponseDto
     from .webhook_response_dto import WebhookResponseDto
+    from .webhook_response_dto_auth import (
+        WebhookResponseDtoAuth,
+        WebhookResponseDtoAuth_ApiKey,
+        WebhookResponseDtoAuth_Basic,
+        WebhookResponseDtoAuth_Bearer,
+    )
     from .webhook_type import WebhookType
 _dynamic_imports: typing.Dict[str, str] = {
     "AddResourceResponseDto": ".add_resource_response_dto",
     "AdditionalAttributes": ".additional_attributes",
     "ApiKeyAuthDto": ".api_key_auth_dto",
+    "ApiKeyAuthResponseDto": ".api_key_auth_response_dto",
     "AssignWebhookResourceResponseDto": ".assign_webhook_resource_response_dto",
     "BaseRecord": ".base_record",
     "BaseRecordEnrichment": ".base_record_enrichment",
     "BaseRecordEnrichmentEnrichmentConfidence": ".base_record_enrichment_enrichment_confidence",
     "BasicAuthDto": ".basic_auth_dto",
+    "BasicAuthResponseDto": ".basic_auth_response_dto",
     "BearerAuthDto": ".bearer_auth_dto",
+    "BearerAuthResponseDto": ".bearer_auth_response_dto",
     "Citation": ".citation",
     "CompanyAttributes": ".company_attributes",
     "CompanyEnrichmentOutput": ".company_enrichment_output",
@@ -251,9 +264,14 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValidatorSchema": ".validator_schema",
     "WebhookDto": ".webhook_dto",
     "WebhookDtoMethod": ".webhook_dto_method",
+    "WebhookHistoryResourceType": ".webhook_history_resource_type",
     "WebhookPayload": ".webhook_payload",
     "WebhookResourceMappingResponseDto": ".webhook_resource_mapping_response_dto",
     "WebhookResponseDto": ".webhook_response_dto",
+    "WebhookResponseDtoAuth": ".webhook_response_dto_auth",
+    "WebhookResponseDtoAuth_ApiKey": ".webhook_response_dto_auth",
+    "WebhookResponseDtoAuth_Basic": ".webhook_response_dto_auth",
+    "WebhookResponseDtoAuth_Bearer": ".webhook_response_dto_auth",
     "WebhookType": ".webhook_type",
 }
 
@@ -283,12 +301,15 @@ __all__ = [
     "AddResourceResponseDto",
     "AdditionalAttributes",
     "ApiKeyAuthDto",
+    "ApiKeyAuthResponseDto",
     "AssignWebhookResourceResponseDto",
     "BaseRecord",
     "BaseRecordEnrichment",
     "BaseRecordEnrichmentEnrichmentConfidence",
     "BasicAuthDto",
+    "BasicAuthResponseDto",
     "BearerAuthDto",
+    "BearerAuthResponseDto",
     "Citation",
     "CompanyAttributes",
     "CompanyEnrichmentOutput",
@@ -399,8 +420,13 @@ __all__ = [
     "ValidatorSchema",
     "WebhookDto",
     "WebhookDtoMethod",
+    "WebhookHistoryResourceType",
     "WebhookPayload",
     "WebhookResourceMappingResponseDto",
     "WebhookResponseDto",
+    "WebhookResponseDtoAuth",
+    "WebhookResponseDtoAuth_ApiKey",
+    "WebhookResponseDtoAuth_Basic",
+    "WebhookResponseDtoAuth_Bearer",
     "WebhookType",
 ]

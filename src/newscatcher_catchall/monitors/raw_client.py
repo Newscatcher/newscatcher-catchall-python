@@ -299,7 +299,9 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[str]:
         """
-        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
+
+        If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
@@ -1097,7 +1099,9 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[str]:
         """
-        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns, citations as a JSON column, and connected entities split into `event_associated_entities` and `mention_entities` JSON columns.
+        Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
+
+        If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
