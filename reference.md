@@ -431,7 +431,7 @@ Job processing mode.
 
 **connected_dataset_ids:** `typing.Optional[typing.List[str]]` 
 
-Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
+Dataset IDs to connect to the job. When provided, this enables Company Monitors mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
 The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
     
@@ -471,7 +471,7 @@ Only valid when `connected_dataset_ids` is set; otherwise ignored. Records where
 
 **fetch_all_watchlist_news:** `typing.Optional[bool]` 
 
-When true, retrieves all news for connected Company Watchlist entities
+When true, retrieves all news for connected Company Monitors entities
 without topic filtering. Requires connected_dataset_ids to be set.
     
 </dd>
@@ -486,6 +486,20 @@ Filter events by entity association type. `event_associated` keeps only
 events where the entity is a direct actor. `mention` keeps only events
 where the entity is merely referenced. Only relevant when
 connected_dataset_ids is set.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**source_groups:** `typing.Optional[typing.List[str]]` 
+
+Slugs of source groups to scope fetching to their curated domain allowlists.
+
+Source groups are named domain lists maintained by NewsCatcher (for example "Top 100 US Finance"). Retrieve the groups available to your organization with [List source groups](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/list-source-groups).
+
+Domains are resolved when the job runs, so a group's current membership always applies. Maximum 20 groups per job. An unknown or inaccessible slug is rejected at submit time.
     
 </dd>
 </dl>
@@ -901,8 +915,7 @@ client.jobs.delete_job(
 </dl>
 </details>
 
-## Monitors
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitors</a>(...) -> ListMonitorsResponseDto</code></summary>
+<details><summary><code>client.jobs.<a href="src/newscatcher_catchall/jobs/client.py">list_source_groups</a>(...) -> ListSourceGroupsResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -914,7 +927,15 @@ client.jobs.delete_job(
 <dl>
 <dd>
 
-Returns all monitors created by the authenticated user.
+Returns a paginated list of source groups visible to your organization.
+
+A source group is a named, curated domain allowlist maintained by NewsCatcher — for
+example "Top 100 US Finance". Pass a group's `slug` in `source_groups` when creating
+a job to scope article fetching to that group's domains, instead of maintaining a
+long domain list yourself.
+
+The response covers public groups plus any restricted groups your organization has
+been granted access to. Each entry returns `slug`, `name`, and `description`.
 </dd>
 </dl>
 </dd>
@@ -937,7 +958,87 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.list_monitors(
+client.jobs.list_source_groups()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**page:** `typing.Optional[int]` — Page number to retrieve.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**page_size:** `typing.Optional[int]` — Number of source groups per page.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Event Monitors
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">list_monitors</a>(...) -> ListMonitorsResponseDto</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns all event monitors created by the authenticated user.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from newscatcher_catchall import CatchAllApi
+from newscatcher_catchall.environment import CatchAllApiEnvironment
+
+client = CatchAllApi(
+    api_key="<value>",
+    environment=CatchAllApiEnvironment.DEFAULT,
+)
+
+client.event_monitors.list_monitors(
     project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
 )
 
@@ -1007,7 +1108,7 @@ client.monitors.list_monitors(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">create_monitor</a>(...) -> CreateMonitorResponseDto</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">create_monitor</a>(...) -> CreateMonitorResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -1019,7 +1120,7 @@ client.monitors.list_monitors(
 <dl>
 <dd>
 
-Create a scheduled monitor based on a reference job.
+Create a scheduled event monitor based on a reference job.
 </dd>
 </dl>
 </dd>
@@ -1042,7 +1143,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.create_monitor(
+client.event_monitors.create_monitor(
     reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
     schedule="every day at 12 PM",
     timezone="UTC",
@@ -1071,7 +1172,7 @@ client.monitors.create_monitor(
 
 Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
+If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/event-monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
     
 </dd>
 </dl>
@@ -1079,7 +1180,7 @@ If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference
 <dl>
 <dd>
 
-**schedule:** `str` — Monitor schedule in plain text format. Minimum frequency depends on your plan.
+**schedule:** `str` — Event monitor schedule in plain text format. Minimum frequency depends on your plan.
     
 </dd>
 </dl>
@@ -1104,7 +1205,7 @@ If the schedule includes a timezone abbreviation (for example, `"every day at 9a
 IDs of centralized webhooks to notify on each run completion.
 Passing IDs here is equivalent to calling
 `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
-Maximum 5 per monitor.
+Maximum 5 per event monitor.
     
 </dd>
 </dl>
@@ -1112,7 +1213,7 @@ Maximum 5 per monitor.
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+**limit:** `typing.Optional[int]` — Maximum number of records per event monitor run. If not provided, defaults to the plan limit.
     
 </dd>
 </dl>
@@ -1132,7 +1233,7 @@ If false, no gap filling occurs and the first run uses the current cron window o
 <dl>
 <dd>
 
-**project_id:** `typing.Optional[str]` — Project to assign this monitor to. The monitor appears in the project's resource list after creation.
+**project_id:** `typing.Optional[str]` — Project to assign this event monitor to. The event monitor appears in the project's resource list after creation.
     
 </dd>
 </dl>
@@ -1152,7 +1253,7 @@ If false, no gap filling occurs and the first run uses the current cron window o
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results</a>(...) -> PullMonitorResponseDto</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">pull_monitor_results</a>(...) -> PullMonitorResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -1164,7 +1265,7 @@ If false, no gap filling occurs and the first run uses the current cron window o
 <dl>
 <dd>
 
-Retrieve aggregated results from all jobs executed by a monitor.
+Retrieve aggregated results from all jobs executed by an event monitor.
 </dd>
 </dl>
 </dd>
@@ -1187,7 +1288,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.pull_monitor_results(
+client.event_monitors.pull_monitor_results(
     monitor_id="monitor_id",
 )
 
@@ -1205,7 +1306,7 @@ client.monitors.pull_monitor_results(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1225,7 +1326,7 @@ client.monitors.pull_monitor_results(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">pull_monitor_results_csv</a>(...) -> str</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">pull_monitor_results_csv</a>(...) -> str</code></summary>
 <dl>
 <dd>
 
@@ -1239,7 +1340,7 @@ client.monitors.pull_monitor_results(
 
 Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
 
-If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
+If the event monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 </dd>
 </dl>
 </dd>
@@ -1262,7 +1363,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.pull_monitor_results_csv(
+client.event_monitors.pull_monitor_results_csv(
     monitor_id="monitor_id",
 )
 
@@ -1280,7 +1381,7 @@ client.monitors.pull_monitor_results_csv(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1300,7 +1401,7 @@ client.monitors.pull_monitor_results_csv(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">list_monitor_jobs</a>(...) -> ListMonitorJobsResponse</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">list_monitor_jobs</a>(...) -> ListMonitorJobsResponse</code></summary>
 <dl>
 <dd>
 
@@ -1312,7 +1413,7 @@ client.monitors.pull_monitor_results_csv(
 <dl>
 <dd>
 
-Return all jobs executed by a monitor.
+Return all jobs executed by an event monitor.
 </dd>
 </dl>
 </dd>
@@ -1335,7 +1436,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.list_monitor_jobs(
+client.event_monitors.list_monitor_jobs(
     monitor_id="monitor_id",
 )
 
@@ -1353,7 +1454,7 @@ client.monitors.list_monitor_jobs(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1381,7 +1482,7 @@ client.monitors.list_monitor_jobs(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">get_monitor_status_history</a>(...) -> MonitorStatusHistoryResponseDto</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">get_monitor_status_history</a>(...) -> MonitorStatusHistoryResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -1393,7 +1494,7 @@ client.monitors.list_monitor_jobs(
 <dl>
 <dd>
 
-Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+Returns the full execution history of an event monitor as a list of status entries, ordered from newest to oldest.
 </dd>
 </dl>
 </dd>
@@ -1416,7 +1517,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.get_monitor_status_history(
+client.event_monitors.get_monitor_status_history(
     monitor_id="monitor_id",
 )
 
@@ -1434,7 +1535,7 @@ client.monitors.get_monitor_status_history(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1454,7 +1555,7 @@ client.monitors.get_monitor_status_history(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">enable_monitor</a>(...) -> EnableMonitorResponse</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">enable_monitor</a>(...) -> EnableMonitorResponse</code></summary>
 <dl>
 <dd>
 
@@ -1466,7 +1567,7 @@ client.monitors.get_monitor_status_history(
 <dl>
 <dd>
 
-Resume scheduled job execution for a monitor.
+Resume scheduled job execution for an event monitor.
 </dd>
 </dl>
 </dd>
@@ -1489,7 +1590,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.enable_monitor(
+client.event_monitors.enable_monitor(
     monitor_id="monitor_id",
     backfill=True,
 )
@@ -1508,7 +1609,7 @@ client.monitors.enable_monitor(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1540,7 +1641,7 @@ If false, no gap filling occurs and the first run uses the current cron window o
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">disable_monitor</a>(...) -> DisableMonitorResponse</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">disable_monitor</a>(...) -> DisableMonitorResponse</code></summary>
 <dl>
 <dd>
 
@@ -1552,7 +1653,7 @@ If false, no gap filling occurs and the first run uses the current cron window o
 <dl>
 <dd>
 
-Stop scheduled job execution for a monitor.
+Stop scheduled job execution for an event monitor.
 </dd>
 </dl>
 </dd>
@@ -1575,7 +1676,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.disable_monitor(
+client.event_monitors.disable_monitor(
     monitor_id="monitor_id",
 )
 
@@ -1593,7 +1694,7 @@ client.monitors.disable_monitor(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1613,7 +1714,7 @@ client.monitors.disable_monitor(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">delete_monitor</a>(...) -> DeleteMonitorResponseDto</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">delete_monitor</a>(...) -> DeleteMonitorResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -1625,14 +1726,14 @@ client.monitors.disable_monitor(
 <dl>
 <dd>
 
-Soft-deletes a monitor. The monitor is flagged as deleted, stops
+Soft-deletes an event monitor. The event monitor is flagged as deleted, stops
 executing scheduled jobs immediately, and no longer appears in list
 results.
 
-Only the monitor owner can delete a monitor. Returns `404` if the
-monitor is not found or does not belong to the authenticated user.
+Only the event monitor owner can delete an event monitor. Returns `404` if the
+event monitor is not found or does not belong to the authenticated user.
 
-Deleting an already-deleted monitor returns `200`.
+Deleting an already-deleted event monitor returns `200`.
 </dd>
 </dl>
 </dd>
@@ -1655,7 +1756,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.delete_monitor(
+client.event_monitors.delete_monitor(
     monitor_id="monitor_id",
 )
 
@@ -1673,7 +1774,7 @@ client.monitors.delete_monitor(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1693,7 +1794,7 @@ client.monitors.delete_monitor(
 </dl>
 </details>
 
-<details><summary><code>client.monitors.<a href="src/newscatcher_catchall/monitors/client.py">update_monitor</a>(...) -> UpdateMonitorResponseDto</code></summary>
+<details><summary><code>client.event_monitors.<a href="src/newscatcher_catchall/event_monitors/client.py">update_monitor</a>(...) -> UpdateMonitorResponseDto</code></summary>
 <dl>
 <dd>
 
@@ -1705,7 +1806,12 @@ client.monitors.delete_monitor(
 <dl>
 <dd>
 
-Update the webhook configuration for an existing monitor.
+Update the webhook assignments, record limit, or schedule of an existing
+event monitor. Omitted fields are left unchanged.
+
+Passing `schedule` replaces the event monitor's current schedule. The new
+schedule takes effect from the next scheduler reload, and the old schedule
+stops firing. The reference job cannot be changed.
 </dd>
 </dl>
 </dd>
@@ -1728,7 +1834,7 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.monitors.update_monitor(
+client.event_monitors.update_monitor(
     monitor_id="monitor_id",
     webhook_ids=[
         "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
@@ -1749,7 +1855,7 @@ client.monitors.update_monitor(
 <dl>
 <dd>
 
-**monitor_id:** `str` — Monitor identifier.
+**monitor_id:** `str` — Event monitor identifier.
     
 </dd>
 </dl>
@@ -1759,7 +1865,7 @@ client.monitors.update_monitor(
 
 **webhook_ids:** `typing.Optional[typing.List[str]]` 
 
-Updated list of centralized webhook IDs for this monitor. 
+Updated list of centralized webhook IDs for this event monitor.
 
 Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
     
@@ -1769,7 +1875,34 @@ Replaces all existing webhook assignments. Pass an empty array `[]` to clear all
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Updated maximum number of records per monitor run.
+**limit:** `typing.Optional[int]` — Updated maximum number of records per event monitor run.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**schedule:** `typing.Optional[str]` 
+
+New natural-language schedule that replaces the event monitor's current
+schedule. Examples: `every day at 9 AM`, `every Monday at 6 PM EST`.
+
+Omit to keep the current schedule. The new schedule takes effect from the
+next scheduler reload, and the old schedule stops firing. Returns `422` if
+the text can't be parsed or runs would be spaced too closely.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**timezone:** `typing.Optional[str]` 
+
+IANA timezone for the new schedule (for example, `America/New_York`).
+A timezone included in the `schedule` text takes precedence. Ignored if
+`schedule` is not set.
     
 </dd>
 </dl>
@@ -1825,7 +1958,9 @@ client = CatchAllApi(
     environment=CatchAllApiEnvironment.DEFAULT,
 )
 
-client.webhooks.list_webhooks()
+client.webhooks.list_webhooks(
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+)
 
 ```
 </dd>
@@ -1858,6 +1993,14 @@ client.webhooks.list_webhooks()
 <dd>
 
 **search:** `typing.Optional[str]` — Filter results by text (case-insensitive substring match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**project_id:** `typing.Optional[str]` — Filter results to resources belonging to this project.
     
 </dd>
 </dl>
@@ -2137,7 +2280,7 @@ client.webhooks.get_webhook(
 
 Permanently deletes a webhook and removes all resource assignments. 
 
-Assigned jobs and monitors no longer trigger delivery to this webhook. This operation cannot be undone.
+Assigned jobs and event monitors no longer trigger delivery to this webhook. This operation cannot be undone.
 </dd>
 </dl>
 </dd>
@@ -2367,7 +2510,7 @@ client.webhooks.update_webhook(
 
 Sends a test HTTP request to the webhook URL using the webhook's configured method, headers, and auth. Returns the response from the target endpoint.
 
-Use this to verify URL reachability and authentication before attaching the webhook to a live job or monitor.
+Use this to verify URL reachability and authentication before attaching the webhook to a live job or event monitor.
 </dd>
 </dl>
 </dd>
@@ -2552,7 +2695,7 @@ client.webhooks.list_webhook_resources(
 <dl>
 <dd>
 
-Attaches a job, monitor, or monitor group to the webhook. When the
+Attaches a job, event monitor, or event monitor group to the webhook. When the
 resource completes, the webhook receives a delivery.
 
 A single webhook can be assigned to multiple resources. Each resource
@@ -2847,7 +2990,7 @@ client.webhooks.list_webhooks_for_resource(
 <dd>
 
 Manually dispatches a webhook delivery for a resource on demand, without
-waiting for the next job or monitor cycle.
+waiting for the next job or event monitor cycle.
 
 Use this to re-deliver results after a failed delivery, replay a specific
 job's results, or validate a webhook against live data. The webhook must
@@ -3081,6 +3224,7 @@ client = CatchAllApi(
 
 client.entities.list_entities(
     search="NewsCatcher",
+    project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
 )
 
 ```
@@ -3146,6 +3290,14 @@ client.entities.list_entities(
 <dd>
 
 **sort_order:** `typing.Optional[SortOrder]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**project_id:** `typing.Optional[str]` — Filter results to resources belonging to this project.
     
 </dd>
 </dl>
@@ -4984,7 +5136,7 @@ client.projects.delete_project(
 
 **delete_resources:** `typing.Optional[bool]` 
 
-If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+If true, permanently deletes all resources (jobs, event monitors, datasets, event monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
 
 Webhooks are never deleted by either setting — they are only detached from the project.
     

@@ -14,6 +14,7 @@ from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
+from ..errors.unauthorized_error import UnauthorizedError
 from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.add_resource_response_dto import AddResourceResponseDto
 from ..types.create_project_response_dto import CreateProjectResponseDto
@@ -92,6 +93,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -172,6 +184,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -237,6 +260,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -286,7 +320,7 @@ class RawProjectsClient:
             Unique project identifier.
 
         delete_resources : typing.Optional[bool]
-            If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+            If true, permanently deletes all resources (jobs, event monitors, datasets, event monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
 
             Webhooks are never deleted by either setting — they are only detached from the project.
 
@@ -308,6 +342,17 @@ class RawProjectsClient:
         try:
             if 200 <= _response.status_code < 300:
                 return HttpResponse(response=_response, data=None)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -392,6 +437,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -470,6 +526,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -554,6 +621,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -657,6 +735,17 @@ class RawProjectsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -733,6 +822,17 @@ class RawProjectsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -823,6 +923,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -903,6 +1014,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -968,6 +1090,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1017,7 +1150,7 @@ class AsyncRawProjectsClient:
             Unique project identifier.
 
         delete_resources : typing.Optional[bool]
-            If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+            If true, permanently deletes all resources (jobs, event monitors, datasets, event monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
 
             Webhooks are never deleted by either setting — they are only detached from the project.
 
@@ -1039,6 +1172,17 @@ class AsyncRawProjectsClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=None)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1123,6 +1267,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1201,6 +1356,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1285,6 +1451,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1388,6 +1565,17 @@ class AsyncRawProjectsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1464,6 +1652,17 @@ class AsyncRawProjectsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),

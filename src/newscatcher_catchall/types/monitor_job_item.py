@@ -15,12 +15,12 @@ class MonitorJobItem(UniversalBaseModel):
 
     start_date: dt.datetime = pydantic.Field()
     """
-    Start of the data collection time window for this job execution (based on monitor schedule) in ISO 8601 format with UTC timezone.
+    Start of the data collection time window for this job execution (based on event monitor schedule) in ISO 8601 format with UTC timezone.
     """
 
     end_date: dt.datetime = pydantic.Field()
     """
-    End of the data collection time window for this job execution (based on monitor schedule) in ISO 8601 format with UTC timezone.
+    End of the data collection time window for this job execution (based on event monitor schedule) in ISO 8601 format with UTC timezone.
     """
 
     if IS_PYDANTIC_V2:

@@ -11,7 +11,7 @@ from .list_monitor_jobs_response_sort_order import ListMonitorJobsResponseSortOr
 class ListMonitorJobsResponse(UniversalBaseModel):
     monitor_id: str = pydantic.Field()
     """
-    Monitor identifier.
+    Event monitor identifier.
     """
 
     sort_order: ListMonitorJobsResponseSortOrder = pydantic.Field()
@@ -21,12 +21,12 @@ class ListMonitorJobsResponse(UniversalBaseModel):
 
     total_jobs: int = pydantic.Field()
     """
-    Total number of jobs for this monitor.
+    Total number of jobs for this event monitor.
     """
 
     jobs: typing.List[MonitorJobItem] = pydantic.Field()
     """
-    Array of job executions for this monitor.
+    Array of job executions for this event monitor.
     """
 
     if IS_PYDANTIC_V2:

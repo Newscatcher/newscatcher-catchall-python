@@ -10,6 +10,7 @@ from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..errors.forbidden_error import ForbiddenError
+from ..errors.unauthorized_error import UnauthorizedError
 from ..types.error import Error
 from ..types.get_plan_limits_response_dto import GetPlanLimitsResponseDto
 from .types.get_version_response import GetVersionResponse
@@ -132,6 +133,17 @@ class RawMetaClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -268,6 +280,17 @@ class AsyncRawMetaClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),

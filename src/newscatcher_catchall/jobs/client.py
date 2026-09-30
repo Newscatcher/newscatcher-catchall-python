@@ -12,6 +12,7 @@ from ..types.enrichment_schema import EnrichmentSchema
 from ..types.entity_association_type import EntityAssociationType
 from ..types.initialize_response_dto import InitializeResponseDto
 from ..types.limit import Limit
+from ..types.list_source_groups_response_dto import ListSourceGroupsResponseDto
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_job_response_dto import PullJobResponseDto
@@ -213,6 +214,7 @@ class JobsClient:
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
         ed_association_type: typing.Optional[EntityAssociationType] = OMIT,
+        source_groups: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -251,7 +253,7 @@ class JobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
+            Dataset IDs to connect to the job. When provided, this enables Company Monitors mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
@@ -267,7 +269,7 @@ class JobsClient:
             IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
         fetch_all_watchlist_news : typing.Optional[bool]
-            When true, retrieves all news for connected Company Watchlist entities
+            When true, retrieves all news for connected Company Monitors entities
             without topic filtering. Requires connected_dataset_ids to be set.
 
         ed_association_type : typing.Optional[EntityAssociationType]
@@ -275,6 +277,13 @@ class JobsClient:
             events where the entity is a direct actor. `mention` keeps only events
             where the entity is merely referenced. Only relevant when
             connected_dataset_ids is set.
+
+        source_groups : typing.Optional[typing.Sequence[str]]
+            Slugs of source groups to scope fetching to their curated domain allowlists.
+
+            Source groups are named domain lists maintained by NewsCatcher (for example "Top 100 US Finance"). Retrieve the groups available to your organization with [List source groups](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/list-source-groups).
+
+            Domains are resolved when the job runs, so a group's current membership always applies. Maximum 20 groups per job. An unknown or inaccessible slug is rejected at submit time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -321,6 +330,7 @@ class JobsClient:
             webhook_ids=webhook_ids,
             fetch_all_watchlist_news=fetch_all_watchlist_news,
             ed_association_type=ed_association_type,
+            source_groups=source_groups,
             request_options=request_options,
         )
         return _response.data
@@ -513,6 +523,52 @@ class JobsClient:
         )
         """
         _response = self._raw_client.delete_job(job_id, request_options=request_options)
+        return _response.data
+
+    def list_source_groups(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListSourceGroupsResponseDto:
+        """
+        Returns a paginated list of source groups visible to your organization.
+
+        A source group is a named, curated domain allowlist maintained by NewsCatcher — for
+        example "Top 100 US Finance". Pass a group's `slug` in `source_groups` when creating
+        a job to scope article fetching to that group's domains, instead of maintaining a
+        long domain list yourself.
+
+        The response covers public groups plus any restricted groups your organization has
+        been granted access to. Each entry returns `slug`, `name`, and `description`.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of source groups per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListSourceGroupsResponseDto
+            Source groups retrieved successfully.
+
+        Examples
+        --------
+        from newscatcher_catchall import CatchAllApi
+
+        client = CatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+        client.jobs.list_source_groups()
+        """
+        _response = self._raw_client.list_source_groups(page=page, page_size=page_size, request_options=request_options)
         return _response.data
 
 
@@ -724,6 +780,7 @@ class AsyncJobsClient:
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
         ed_association_type: typing.Optional[EntityAssociationType] = OMIT,
+        source_groups: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SubmitResponseDto:
         """
@@ -762,7 +819,7 @@ class AsyncJobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
+            Dataset IDs to connect to the job. When provided, this enables Company Monitors mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
@@ -778,7 +835,7 @@ class AsyncJobsClient:
             IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
         fetch_all_watchlist_news : typing.Optional[bool]
-            When true, retrieves all news for connected Company Watchlist entities
+            When true, retrieves all news for connected Company Monitors entities
             without topic filtering. Requires connected_dataset_ids to be set.
 
         ed_association_type : typing.Optional[EntityAssociationType]
@@ -786,6 +843,13 @@ class AsyncJobsClient:
             events where the entity is a direct actor. `mention` keeps only events
             where the entity is merely referenced. Only relevant when
             connected_dataset_ids is set.
+
+        source_groups : typing.Optional[typing.Sequence[str]]
+            Slugs of source groups to scope fetching to their curated domain allowlists.
+
+            Source groups are named domain lists maintained by NewsCatcher (for example "Top 100 US Finance"). Retrieve the groups available to your organization with [List source groups](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/list-source-groups).
+
+            Domains are resolved when the job runs, so a group's current membership always applies. Maximum 20 groups per job. An unknown or inaccessible slug is rejected at submit time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -839,6 +903,7 @@ class AsyncJobsClient:
             webhook_ids=webhook_ids,
             fetch_all_watchlist_news=fetch_all_watchlist_news,
             ed_association_type=ed_association_type,
+            source_groups=source_groups,
             request_options=request_options,
         )
         return _response.data
@@ -1073,4 +1138,60 @@ class AsyncJobsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.delete_job(job_id, request_options=request_options)
+        return _response.data
+
+    async def list_source_groups(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListSourceGroupsResponseDto:
+        """
+        Returns a paginated list of source groups visible to your organization.
+
+        A source group is a named, curated domain allowlist maintained by NewsCatcher — for
+        example "Top 100 US Finance". Pass a group's `slug` in `source_groups` when creating
+        a job to scope article fetching to that group's domains, instead of maintaining a
+        long domain list yourself.
+
+        The response covers public groups plus any restricted groups your organization has
+        been granted access to. Each entry returns `slug`, `name`, and `description`.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of source groups per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListSourceGroupsResponseDto
+            Source groups retrieved successfully.
+
+        Examples
+        --------
+        import asyncio
+
+        from newscatcher_catchall import AsyncCatchAllApi
+
+        client = AsyncCatchAllApi(
+            api_key="YOUR_API_KEY",
+        )
+
+
+        async def main() -> None:
+            await client.jobs.list_source_groups()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_source_groups(
+            page=page, page_size=page_size, request_options=request_options
+        )
         return _response.data

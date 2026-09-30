@@ -4,6 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .source_group_ref import SourceGroupRef
 
 
 class ReferenceJob(UniversalBaseModel):
@@ -15,6 +16,12 @@ class ReferenceJob(UniversalBaseModel):
     context: typing.Optional[str] = pydantic.Field(default=None)
     """
     Context provided with the reference job query.
+    """
+
+    source_groups: typing.Optional[typing.List[SourceGroupRef]] = pydantic.Field(default=None)
+    """
+    Source groups attached to the reference job, each with `slug`, `name`, and
+    `description`. `null` when the reference job was not scoped to any source group.
     """
 
     if IS_PYDANTIC_V2:

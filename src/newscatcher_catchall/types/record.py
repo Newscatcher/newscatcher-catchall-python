@@ -7,6 +7,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2
 from .base_record import BaseRecord
 from .citation import Citation
 from .connected_entity import ConnectedEntity
+from .event_tags import EventTags
 
 
 class Record(BaseRecord):
@@ -19,6 +20,15 @@ class Record(BaseRecord):
     """
     Entities from the connected dataset that are relevant to this record.
     Only present when the job was submitted with `connected_dataset_ids`.
+    """
+
+    tags: typing.Optional[EventTags] = pydantic.Field(default=None)
+    """
+    Fixed-taxonomy classification of the event, as `event_type` and `sector`.
+    
+    Only present for all-news watchlist jobs — those submitted with
+    `fetch_all_watchlist_news: true`, which the job pull response reports as
+    `is_all_news_query: true`. Absent or `null` for every other job.
     """
 
     if IS_PYDANTIC_V2:

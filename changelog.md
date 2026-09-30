@@ -1,3 +1,23 @@
+## [4.0.0] - 2026-09-30
+### Breaking Changes
+- **`MonitorsClient` / `AsyncMonitorsClient`** — renamed to `EventMonitorsClient` / `AsyncEventMonitorsClient`; update all imports and type annotations accordingly.
+- **`RawMonitorsClient` / `AsyncRawMonitorsClient`** — renamed to `RawEventMonitorsClient` / `AsyncRawEventMonitorsClient`; update any direct references to these raw client classes.
+- **`client.monitors`** — accessor renamed to `client.event_monitors`; replace all `client.monitors.*` call sites with `client.event_monitors.*`.
+- **`newscatcher_catchall.monitors` module** — renamed to `newscatcher_catchall.event_monitors`; update all imports from `from newscatcher_catchall.monitors import …` to `from newscatcher_catchall.event_monitors import …`.
+
+### Added
+- **`EventMonitorsClient.update_monitor()` `schedule` and `timezone` parameters** — new optional parameters (sync and async) allow replacing an event monitor's schedule and IANA timezone in a single call; omit to leave the current schedule unchanged.
+- **`JobsClient.list_source_groups()` / `AsyncJobsClient.list_source_groups()`** — new paginated method returning all `ListSourceGroupsResponseDto` source groups visible to your organization.
+- **`JobsClient.submit()` `source_groups` parameter** — new optional `list[str]` parameter (sync and async) that scopes article fetching to up to 20 curated domain allowlists by slug.
+- **`EventTags`, `ListSourceGroupsResponseDto`, `SourceGroupRef`** — three new types added to the top-level `newscatcher_catchall` namespace.
+- **`project_id` filter parameter** — new optional `project_id: str` added to `EntitiesClient.list_entities()` and `WebhooksClient.list_webhooks()` (sync and async) to scope results to a specific project.
+
+### Changed
+- **`UnauthorizedError` (HTTP 401) handling** — all event-monitor, job, entity, project, webhook, dataset, and meta endpoints now raise `UnauthorizedError` on 401 instead of falling through to a generic `ApiError`.
+- **`HttpClient` request body handling** — requests with no body fields supplied now omit the body and strip the `Content-Type` header entirely instead of sending an empty JSON object.
+- **`pydantic_utilities` alias coercion** — field-alias rewriting is now cached per model class via a `WeakKeyDictionary`, reducing introspection overhead on hot deserialization paths.
+- **`BaseHttpResponse.response` property** — exposes the underlying `httpx.Response` object directly from any `HttpResponse` or `AsyncHttpResponse` instance.
+
 ## 3.0.0 - 2026-05-27
 ### Breaking Changes
 * **`MonitorsClient.create_monitor()` and `MonitorsClient.update_monitor()`** — the `webhook` parameter (type `WebhookDto`) has been replaced by `webhook_ids` (type `list[str]`); rename the argument and pass a list of webhook ID strings instead of a `WebhookDto` object.

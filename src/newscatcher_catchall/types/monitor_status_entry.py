@@ -13,9 +13,9 @@ class MonitorStatusEntry(UniversalBaseModel):
     """
     Type of lifecycle event.
     
-    - `created`: Monitor was created.
-    - `enable`: Monitor was enabled.
-    - `disable`: Monitor was disabled.
+    - `created`: Event monitor was created.
+    - `enable`: Event monitor was enabled.
+    - `disable`: Event monitor was disabled.
     - `scheduled`: A job was triggered for execution.
       `additional_information` contains `job_id`, `start_date`,
       and `end_date`.
@@ -54,7 +54,7 @@ class MonitorStatusEntry(UniversalBaseModel):
       }
     }
     ```
-    The `webhook` key is only present if the monitor has a webhook configured.
+    The `webhook` key is only present if the event monitor has a webhook configured.
     """
 
     if IS_PYDANTIC_V2:

@@ -33,7 +33,7 @@ from pydantic import ValidationError
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawMonitorsClient:
+class RawEventMonitorsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
@@ -48,7 +48,7 @@ class RawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListMonitorsResponseDto]:
         """
-        Returns all monitors created by the authenticated user.
+        Returns all event monitors created by the authenticated user.
 
         Parameters
         ----------
@@ -72,7 +72,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[ListMonitorsResponseDto]
-            List of user monitors
+            List of user event monitors
         """
         _response = self._client_wrapper.httpx_client.request(
             "catchAll/monitors",
@@ -96,6 +96,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -140,17 +151,17 @@ class RawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateMonitorResponseDto]:
         """
-        Create a scheduled monitor based on a reference job.
+        Create a scheduled event monitor based on a reference job.
 
         Parameters
         ----------
         reference_job_id : str
             Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
+            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/event-monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format. Minimum frequency depends on your plan.
+            Event monitor schedule in plain text format. Minimum frequency depends on your plan.
 
         timezone : typing.Optional[str]
             The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
@@ -161,10 +172,10 @@ class RawMonitorsClient:
             IDs of centralized webhooks to notify on each run completion.
             Passing IDs here is equivalent to calling
             `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
-            Maximum 5 per monitor.
+            Maximum 5 per event monitor.
 
         limit : typing.Optional[int]
-            Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+            Maximum number of records per event monitor run. If not provided, defaults to the plan limit.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
@@ -172,7 +183,7 @@ class RawMonitorsClient:
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
 
         project_id : typing.Optional[str]
-            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
+            Project to assign this event monitor to. The event monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -180,7 +191,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[CreateMonitorResponseDto]
-            Monitor created successfully
+            Event monitor created successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             "catchAll/monitors/create",
@@ -210,6 +221,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     headers=dict(_response.headers),
@@ -234,12 +256,12 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[PullMonitorResponseDto]:
         """
-        Retrieve aggregated results from all jobs executed by a monitor.
+        Retrieve aggregated results from all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -247,7 +269,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[PullMonitorResponseDto]
-            Monitor results retrieved successfully
+            Event monitor results retrieved successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/pull/{encode_path_param(monitor_id)}",
@@ -264,6 +286,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -301,12 +334,12 @@ class RawMonitorsClient:
         """
         Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
 
-        If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
+        If the event monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -314,7 +347,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[str]
-            CSV export of the latest monitor run.
+            CSV export of the latest event monitor run.
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/pull/{encode_path_param(monitor_id)}/csv",
@@ -324,6 +357,17 @@ class RawMonitorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 return HttpResponse(response=_response, data=_response.text)  # type: ignore
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -363,12 +407,12 @@ class RawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListMonitorJobsResponse]:
         """
-        Return all jobs executed by a monitor.
+        Return all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         sort : typing.Optional[ListMonitorJobsRequestSort]
             Sort by start_date (asc or desc).
@@ -379,7 +423,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[ListMonitorJobsResponse]
-            List of monitor jobs
+            List of event monitor jobs
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/jobs",
@@ -399,6 +443,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -434,12 +489,12 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[MonitorStatusHistoryResponseDto]:
         """
-        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+        Returns the full execution history of an event monitor as a list of status entries, ordered from newest to oldest.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -447,7 +502,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[MonitorStatusHistoryResponseDto]
-            Monitor status history retrieved successfully.
+            Event monitor status history retrieved successfully.
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/status",
@@ -503,12 +558,12 @@ class RawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[EnableMonitorResponse]:
         """
-        Resume scheduled job execution for a monitor.
+        Resume scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
@@ -521,7 +576,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[EnableMonitorResponse]
-            Monitor enabled successfully
+            Event monitor enabled successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/enable",
@@ -545,6 +600,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -591,12 +657,12 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DisableMonitorResponse]:
         """
-        Stop scheduled job execution for a monitor.
+        Stop scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -604,7 +670,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[DisableMonitorResponse]
-            Monitor disabled successfully
+            Event monitor disabled successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/disable",
@@ -621,6 +687,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -667,19 +744,19 @@ class RawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DeleteMonitorResponseDto]:
         """
-        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        Soft-deletes an event monitor. The event monitor is flagged as deleted, stops
         executing scheduled jobs immediately, and no longer appears in list
         results.
 
-        Only the monitor owner can delete a monitor. Returns `404` if the
-        monitor is not found or does not belong to the authenticated user.
+        Only the event monitor owner can delete an event monitor. Returns `404` if the
+        event monitor is not found or does not belong to the authenticated user.
 
-        Deleting an already-deleted monitor returns `200`.
+        Deleting an already-deleted event monitor returns `200`.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -687,7 +764,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[DeleteMonitorResponseDto]
-            Monitor deleted successfully (or already deleted).
+            Event monitor deleted successfully (or already deleted).
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}",
@@ -741,23 +818,43 @@ class RawMonitorsClient:
         *,
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
+        schedule: typing.Optional[str] = OMIT,
+        timezone: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UpdateMonitorResponseDto]:
         """
-        Update the webhook configuration for an existing monitor.
+        Update the webhook assignments, record limit, or schedule of an existing
+        event monitor. Omitted fields are left unchanged.
+
+        Passing `schedule` replaces the event monitor's current schedule. The new
+        schedule takes effect from the next scheduler reload, and the old schedule
+        stops firing. The reference job cannot be changed.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         webhook_ids : typing.Optional[typing.Sequence[str]]
-            Updated list of centralized webhook IDs for this monitor.
+            Updated list of centralized webhook IDs for this event monitor.
 
             Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
-            Updated maximum number of records per monitor run.
+            Updated maximum number of records per event monitor run.
+
+        schedule : typing.Optional[str]
+            New natural-language schedule that replaces the event monitor's current
+            schedule. Examples: `every day at 9 AM`, `every Monday at 6 PM EST`.
+
+            Omit to keep the current schedule. The new schedule takes effect from the
+            next scheduler reload, and the old schedule stops firing. Returns `422` if
+            the text can't be parsed or runs would be spaced too closely.
+
+        timezone : typing.Optional[str]
+            IANA timezone for the new schedule (for example, `America/New_York`).
+            A timezone included in the `schedule` text takes precedence. Ignored if
+            `schedule` is not set.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -765,7 +862,7 @@ class RawMonitorsClient:
         Returns
         -------
         HttpResponse[UpdateMonitorResponseDto]
-            Monitor updated successfully
+            Event monitor updated successfully
         """
         _response = self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}",
@@ -773,6 +870,8 @@ class RawMonitorsClient:
             json={
                 "webhook_ids": webhook_ids,
                 "limit": limit,
+                "schedule": schedule,
+                "timezone": timezone,
             },
             headers={
                 "content-type": "application/json",
@@ -790,6 +889,17 @@ class RawMonitorsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -833,7 +943,7 @@ class RawMonitorsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
-class AsyncRawMonitorsClient:
+class AsyncRawEventMonitorsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
@@ -848,7 +958,7 @@ class AsyncRawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListMonitorsResponseDto]:
         """
-        Returns all monitors created by the authenticated user.
+        Returns all event monitors created by the authenticated user.
 
         Parameters
         ----------
@@ -872,7 +982,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[ListMonitorsResponseDto]
-            List of user monitors
+            List of user event monitors
         """
         _response = await self._client_wrapper.httpx_client.request(
             "catchAll/monitors",
@@ -896,6 +1006,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -940,17 +1061,17 @@ class AsyncRawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateMonitorResponseDto]:
         """
-        Create a scheduled monitor based on a reference job.
+        Create a scheduled event monitor based on a reference job.
 
         Parameters
         ----------
         reference_job_id : str
             Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
+            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/event-monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format. Minimum frequency depends on your plan.
+            Event monitor schedule in plain text format. Minimum frequency depends on your plan.
 
         timezone : typing.Optional[str]
             The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
@@ -961,10 +1082,10 @@ class AsyncRawMonitorsClient:
             IDs of centralized webhooks to notify on each run completion.
             Passing IDs here is equivalent to calling
             `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
-            Maximum 5 per monitor.
+            Maximum 5 per event monitor.
 
         limit : typing.Optional[int]
-            Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+            Maximum number of records per event monitor run. If not provided, defaults to the plan limit.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
@@ -972,7 +1093,7 @@ class AsyncRawMonitorsClient:
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
 
         project_id : typing.Optional[str]
-            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
+            Project to assign this event monitor to. The event monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -980,7 +1101,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[CreateMonitorResponseDto]
-            Monitor created successfully
+            Event monitor created successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             "catchAll/monitors/create",
@@ -1010,6 +1131,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 422:
                 raise UnprocessableEntityError(
                     headers=dict(_response.headers),
@@ -1034,12 +1166,12 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[PullMonitorResponseDto]:
         """
-        Retrieve aggregated results from all jobs executed by a monitor.
+        Retrieve aggregated results from all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1047,7 +1179,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[PullMonitorResponseDto]
-            Monitor results retrieved successfully
+            Event monitor results retrieved successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/pull/{encode_path_param(monitor_id)}",
@@ -1064,6 +1196,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -1101,12 +1244,12 @@ class AsyncRawMonitorsClient:
         """
         Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
 
-        If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
+        If the event monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1114,7 +1257,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[str]
-            CSV export of the latest monitor run.
+            CSV export of the latest event monitor run.
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/pull/{encode_path_param(monitor_id)}/csv",
@@ -1124,6 +1267,17 @@ class AsyncRawMonitorsClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=_response.text)  # type: ignore
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1163,12 +1317,12 @@ class AsyncRawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListMonitorJobsResponse]:
         """
-        Return all jobs executed by a monitor.
+        Return all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         sort : typing.Optional[ListMonitorJobsRequestSort]
             Sort by start_date (asc or desc).
@@ -1179,7 +1333,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[ListMonitorJobsResponse]
-            List of monitor jobs
+            List of event monitor jobs
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/jobs",
@@ -1199,6 +1353,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -1234,12 +1399,12 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[MonitorStatusHistoryResponseDto]:
         """
-        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+        Returns the full execution history of an event monitor as a list of status entries, ordered from newest to oldest.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1247,7 +1412,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[MonitorStatusHistoryResponseDto]
-            Monitor status history retrieved successfully.
+            Event monitor status history retrieved successfully.
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/status",
@@ -1303,12 +1468,12 @@ class AsyncRawMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[EnableMonitorResponse]:
         """
-        Resume scheduled job execution for a monitor.
+        Resume scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
@@ -1321,7 +1486,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[EnableMonitorResponse]
-            Monitor enabled successfully
+            Event monitor enabled successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/enable",
@@ -1345,6 +1510,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1391,12 +1567,12 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DisableMonitorResponse]:
         """
-        Stop scheduled job execution for a monitor.
+        Stop scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1404,7 +1580,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[DisableMonitorResponse]
-            Monitor disabled successfully
+            Event monitor disabled successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}/disable",
@@ -1421,6 +1597,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1467,19 +1654,19 @@ class AsyncRawMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DeleteMonitorResponseDto]:
         """
-        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        Soft-deletes an event monitor. The event monitor is flagged as deleted, stops
         executing scheduled jobs immediately, and no longer appears in list
         results.
 
-        Only the monitor owner can delete a monitor. Returns `404` if the
-        monitor is not found or does not belong to the authenticated user.
+        Only the event monitor owner can delete an event monitor. Returns `404` if the
+        event monitor is not found or does not belong to the authenticated user.
 
-        Deleting an already-deleted monitor returns `200`.
+        Deleting an already-deleted event monitor returns `200`.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1487,7 +1674,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[DeleteMonitorResponseDto]
-            Monitor deleted successfully (or already deleted).
+            Event monitor deleted successfully (or already deleted).
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}",
@@ -1541,23 +1728,43 @@ class AsyncRawMonitorsClient:
         *,
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
+        schedule: typing.Optional[str] = OMIT,
+        timezone: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UpdateMonitorResponseDto]:
         """
-        Update the webhook configuration for an existing monitor.
+        Update the webhook assignments, record limit, or schedule of an existing
+        event monitor. Omitted fields are left unchanged.
+
+        Passing `schedule` replaces the event monitor's current schedule. The new
+        schedule takes effect from the next scheduler reload, and the old schedule
+        stops firing. The reference job cannot be changed.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         webhook_ids : typing.Optional[typing.Sequence[str]]
-            Updated list of centralized webhook IDs for this monitor.
+            Updated list of centralized webhook IDs for this event monitor.
 
             Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
-            Updated maximum number of records per monitor run.
+            Updated maximum number of records per event monitor run.
+
+        schedule : typing.Optional[str]
+            New natural-language schedule that replaces the event monitor's current
+            schedule. Examples: `every day at 9 AM`, `every Monday at 6 PM EST`.
+
+            Omit to keep the current schedule. The new schedule takes effect from the
+            next scheduler reload, and the old schedule stops firing. Returns `422` if
+            the text can't be parsed or runs would be spaced too closely.
+
+        timezone : typing.Optional[str]
+            IANA timezone for the new schedule (for example, `America/New_York`).
+            A timezone included in the `schedule` text takes precedence. Ignored if
+            `schedule` is not set.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1565,7 +1772,7 @@ class AsyncRawMonitorsClient:
         Returns
         -------
         AsyncHttpResponse[UpdateMonitorResponseDto]
-            Monitor updated successfully
+            Event monitor updated successfully
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"catchAll/monitors/{encode_path_param(monitor_id)}",
@@ -1573,6 +1780,8 @@ class AsyncRawMonitorsClient:
             json={
                 "webhook_ids": webhook_ids,
                 "limit": limit,
+                "schedule": schedule,
+                "timezone": timezone,
             },
             headers={
                 "content-type": "application/json",
@@ -1590,6 +1799,17 @@ class AsyncRawMonitorsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),

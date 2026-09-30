@@ -46,6 +46,7 @@ class WebhooksClient:
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListWebhooksResponseDto:
         """
@@ -62,6 +63,9 @@ class WebhooksClient:
         search : typing.Optional[str]
             Filter results by text (case-insensitive substring match).
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -77,10 +81,12 @@ class WebhooksClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.webhooks.list_webhooks()
+        client.webhooks.list_webhooks(
+            project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+        )
         """
         _response = self._raw_client.list_webhooks(
-            page=page, page_size=page_size, search=search, request_options=request_options
+            page=page, page_size=page_size, search=search, project_id=project_id, request_options=request_options
         )
         return _response.data
 
@@ -224,7 +230,7 @@ class WebhooksClient:
         """
         Permanently deletes a webhook and removes all resource assignments.
 
-        Assigned jobs and monitors no longer trigger delivery to this webhook. This operation cannot be undone.
+        Assigned jobs and event monitors no longer trigger delivery to this webhook. This operation cannot be undone.
 
         Parameters
         ----------
@@ -350,7 +356,7 @@ class WebhooksClient:
         """
         Sends a test HTTP request to the webhook URL using the webhook's configured method, headers, and auth. Returns the response from the target endpoint.
 
-        Use this to verify URL reachability and authentication before attaching the webhook to a live job or monitor.
+        Use this to verify URL reachability and authentication before attaching the webhook to a live job or event monitor.
 
         Parameters
         ----------
@@ -442,7 +448,7 @@ class WebhooksClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AssignWebhookResourceResponseDto:
         """
-        Attaches a job, monitor, or monitor group to the webhook. When the
+        Attaches a job, event monitor, or event monitor group to the webhook. When the
         resource completes, the webhook receives a delivery.
 
         A single webhook can be assigned to multiple resources. Each resource
@@ -603,7 +609,7 @@ class WebhooksClient:
     ) -> None:
         """
         Manually dispatches a webhook delivery for a resource on demand, without
-        waiting for the next job or monitor cycle.
+        waiting for the next job or event monitor cycle.
 
         Use this to re-deliver results after a failed delivery, replay a specific
         job's results, or validate a webhook against live data. The webhook must
@@ -729,6 +735,7 @@ class AsyncWebhooksClient:
         page: typing.Optional[int] = None,
         page_size: typing.Optional[int] = None,
         search: typing.Optional[str] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListWebhooksResponseDto:
         """
@@ -744,6 +751,9 @@ class AsyncWebhooksClient:
 
         search : typing.Optional[str]
             Filter results by text (case-insensitive substring match).
+
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -765,13 +775,15 @@ class AsyncWebhooksClient:
 
 
         async def main() -> None:
-            await client.webhooks.list_webhooks()
+            await client.webhooks.list_webhooks(
+                project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
+            )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.list_webhooks(
-            page=page, page_size=page_size, search=search, request_options=request_options
+            page=page, page_size=page_size, search=search, project_id=project_id, request_options=request_options
         )
         return _response.data
 
@@ -931,7 +943,7 @@ class AsyncWebhooksClient:
         """
         Permanently deletes a webhook and removes all resource assignments.
 
-        Assigned jobs and monitors no longer trigger delivery to this webhook. This operation cannot be undone.
+        Assigned jobs and event monitors no longer trigger delivery to this webhook. This operation cannot be undone.
 
         Parameters
         ----------
@@ -1073,7 +1085,7 @@ class AsyncWebhooksClient:
         """
         Sends a test HTTP request to the webhook URL using the webhook's configured method, headers, and auth. Returns the response from the target endpoint.
 
-        Use this to verify URL reachability and authentication before attaching the webhook to a live job or monitor.
+        Use this to verify URL reachability and authentication before attaching the webhook to a live job or event monitor.
 
         Parameters
         ----------
@@ -1181,7 +1193,7 @@ class AsyncWebhooksClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AssignWebhookResourceResponseDto:
         """
-        Attaches a job, monitor, or monitor group to the webhook. When the
+        Attaches a job, event monitor, or event monitor group to the webhook. When the
         resource completes, the webhook receives a delivery.
 
         A single webhook can be assigned to multiple resources. Each resource
@@ -1366,7 +1378,7 @@ class AsyncWebhooksClient:
     ) -> None:
         """
         Manually dispatches a webhook delivery for a resource on demand, without
-        waiting for the next job or monitor cycle.
+        waiting for the next job or event monitor cycle.
 
         Use this to re-deliver results after a failed delivery, replay a specific
         job's results, or validate a webhook against live data. The webhook must

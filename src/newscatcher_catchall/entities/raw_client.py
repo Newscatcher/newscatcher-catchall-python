@@ -14,6 +14,8 @@ from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.not_found_error import NotFoundError
+from ..errors.unauthorized_error import UnauthorizedError
+from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.additional_attributes import AdditionalAttributes
 from ..types.create_entities_batch_response import CreateEntitiesBatchResponse
 from ..types.create_entity_request import CreateEntityRequest
@@ -25,6 +27,7 @@ from ..types.entity_status import EntityStatus
 from ..types.entity_type import EntityType
 from ..types.error import Error
 from ..types.sort_order import SortOrder
+from ..types.validation_error_response import ValidationErrorResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -45,6 +48,7 @@ class RawEntitiesClient:
         entity_type: typing.Optional[EntityType] = None,
         sort_by: typing.Optional[EntitySortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[EntityListResponse]:
         """
@@ -69,6 +73,9 @@ class RawEntitiesClient:
 
         sort_order : typing.Optional[SortOrder]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -88,6 +95,7 @@ class RawEntitiesClient:
                 "entity_type": entity_type,
                 "sort_by": sort_by,
                 "sort_order": sort_order,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -101,6 +109,17 @@ class RawEntitiesClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -108,6 +127,28 @@ class RawEntitiesClient:
                         Error,
                         parse_obj_as(
                             type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -147,7 +188,7 @@ class RawEntitiesClient:
         entity_type : typing.Optional[EntityType]
 
         description : typing.Optional[str]
-            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
+            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-monitors#writing-effective-descriptions) for guidance on improving matching quality.
 
         external_entity_id : typing.Optional[str]
             Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
@@ -194,6 +235,17 @@ class RawEntitiesClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -277,6 +329,17 @@ class RawEntitiesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -331,6 +394,17 @@ class RawEntitiesClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -389,6 +463,17 @@ class RawEntitiesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return HttpResponse(response=_response, data=None)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -495,6 +580,17 @@ class RawEntitiesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -541,6 +637,7 @@ class AsyncRawEntitiesClient:
         entity_type: typing.Optional[EntityType] = None,
         sort_by: typing.Optional[EntitySortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[EntityListResponse]:
         """
@@ -565,6 +662,9 @@ class AsyncRawEntitiesClient:
 
         sort_order : typing.Optional[SortOrder]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -584,6 +684,7 @@ class AsyncRawEntitiesClient:
                 "entity_type": entity_type,
                 "sort_by": sort_by,
                 "sort_order": sort_order,
+                "project_id": project_id,
             },
             request_options=request_options,
         )
@@ -597,6 +698,17 @@ class AsyncRawEntitiesClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -604,6 +716,28 @@ class AsyncRawEntitiesClient:
                         Error,
                         parse_obj_as(
                             type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -643,7 +777,7 @@ class AsyncRawEntitiesClient:
         entity_type : typing.Optional[EntityType]
 
         description : typing.Optional[str]
-            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
+            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-monitors#writing-effective-descriptions) for guidance on improving matching quality.
 
         external_entity_id : typing.Optional[str]
             Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
@@ -690,6 +824,17 @@ class AsyncRawEntitiesClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -773,6 +918,17 @@ class AsyncRawEntitiesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -827,6 +983,17 @@ class AsyncRawEntitiesClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -885,6 +1052,17 @@ class AsyncRawEntitiesClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=None)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -987,6 +1165,17 @@ class AsyncRawEntitiesClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

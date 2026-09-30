@@ -20,7 +20,7 @@ class MonitorStatusHistoryResponseDto(UniversalBaseModel):
 
     monitor_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Monitor identifier. `null` on failure.
+    Event monitor identifier. `null` on failure.
     """
 
     total_statuses: typing.Optional[int] = pydantic.Field(default=None)

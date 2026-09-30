@@ -19,7 +19,7 @@ class DisableMonitorResponse(UniversalBaseModel):
 
     monitor_id: str = pydantic.Field()
     """
-    ID of the disabled monitor.
+    ID of the disabled event monitor.
     """
 
     if IS_PYDANTIC_V2:
