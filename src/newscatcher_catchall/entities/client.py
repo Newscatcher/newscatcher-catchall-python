@@ -45,6 +45,7 @@ class EntitiesClient:
         entity_type: typing.Optional[EntityType] = None,
         sort_by: typing.Optional[EntitySortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EntityListResponse:
         """
@@ -69,6 +70,9 @@ class EntitiesClient:
 
         sort_order : typing.Optional[SortOrder]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -86,6 +90,7 @@ class EntitiesClient:
         )
         client.entities.list_entities(
             search="NewsCatcher",
+            project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
         )
         """
         _response = self._raw_client.list_entities(
@@ -96,6 +101,7 @@ class EntitiesClient:
             entity_type=entity_type,
             sort_by=sort_by,
             sort_order=sort_order,
+            project_id=project_id,
             request_options=request_options,
         )
         return _response.data
@@ -126,7 +132,7 @@ class EntitiesClient:
         entity_type : typing.Optional[EntityType]
 
         description : typing.Optional[str]
-            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
+            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-monitors#writing-effective-descriptions) for guidance on improving matching quality.
 
         external_entity_id : typing.Optional[str]
             Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.
@@ -402,6 +408,7 @@ class AsyncEntitiesClient:
         entity_type: typing.Optional[EntityType] = None,
         sort_by: typing.Optional[EntitySortBy] = None,
         sort_order: typing.Optional[SortOrder] = None,
+        project_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EntityListResponse:
         """
@@ -426,6 +433,9 @@ class AsyncEntitiesClient:
 
         sort_order : typing.Optional[SortOrder]
 
+        project_id : typing.Optional[str]
+            Filter results to resources belonging to this project.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -448,6 +458,7 @@ class AsyncEntitiesClient:
         async def main() -> None:
             await client.entities.list_entities(
                 search="NewsCatcher",
+                project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
             )
 
 
@@ -461,6 +472,7 @@ class AsyncEntitiesClient:
             entity_type=entity_type,
             sort_by=sort_by,
             sort_order=sort_order,
+            project_id=project_id,
             request_options=request_options,
         )
         return _response.data
@@ -491,7 +503,7 @@ class AsyncEntitiesClient:
         entity_type : typing.Optional[EntityType]
 
         description : typing.Optional[str]
-            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-search#writing-effective-descriptions) for guidance on improving matching quality.
+            Free-text description of the entity used for disambiguation when similar names exist. See [Writing effective descriptions](https://www.newscatcherapi.com/docs/web-search-api/concepts/company-monitors#writing-effective-descriptions) for guidance on improving matching quality.
 
         external_entity_id : typing.Optional[str]
             Optional external identifier for this entity. Free-form string, not enforced as unique. Use it to store your own CRM, data warehouse, or internal database ID so you can join CatchAll results back to your systems.

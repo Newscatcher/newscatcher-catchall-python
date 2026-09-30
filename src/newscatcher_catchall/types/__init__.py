@@ -62,6 +62,7 @@ if typing.TYPE_CHECKING:
     from .entity_type import EntityType
     from .entity_validation_error_body import EntityValidationErrorBody
     from .error import Error
+    from .event_tags import EventTags
     from .formatter_config_dto import FormatterConfigDto
     from .get_plan_limits_response_dto import GetPlanLimitsResponseDto
     from .get_webhook_response_dto import GetWebhookResponseDto
@@ -71,6 +72,7 @@ if typing.TYPE_CHECKING:
     from .job_step import JobStep
     from .limit import Limit
     from .list_monitors_response_dto import ListMonitorsResponseDto
+    from .list_source_groups_response_dto import ListSourceGroupsResponseDto
     from .list_user_jobs_response_dto import ListUserJobsResponseDto
     from .list_webhook_resources_response_dto import ListWebhookResourcesResponseDto
     from .list_webhooks_response_dto import ListWebhooksResponseDto
@@ -111,6 +113,7 @@ if typing.TYPE_CHECKING:
     from .sharing_info_permission import SharingInfoPermission
     from .skipped_row import SkippedRow
     from .sort_order import SortOrder
+    from .source_group_ref import SourceGroupRef
     from .start_date import StartDate
     from .status_response_dto import StatusResponseDto
     from .submit_response_dto import SubmitResponseDto
@@ -196,6 +199,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "EntityType": ".entity_type",
     "EntityValidationErrorBody": ".entity_validation_error_body",
     "Error": ".error",
+    "EventTags": ".event_tags",
     "FormatterConfigDto": ".formatter_config_dto",
     "GetPlanLimitsResponseDto": ".get_plan_limits_response_dto",
     "GetWebhookResponseDto": ".get_webhook_response_dto",
@@ -205,6 +209,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "JobStep": ".job_step",
     "Limit": ".limit",
     "ListMonitorsResponseDto": ".list_monitors_response_dto",
+    "ListSourceGroupsResponseDto": ".list_source_groups_response_dto",
     "ListUserJobsResponseDto": ".list_user_jobs_response_dto",
     "ListWebhookResourcesResponseDto": ".list_webhook_resources_response_dto",
     "ListWebhooksResponseDto": ".list_webhooks_response_dto",
@@ -245,6 +250,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SharingInfoPermission": ".sharing_info_permission",
     "SkippedRow": ".skipped_row",
     "SortOrder": ".sort_order",
+    "SourceGroupRef": ".source_group_ref",
     "StartDate": ".start_date",
     "StatusResponseDto": ".status_response_dto",
     "SubmitResponseDto": ".submit_response_dto",
@@ -352,6 +358,7 @@ __all__ = [
     "EntityType",
     "EntityValidationErrorBody",
     "Error",
+    "EventTags",
     "FormatterConfigDto",
     "GetPlanLimitsResponseDto",
     "GetWebhookResponseDto",
@@ -361,6 +368,7 @@ __all__ = [
     "JobStep",
     "Limit",
     "ListMonitorsResponseDto",
+    "ListSourceGroupsResponseDto",
     "ListUserJobsResponseDto",
     "ListWebhookResourcesResponseDto",
     "ListWebhooksResponseDto",
@@ -401,6 +409,7 @@ __all__ = [
     "SharingInfoPermission",
     "SkippedRow",
     "SortOrder",
+    "SourceGroupRef",
     "StartDate",
     "StatusResponseDto",
     "SubmitResponseDto",

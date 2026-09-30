@@ -9,7 +9,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class CreateMonitorResponseDto(UniversalBaseModel):
     monitor_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Monitor ID if successful, null if error.
+    Event monitor ID if successful, null if error.
     """
 
     status: str = pydantic.Field()

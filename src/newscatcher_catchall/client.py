@@ -12,9 +12,9 @@ from .environment import CatchAllApiEnvironment
 if typing.TYPE_CHECKING:
     from .datasets.client import AsyncDatasetsClient, DatasetsClient
     from .entities.client import AsyncEntitiesClient, EntitiesClient
+    from .event_monitors.client import AsyncEventMonitorsClient, EventMonitorsClient
     from .jobs.client import AsyncJobsClient, JobsClient
     from .meta.client import AsyncMetaClient, MetaClient
-    from .monitors.client import AsyncMonitorsClient, MonitorsClient
     from .projects.client import AsyncProjectsClient, ProjectsClient
     from .webhooks.client import AsyncWebhooksClient, WebhooksClient
 
@@ -104,7 +104,7 @@ class CatchAllApi:
             logging=logging,
         )
         self._jobs: typing.Optional[JobsClient] = None
-        self._monitors: typing.Optional[MonitorsClient] = None
+        self._event_monitors: typing.Optional[EventMonitorsClient] = None
         self._webhooks: typing.Optional[WebhooksClient] = None
         self._entities: typing.Optional[EntitiesClient] = None
         self._datasets: typing.Optional[DatasetsClient] = None
@@ -120,12 +120,12 @@ class CatchAllApi:
         return self._jobs
 
     @property
-    def monitors(self):
-        if self._monitors is None:
-            from .monitors.client import MonitorsClient  # noqa: E402
+    def event_monitors(self):
+        if self._event_monitors is None:
+            from .event_monitors.client import EventMonitorsClient  # noqa: E402
 
-            self._monitors = MonitorsClient(client_wrapper=self._client_wrapper)
-        return self._monitors
+            self._event_monitors = EventMonitorsClient(client_wrapper=self._client_wrapper)
+        return self._event_monitors
 
     @property
     def webhooks(self):
@@ -269,7 +269,7 @@ class AsyncCatchAllApi:
             logging=logging,
         )
         self._jobs: typing.Optional[AsyncJobsClient] = None
-        self._monitors: typing.Optional[AsyncMonitorsClient] = None
+        self._event_monitors: typing.Optional[AsyncEventMonitorsClient] = None
         self._webhooks: typing.Optional[AsyncWebhooksClient] = None
         self._entities: typing.Optional[AsyncEntitiesClient] = None
         self._datasets: typing.Optional[AsyncDatasetsClient] = None
@@ -285,12 +285,12 @@ class AsyncCatchAllApi:
         return self._jobs
 
     @property
-    def monitors(self):
-        if self._monitors is None:
-            from .monitors.client import AsyncMonitorsClient  # noqa: E402
+    def event_monitors(self):
+        if self._event_monitors is None:
+            from .event_monitors.client import AsyncEventMonitorsClient  # noqa: E402
 
-            self._monitors = AsyncMonitorsClient(client_wrapper=self._client_wrapper)
-        return self._monitors
+            self._event_monitors = AsyncEventMonitorsClient(client_wrapper=self._client_wrapper)
+        return self._event_monitors
 
     @property
     def webhooks(self):

@@ -25,6 +25,7 @@ from ..types.entity_association_type import EntityAssociationType
 from ..types.error import Error
 from ..types.initialize_response_dto import InitializeResponseDto
 from ..types.limit import Limit
+from ..types.list_source_groups_response_dto import ListSourceGroupsResponseDto
 from ..types.list_user_jobs_response_dto import ListUserJobsResponseDto
 from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_job_response_dto import PullJobResponseDto
@@ -111,6 +112,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -174,6 +186,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -263,6 +286,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -311,6 +345,7 @@ class RawJobsClient:
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
         ed_association_type: typing.Optional[EntityAssociationType] = OMIT,
+        source_groups: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SubmitResponseDto]:
         """
@@ -349,7 +384,7 @@ class RawJobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
+            Dataset IDs to connect to the job. When provided, this enables Company Monitors mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
@@ -365,7 +400,7 @@ class RawJobsClient:
             IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
         fetch_all_watchlist_news : typing.Optional[bool]
-            When true, retrieves all news for connected Company Watchlist entities
+            When true, retrieves all news for connected Company Monitors entities
             without topic filtering. Requires connected_dataset_ids to be set.
 
         ed_association_type : typing.Optional[EntityAssociationType]
@@ -373,6 +408,13 @@ class RawJobsClient:
             events where the entity is a direct actor. `mention` keeps only events
             where the entity is merely referenced. Only relevant when
             connected_dataset_ids is set.
+
+        source_groups : typing.Optional[typing.Sequence[str]]
+            Slugs of source groups to scope fetching to their curated domain allowlists.
+
+            Source groups are named domain lists maintained by NewsCatcher (for example "Top 100 US Finance"). Retrieve the groups available to your organization with [List source groups](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/list-source-groups).
+
+            Domains are resolved when the job runs, so a group's current membership always applies. Maximum 20 groups per job. An unknown or inaccessible slug is rejected at submit time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -404,6 +446,7 @@ class RawJobsClient:
                 "webhook_ids": webhook_ids,
                 "fetch_all_watchlist_news": fetch_all_watchlist_news,
                 "ed_association_type": ed_association_type,
+                "source_groups": source_groups,
             },
             headers={
                 "content-type": "application/json",
@@ -428,6 +471,17 @@ class RawJobsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -497,6 +551,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -577,6 +642,17 @@ class RawJobsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -637,6 +713,17 @@ class RawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 return HttpResponse(response=_response, data=_response.text)  # type: ignore
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -724,6 +811,17 @@ class RawJobsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -828,6 +926,90 @@ class RawJobsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def list_source_groups(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ListSourceGroupsResponseDto]:
+        """
+        Returns a paginated list of source groups visible to your organization.
+
+        A source group is a named, curated domain allowlist maintained by NewsCatcher — for
+        example "Top 100 US Finance". Pass a group's `slug` in `source_groups` when creating
+        a job to scope article fetching to that group's domains, instead of maintaining a
+        long domain list yourself.
+
+        The response covers public groups plus any restricted groups your organization has
+        been granted access to. Each entry returns `slug`, `name`, and `description`.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of source groups per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ListSourceGroupsResponseDto]
+            Source groups retrieved successfully.
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "catchAll/source-groups",
+            method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListSourceGroupsResponseDto,
+                    parse_obj_as(
+                        type_=ListSourceGroupsResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawJobsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -897,6 +1079,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -960,6 +1153,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1049,6 +1253,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1097,6 +1312,7 @@ class AsyncRawJobsClient:
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         fetch_all_watchlist_news: typing.Optional[bool] = OMIT,
         ed_association_type: typing.Optional[EntityAssociationType] = OMIT,
+        source_groups: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SubmitResponseDto]:
         """
@@ -1135,7 +1351,7 @@ class AsyncRawJobsClient:
             - `lite`: Lightweight extraction with faster processing. Returns titles and citations only.
 
         connected_dataset_ids : typing.Optional[typing.Sequence[str]]
-            Dataset IDs to connect to the job. When provided, this enables Company Watchlist mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
+            Dataset IDs to connect to the job. When provided, this enables Company Monitors mode — the job returns only events relevant to companies in the connected datasets. To set the minimum relevance threshold, use `ed_score_min`.
 
             The dataset must have `latest_status: ready` before the job is submitted. Submitting with a non-existent or inaccessible dataset ID returns `400`.
 
@@ -1151,7 +1367,7 @@ class AsyncRawJobsClient:
             IDs of webhooks to notify when the job completes. Maximum 5 per job.
 
         fetch_all_watchlist_news : typing.Optional[bool]
-            When true, retrieves all news for connected Company Watchlist entities
+            When true, retrieves all news for connected Company Monitors entities
             without topic filtering. Requires connected_dataset_ids to be set.
 
         ed_association_type : typing.Optional[EntityAssociationType]
@@ -1159,6 +1375,13 @@ class AsyncRawJobsClient:
             events where the entity is a direct actor. `mention` keeps only events
             where the entity is merely referenced. Only relevant when
             connected_dataset_ids is set.
+
+        source_groups : typing.Optional[typing.Sequence[str]]
+            Slugs of source groups to scope fetching to their curated domain allowlists.
+
+            Source groups are named domain lists maintained by NewsCatcher (for example "Top 100 US Finance"). Retrieve the groups available to your organization with [List source groups](https://www.newscatcherapi.com/docs/web-search-api/api-reference/jobs/list-source-groups).
+
+            Domains are resolved when the job runs, so a group's current membership always applies. Maximum 20 groups per job. An unknown or inaccessible slug is rejected at submit time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1190,6 +1413,7 @@ class AsyncRawJobsClient:
                 "webhook_ids": webhook_ids,
                 "fetch_all_watchlist_news": fetch_all_watchlist_news,
                 "ed_association_type": ed_association_type,
+                "source_groups": source_groups,
             },
             headers={
                 "content-type": "application/json",
@@ -1214,6 +1438,17 @@ class AsyncRawJobsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1283,6 +1518,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1363,6 +1609,17 @@ class AsyncRawJobsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1423,6 +1680,17 @@ class AsyncRawJobsClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=_response.text)  # type: ignore
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1514,6 +1782,17 @@ class AsyncRawJobsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
@@ -1601,6 +1880,90 @@ class AsyncRawJobsClient:
                         Error,
                         parse_obj_as(
                             type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def list_source_groups(
+        self,
+        *,
+        page: typing.Optional[int] = None,
+        page_size: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ListSourceGroupsResponseDto]:
+        """
+        Returns a paginated list of source groups visible to your organization.
+
+        A source group is a named, curated domain allowlist maintained by NewsCatcher — for
+        example "Top 100 US Finance". Pass a group's `slug` in `source_groups` when creating
+        a job to scope article fetching to that group's domains, instead of maintaining a
+        long domain list yourself.
+
+        The response covers public groups plus any restricted groups your organization has
+        been granted access to. Each entry returns `slug`, `name`, and `description`.
+
+        Parameters
+        ----------
+        page : typing.Optional[int]
+            Page number to retrieve.
+
+        page_size : typing.Optional[int]
+            Number of source groups per page.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ListSourceGroupsResponseDto]
+            Source groups retrieved successfully.
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "catchAll/source-groups",
+            method="GET",
+            params={
+                "page": page,
+                "page_size": page_size,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListSourceGroupsResponseDto,
+                    parse_obj_as(
+                        type_=ListSourceGroupsResponseDto,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ValidationErrorResponse,
+                        parse_obj_as(
+                            type_=ValidationErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

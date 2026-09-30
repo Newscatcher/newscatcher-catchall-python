@@ -19,7 +19,7 @@ class DeleteMonitorResponseDto(UniversalBaseModel):
 
     monitor_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    ID of the deleted monitor. `null` on failure.
+    ID of the deleted event monitor. `null` on failure.
     """
 
     if IS_PYDANTIC_V2:

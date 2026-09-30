@@ -11,24 +11,24 @@ from .monitor_citation import MonitorCitation
 
 class MonitorRecord(BaseRecord):
     """
-    Record with monitor-specific metadata. Used in monitor results and webhook payloads.
+    Record with event monitor-specific metadata. Used in event monitor results and webhook payloads.
 
     Includes timestamps tracking when records were added and updated, and citations include job tracking.
     """
 
     citations: typing.List[MonitorCitation] = pydantic.Field()
     """
-    Source documents with monitor-specific metadata (job_id, added_on timestamps).
+    Source documents with event monitor-specific metadata (job_id, added_on timestamps).
     """
 
     added_on: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
-    The date when this record was first added to monitor results in ISO 8601 format with UTC timezone.
+    The date when this record was first added to event monitor results in ISO 8601 format with UTC timezone.
     """
 
     updated_on: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
-    The date when this record was last updated in monitor results in ISO 8601 format with UTC timezone.
+    The date when this record was last updated in event monitor results in ISO 8601 format with UTC timezone.
     """
 
     if IS_PYDANTIC_V2:

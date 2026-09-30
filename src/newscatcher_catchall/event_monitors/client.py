@@ -11,7 +11,7 @@ from ..types.monitor_status_history_response_dto import MonitorStatusHistoryResp
 from ..types.ownership_filter import OwnershipFilter
 from ..types.pull_monitor_response_dto import PullMonitorResponseDto
 from ..types.update_monitor_response_dto import UpdateMonitorResponseDto
-from .raw_client import AsyncRawMonitorsClient, RawMonitorsClient
+from .raw_client import AsyncRawEventMonitorsClient, RawEventMonitorsClient
 from .types.disable_monitor_response import DisableMonitorResponse
 from .types.enable_monitor_response import EnableMonitorResponse
 from .types.list_monitor_jobs_request_sort import ListMonitorJobsRequestSort
@@ -21,18 +21,18 @@ from .types.list_monitor_jobs_response import ListMonitorJobsResponse
 OMIT = typing.cast(typing.Any, ...)
 
 
-class MonitorsClient:
+class EventMonitorsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
-        self._raw_client = RawMonitorsClient(client_wrapper=client_wrapper)
+        self._raw_client = RawEventMonitorsClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> RawMonitorsClient:
+    def with_raw_response(self) -> RawEventMonitorsClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        RawMonitorsClient
+        RawEventMonitorsClient
         """
         return self._raw_client
 
@@ -47,7 +47,7 @@ class MonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorsResponseDto:
         """
-        Returns all monitors created by the authenticated user.
+        Returns all event monitors created by the authenticated user.
 
         Parameters
         ----------
@@ -71,7 +71,7 @@ class MonitorsClient:
         Returns
         -------
         ListMonitorsResponseDto
-            List of user monitors
+            List of user event monitors
 
         Examples
         --------
@@ -80,7 +80,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.list_monitors(
+        client.event_monitors.list_monitors(
             project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
         )
         """
@@ -107,17 +107,17 @@ class MonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateMonitorResponseDto:
         """
-        Create a scheduled monitor based on a reference job.
+        Create a scheduled event monitor based on a reference job.
 
         Parameters
         ----------
         reference_job_id : str
             Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
+            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/event-monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format. Minimum frequency depends on your plan.
+            Event monitor schedule in plain text format. Minimum frequency depends on your plan.
 
         timezone : typing.Optional[str]
             The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
@@ -128,10 +128,10 @@ class MonitorsClient:
             IDs of centralized webhooks to notify on each run completion.
             Passing IDs here is equivalent to calling
             `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
-            Maximum 5 per monitor.
+            Maximum 5 per event monitor.
 
         limit : typing.Optional[int]
-            Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+            Maximum number of records per event monitor run. If not provided, defaults to the plan limit.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
@@ -139,7 +139,7 @@ class MonitorsClient:
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
 
         project_id : typing.Optional[str]
-            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
+            Project to assign this event monitor to. The event monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -147,7 +147,7 @@ class MonitorsClient:
         Returns
         -------
         CreateMonitorResponseDto
-            Monitor created successfully
+            Event monitor created successfully
 
         Examples
         --------
@@ -156,7 +156,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.create_monitor(
+        client.event_monitors.create_monitor(
             reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
             schedule="every day at 12 PM",
             timezone="UTC",
@@ -181,12 +181,12 @@ class MonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> PullMonitorResponseDto:
         """
-        Retrieve aggregated results from all jobs executed by a monitor.
+        Retrieve aggregated results from all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -194,7 +194,7 @@ class MonitorsClient:
         Returns
         -------
         PullMonitorResponseDto
-            Monitor results retrieved successfully
+            Event monitor results retrieved successfully
 
         Examples
         --------
@@ -203,7 +203,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.pull_monitor_results(
+        client.event_monitors.pull_monitor_results(
             monitor_id="monitor_id",
         )
         """
@@ -216,12 +216,12 @@ class MonitorsClient:
         """
         Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
 
-        If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
+        If the event monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -229,7 +229,7 @@ class MonitorsClient:
         Returns
         -------
         str
-            CSV export of the latest monitor run.
+            CSV export of the latest event monitor run.
 
         Examples
         --------
@@ -238,7 +238,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.pull_monitor_results_csv(
+        client.event_monitors.pull_monitor_results_csv(
             monitor_id="monitor_id",
         )
         """
@@ -253,12 +253,12 @@ class MonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorJobsResponse:
         """
-        Return all jobs executed by a monitor.
+        Return all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         sort : typing.Optional[ListMonitorJobsRequestSort]
             Sort by start_date (asc or desc).
@@ -269,7 +269,7 @@ class MonitorsClient:
         Returns
         -------
         ListMonitorJobsResponse
-            List of monitor jobs
+            List of event monitor jobs
 
         Examples
         --------
@@ -278,7 +278,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.list_monitor_jobs(
+        client.event_monitors.list_monitor_jobs(
             monitor_id="monitor_id",
         )
         """
@@ -289,12 +289,12 @@ class MonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> MonitorStatusHistoryResponseDto:
         """
-        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+        Returns the full execution history of an event monitor as a list of status entries, ordered from newest to oldest.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -302,7 +302,7 @@ class MonitorsClient:
         Returns
         -------
         MonitorStatusHistoryResponseDto
-            Monitor status history retrieved successfully.
+            Event monitor status history retrieved successfully.
 
         Examples
         --------
@@ -311,7 +311,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.get_monitor_status_history(
+        client.event_monitors.get_monitor_status_history(
             monitor_id="monitor_id",
         )
         """
@@ -326,12 +326,12 @@ class MonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EnableMonitorResponse:
         """
-        Resume scheduled job execution for a monitor.
+        Resume scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
@@ -344,7 +344,7 @@ class MonitorsClient:
         Returns
         -------
         EnableMonitorResponse
-            Monitor enabled successfully
+            Event monitor enabled successfully
 
         Examples
         --------
@@ -353,7 +353,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.enable_monitor(
+        client.event_monitors.enable_monitor(
             monitor_id="monitor_id",
             backfill=True,
         )
@@ -365,12 +365,12 @@ class MonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DisableMonitorResponse:
         """
-        Stop scheduled job execution for a monitor.
+        Stop scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -378,7 +378,7 @@ class MonitorsClient:
         Returns
         -------
         DisableMonitorResponse
-            Monitor disabled successfully
+            Event monitor disabled successfully
 
         Examples
         --------
@@ -387,7 +387,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.disable_monitor(
+        client.event_monitors.disable_monitor(
             monitor_id="monitor_id",
         )
         """
@@ -398,19 +398,19 @@ class MonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteMonitorResponseDto:
         """
-        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        Soft-deletes an event monitor. The event monitor is flagged as deleted, stops
         executing scheduled jobs immediately, and no longer appears in list
         results.
 
-        Only the monitor owner can delete a monitor. Returns `404` if the
-        monitor is not found or does not belong to the authenticated user.
+        Only the event monitor owner can delete an event monitor. Returns `404` if the
+        event monitor is not found or does not belong to the authenticated user.
 
-        Deleting an already-deleted monitor returns `200`.
+        Deleting an already-deleted event monitor returns `200`.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -418,7 +418,7 @@ class MonitorsClient:
         Returns
         -------
         DeleteMonitorResponseDto
-            Monitor deleted successfully (or already deleted).
+            Event monitor deleted successfully (or already deleted).
 
         Examples
         --------
@@ -427,7 +427,7 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.delete_monitor(
+        client.event_monitors.delete_monitor(
             monitor_id="monitor_id",
         )
         """
@@ -440,23 +440,43 @@ class MonitorsClient:
         *,
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
+        schedule: typing.Optional[str] = OMIT,
+        timezone: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateMonitorResponseDto:
         """
-        Update the webhook configuration for an existing monitor.
+        Update the webhook assignments, record limit, or schedule of an existing
+        event monitor. Omitted fields are left unchanged.
+
+        Passing `schedule` replaces the event monitor's current schedule. The new
+        schedule takes effect from the next scheduler reload, and the old schedule
+        stops firing. The reference job cannot be changed.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         webhook_ids : typing.Optional[typing.Sequence[str]]
-            Updated list of centralized webhook IDs for this monitor.
+            Updated list of centralized webhook IDs for this event monitor.
 
             Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
-            Updated maximum number of records per monitor run.
+            Updated maximum number of records per event monitor run.
+
+        schedule : typing.Optional[str]
+            New natural-language schedule that replaces the event monitor's current
+            schedule. Examples: `every day at 9 AM`, `every Monday at 6 PM EST`.
+
+            Omit to keep the current schedule. The new schedule takes effect from the
+            next scheduler reload, and the old schedule stops firing. Returns `422` if
+            the text can't be parsed or runs would be spaced too closely.
+
+        timezone : typing.Optional[str]
+            IANA timezone for the new schedule (for example, `America/New_York`).
+            A timezone included in the `schedule` text takes precedence. Ignored if
+            `schedule` is not set.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -464,7 +484,7 @@ class MonitorsClient:
         Returns
         -------
         UpdateMonitorResponseDto
-            Monitor updated successfully
+            Event monitor updated successfully
 
         Examples
         --------
@@ -473,29 +493,34 @@ class MonitorsClient:
         client = CatchAllApi(
             api_key="YOUR_API_KEY",
         )
-        client.monitors.update_monitor(
+        client.event_monitors.update_monitor(
             monitor_id="monitor_id",
             webhook_ids=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
         )
         """
         _response = self._raw_client.update_monitor(
-            monitor_id, webhook_ids=webhook_ids, limit=limit, request_options=request_options
+            monitor_id,
+            webhook_ids=webhook_ids,
+            limit=limit,
+            schedule=schedule,
+            timezone=timezone,
+            request_options=request_options,
         )
         return _response.data
 
 
-class AsyncMonitorsClient:
+class AsyncEventMonitorsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
-        self._raw_client = AsyncRawMonitorsClient(client_wrapper=client_wrapper)
+        self._raw_client = AsyncRawEventMonitorsClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> AsyncRawMonitorsClient:
+    def with_raw_response(self) -> AsyncRawEventMonitorsClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        AsyncRawMonitorsClient
+        AsyncRawEventMonitorsClient
         """
         return self._raw_client
 
@@ -510,7 +535,7 @@ class AsyncMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorsResponseDto:
         """
-        Returns all monitors created by the authenticated user.
+        Returns all event monitors created by the authenticated user.
 
         Parameters
         ----------
@@ -534,7 +559,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         ListMonitorsResponseDto
-            List of user monitors
+            List of user event monitors
 
         Examples
         --------
@@ -548,7 +573,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.list_monitors(
+            await client.event_monitors.list_monitors(
                 project_id="60a85db4-78ec-4b78-876a-bc7d9cdadd04",
             )
 
@@ -578,17 +603,17 @@ class AsyncMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateMonitorResponseDto:
         """
-        Create a scheduled monitor based on a reference job.
+        Create a scheduled event monitor based on a reference job.
 
         Parameters
         ----------
         reference_job_id : str
             Job ID to use as template for scheduled runs. Defines the query, validators, and enrichments used for each scheduled run.
 
-            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
+            If [`backfill`](https://www.newscatcherapi.com/docs/web-search-api/api-reference/event-monitors/create-monitor#body-backfill) is true, the job's `end_date` must be within the last 7 days.
 
         schedule : str
-            Monitor schedule in plain text format. Minimum frequency depends on your plan.
+            Event monitor schedule in plain text format. Minimum frequency depends on your plan.
 
         timezone : typing.Optional[str]
             The IANA timezone identifier used as the fallback when the `schedule` string does not include an explicit timezone.
@@ -599,10 +624,10 @@ class AsyncMonitorsClient:
             IDs of centralized webhooks to notify on each run completion.
             Passing IDs here is equivalent to calling
             `POST /catchAll/webhooks/{webhook_id}/resources` for each ID after creation.
-            Maximum 5 per monitor.
+            Maximum 5 per event monitor.
 
         limit : typing.Optional[int]
-            Maximum number of records per monitor run. If not provided, defaults to the plan limit.
+            Maximum number of records per event monitor run. If not provided, defaults to the plan limit.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the reference job's `end_date` and the first scheduled run. The reference job's `end_date` must be within the last 7 days.
@@ -610,7 +635,7 @@ class AsyncMonitorsClient:
             If false, no gap filling occurs and the first run uses the current cron window only — the reference job's age does not matter.
 
         project_id : typing.Optional[str]
-            Project to assign this monitor to. The monitor appears in the project's resource list after creation.
+            Project to assign this event monitor to. The event monitor appears in the project's resource list after creation.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -618,7 +643,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         CreateMonitorResponseDto
-            Monitor created successfully
+            Event monitor created successfully
 
         Examples
         --------
@@ -632,7 +657,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.create_monitor(
+            await client.event_monitors.create_monitor(
                 reference_job_id="5f0c9087-85cb-4917-b3c7-e5a5eff73a0c",
                 schedule="every day at 12 PM",
                 timezone="UTC",
@@ -660,12 +685,12 @@ class AsyncMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> PullMonitorResponseDto:
         """
-        Retrieve aggregated results from all jobs executed by a monitor.
+        Retrieve aggregated results from all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -673,7 +698,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         PullMonitorResponseDto
-            Monitor results retrieved successfully
+            Event monitor results retrieved successfully
 
         Examples
         --------
@@ -687,7 +712,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.pull_monitor_results(
+            await client.event_monitors.pull_monitor_results(
                 monitor_id="monitor_id",
             )
 
@@ -703,12 +728,12 @@ class AsyncMonitorsClient:
         """
         Returns the most recent run's records as a CSV download. One row per record, with enrichment fields as columns and citations as a JSON column.
 
-        If the monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
+        If the event monitor's reference job used connected entity datasets, connected entities are split into `event_associated_entities` and `mention_entities` JSON columns. When no entity dataset was used, those two columns are omitted from the export entirely.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -716,7 +741,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         str
-            CSV export of the latest monitor run.
+            CSV export of the latest event monitor run.
 
         Examples
         --------
@@ -730,7 +755,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.pull_monitor_results_csv(
+            await client.event_monitors.pull_monitor_results_csv(
                 monitor_id="monitor_id",
             )
 
@@ -748,12 +773,12 @@ class AsyncMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListMonitorJobsResponse:
         """
-        Return all jobs executed by a monitor.
+        Return all jobs executed by an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         sort : typing.Optional[ListMonitorJobsRequestSort]
             Sort by start_date (asc or desc).
@@ -764,7 +789,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         ListMonitorJobsResponse
-            List of monitor jobs
+            List of event monitor jobs
 
         Examples
         --------
@@ -778,7 +803,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.list_monitor_jobs(
+            await client.event_monitors.list_monitor_jobs(
                 monitor_id="monitor_id",
             )
 
@@ -792,12 +817,12 @@ class AsyncMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> MonitorStatusHistoryResponseDto:
         """
-        Returns the full execution history of a monitor as a list of status entries, ordered from newest to oldest.
+        Returns the full execution history of an event monitor as a list of status entries, ordered from newest to oldest.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -805,7 +830,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         MonitorStatusHistoryResponseDto
-            Monitor status history retrieved successfully.
+            Event monitor status history retrieved successfully.
 
         Examples
         --------
@@ -819,7 +844,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.get_monitor_status_history(
+            await client.event_monitors.get_monitor_status_history(
                 monitor_id="monitor_id",
             )
 
@@ -837,12 +862,12 @@ class AsyncMonitorsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> EnableMonitorResponse:
         """
-        Resume scheduled job execution for a monitor.
+        Resume scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         backfill : typing.Optional[bool]
             If true, fills the data gap between the last job's `end_date` and the first scheduled run after enabling. The last job's `end_date` must be within the last 7 days.
@@ -855,7 +880,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         EnableMonitorResponse
-            Monitor enabled successfully
+            Event monitor enabled successfully
 
         Examples
         --------
@@ -869,7 +894,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.enable_monitor(
+            await client.event_monitors.enable_monitor(
                 monitor_id="monitor_id",
                 backfill=True,
             )
@@ -886,12 +911,12 @@ class AsyncMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DisableMonitorResponse:
         """
-        Stop scheduled job execution for a monitor.
+        Stop scheduled job execution for an event monitor.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -899,7 +924,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         DisableMonitorResponse
-            Monitor disabled successfully
+            Event monitor disabled successfully
 
         Examples
         --------
@@ -913,7 +938,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.disable_monitor(
+            await client.event_monitors.disable_monitor(
                 monitor_id="monitor_id",
             )
 
@@ -927,19 +952,19 @@ class AsyncMonitorsClient:
         self, monitor_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteMonitorResponseDto:
         """
-        Soft-deletes a monitor. The monitor is flagged as deleted, stops
+        Soft-deletes an event monitor. The event monitor is flagged as deleted, stops
         executing scheduled jobs immediately, and no longer appears in list
         results.
 
-        Only the monitor owner can delete a monitor. Returns `404` if the
-        monitor is not found or does not belong to the authenticated user.
+        Only the event monitor owner can delete an event monitor. Returns `404` if the
+        event monitor is not found or does not belong to the authenticated user.
 
-        Deleting an already-deleted monitor returns `200`.
+        Deleting an already-deleted event monitor returns `200`.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -947,7 +972,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         DeleteMonitorResponseDto
-            Monitor deleted successfully (or already deleted).
+            Event monitor deleted successfully (or already deleted).
 
         Examples
         --------
@@ -961,7 +986,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.delete_monitor(
+            await client.event_monitors.delete_monitor(
                 monitor_id="monitor_id",
             )
 
@@ -977,23 +1002,43 @@ class AsyncMonitorsClient:
         *,
         webhook_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         limit: typing.Optional[int] = OMIT,
+        schedule: typing.Optional[str] = OMIT,
+        timezone: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UpdateMonitorResponseDto:
         """
-        Update the webhook configuration for an existing monitor.
+        Update the webhook assignments, record limit, or schedule of an existing
+        event monitor. Omitted fields are left unchanged.
+
+        Passing `schedule` replaces the event monitor's current schedule. The new
+        schedule takes effect from the next scheduler reload, and the old schedule
+        stops firing. The reference job cannot be changed.
 
         Parameters
         ----------
         monitor_id : str
-            Monitor identifier.
+            Event monitor identifier.
 
         webhook_ids : typing.Optional[typing.Sequence[str]]
-            Updated list of centralized webhook IDs for this monitor.
+            Updated list of centralized webhook IDs for this event monitor.
 
             Replaces all existing webhook assignments. Pass an empty array `[]` to clear all assignments. Omit to leave existing assignments unchanged.
 
         limit : typing.Optional[int]
-            Updated maximum number of records per monitor run.
+            Updated maximum number of records per event monitor run.
+
+        schedule : typing.Optional[str]
+            New natural-language schedule that replaces the event monitor's current
+            schedule. Examples: `every day at 9 AM`, `every Monday at 6 PM EST`.
+
+            Omit to keep the current schedule. The new schedule takes effect from the
+            next scheduler reload, and the old schedule stops firing. Returns `422` if
+            the text can't be parsed or runs would be spaced too closely.
+
+        timezone : typing.Optional[str]
+            IANA timezone for the new schedule (for example, `America/New_York`).
+            A timezone included in the `schedule` text takes precedence. Ignored if
+            `schedule` is not set.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1001,7 +1046,7 @@ class AsyncMonitorsClient:
         Returns
         -------
         UpdateMonitorResponseDto
-            Monitor updated successfully
+            Event monitor updated successfully
 
         Examples
         --------
@@ -1015,7 +1060,7 @@ class AsyncMonitorsClient:
 
 
         async def main() -> None:
-            await client.monitors.update_monitor(
+            await client.event_monitors.update_monitor(
                 monitor_id="monitor_id",
                 webhook_ids=["a1b2c3d4-e5f6-7890-abcd-ef1234567890"],
             )
@@ -1024,6 +1069,11 @@ class AsyncMonitorsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.update_monitor(
-            monitor_id, webhook_ids=webhook_ids, limit=limit, request_options=request_options
+            monitor_id,
+            webhook_ids=webhook_ids,
+            limit=limit,
+            schedule=schedule,
+            timezone=timezone,
+            request_options=request_options,
         )
         return _response.data

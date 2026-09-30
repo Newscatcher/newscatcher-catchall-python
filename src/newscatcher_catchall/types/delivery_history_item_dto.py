@@ -32,7 +32,7 @@ class DeliveryHistoryItemDto(UniversalBaseModel):
 
     additional_info: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
-    Extra context about the triggering event, such as job query or monitor schedule.
+    Extra context about the triggering event, such as job query or event monitor schedule.
     """
 
     status_code: int = pydantic.Field()

@@ -12,12 +12,12 @@ from .webhook_dto import WebhookDto
 class MonitorListItemDto(UniversalBaseModel):
     monitor_id: str = pydantic.Field()
     """
-    Monitor identifier.
+    Event monitor identifier.
     """
 
     reference_job_id: str = pydantic.Field()
     """
-    Job identifier used as a reference for this monitor.
+    Job identifier used as a reference for this event monitor.
     """
 
     reference_job_query: str = pydantic.Field()
@@ -27,17 +27,17 @@ class MonitorListItemDto(UniversalBaseModel):
 
     enabled: bool = pydantic.Field()
     """
-    True if the monitor is currently active; false otherwise.
+    True if the event monitor is currently active; false otherwise.
     """
 
     schedule: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Cron expression for monitor schedule.
+    Cron expression for event monitor schedule.
     """
 
     schedule_human_readable: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The monitor schedule in a plain text format.
+    The event monitor schedule in a plain text format.
     """
 
     timezone: typing.Optional[str] = pydantic.Field(default=None)
@@ -47,22 +47,22 @@ class MonitorListItemDto(UniversalBaseModel):
 
     created_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
-    The date when the monitor was created.
+    The date when the event monitor was created.
     """
 
     webhook: typing.Optional[WebhookDto] = pydantic.Field(default=None)
     """
-    Webhook configuration for this monitor, or null if not set.
+    Webhook configuration for this event monitor, or null if not set.
     """
 
     user_key: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Masked API key associated with this monitor.
+    Masked API key associated with this event monitor.
     """
 
     sharing_info: typing.Optional[SharingInfo] = pydantic.Field(default=None)
     """
-    Present when this monitor was shared with the authenticated user. Omitted when the user owns the monitor.
+    Present when this event monitor was shared with the authenticated user. Omitted when the user owns the event monitor.
     """
 
     if IS_PYDANTIC_V2:

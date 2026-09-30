@@ -13,12 +13,12 @@ from .reference_job import ReferenceJob
 class PullMonitorResponseDto(UniversalBaseModel):
     monitor_id: str = pydantic.Field()
     """
-    Unique identifier for the monitor.
+    Unique identifier for the event monitor.
     """
 
     cron_expression: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The cron expression for a monitor schedule parsed from the text schedule you provide.
+    The cron expression for an event monitor schedule parsed from the text schedule you provide.
     
     Standard cron format (minute hour day month day-of-week).
     """
@@ -31,27 +31,27 @@ class PullMonitorResponseDto(UniversalBaseModel):
     reference_job: ReferenceJob
     run_info: typing.Optional[PullMonitorResponseDtoRunInfo] = pydantic.Field(default=None)
     """
-    Execution time range for this monitor.
+    Execution time range for this event monitor.
     """
 
     records: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Total number of records collected across all monitor jobs.
+    Total number of records collected across all event monitor jobs.
     """
 
     status: str = pydantic.Field()
     """
-    Current monitor status or error message if monitor creation failed.
+    Current event monitor status or error message if event monitor creation failed.
     """
 
     all_records: typing.Optional[typing.List[MonitorRecord]] = pydantic.Field(default=None)
     """
-    Aggregated records from all jobs executed by this monitor. Each record includes structured data extracted from web sources with citations.
+    Aggregated records from all jobs executed by this event monitor. Each record includes structured data extracted from web sources with citations.
     """
 
     limit: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Record limit applied to this monitor's jobs.
+    Record limit applied to this event monitor's jobs.
     """
 
     connected_datasets: typing.Optional[typing.List[ConnectedDataset]] = pydantic.Field(default=None)

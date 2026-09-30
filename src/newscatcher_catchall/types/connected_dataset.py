@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class ConnectedDataset(UniversalBaseModel):
     """
-    A dataset used to narrow the retrieval scope of a job or monitor, returned with its identifier and name.
+    A dataset used to narrow the retrieval scope of a job or event monitor, returned with its identifier and name.
     """
 
     id: str = pydantic.Field()

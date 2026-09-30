@@ -177,7 +177,7 @@ class ProjectsClient:
             Unique project identifier.
 
         delete_resources : typing.Optional[bool]
-            If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+            If true, permanently deletes all resources (jobs, event monitors, datasets, event monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
 
             Webhooks are never deleted by either setting — they are only detached from the project.
 
@@ -614,7 +614,7 @@ class AsyncProjectsClient:
             Unique project identifier.
 
         delete_resources : typing.Optional[bool]
-            If true, permanently deletes all resources (jobs, monitors, datasets, monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
+            If true, permanently deletes all resources (jobs, event monitors, datasets, event monitor groups) assigned to the project. If false, the project is deleted and its resources are unassigned but not deleted.
 
             Webhooks are never deleted by either setting — they are only detached from the project.
 

@@ -10,19 +10,19 @@ from .monitor_record import MonitorRecord
 
 class WebhookPayload(UniversalBaseModel):
     """
-    **First execution:** The initial webhook after monitor creation includes all records from the reference job, providing immediate access to collected data.
+    **First execution:** The initial webhook after event monitor creation includes all records from the reference job, providing immediate access to collected data.
 
     **Subsequent executions:** Only new records (after deduplication) are included.
     """
 
     monitor_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Monitor identifier.
+    Event monitor identifier.
     """
 
     reference_job_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Reference job used as template for this monitor.
+    Reference job used as template for this event monitor.
     """
 
     latest_job_id: typing.Optional[str] = pydantic.Field(default=None)
@@ -37,7 +37,7 @@ class WebhookPayload(UniversalBaseModel):
 
     jobs_processed: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Total number of jobs executed by this monitor.
+    Total number of jobs executed by this event monitor.
     """
 
     updated_at: typing.Optional[dt.datetime] = pydantic.Field(default=None)
@@ -47,7 +47,7 @@ class WebhookPayload(UniversalBaseModel):
 
     cron_expression: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Cron expression defining the monitor schedule.
+    Cron expression defining the event monitor schedule.
     """
 
     timezone: typing.Optional[str] = pydantic.Field(default=None)
@@ -57,7 +57,7 @@ class WebhookPayload(UniversalBaseModel):
 
     records: typing.Optional[typing.List[MonitorRecord]] = pydantic.Field(default=None)
     """
-    Array of new records from the latest job execution (includes monitor-specific fields like added_on, updated_on).
+    Array of new records from the latest job execution (includes event monitor-specific fields like added_on, updated_on).
     """
 
     if IS_PYDANTIC_V2:

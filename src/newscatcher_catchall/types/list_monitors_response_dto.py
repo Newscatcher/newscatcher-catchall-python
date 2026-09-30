@@ -10,7 +10,7 @@ from .monitor_list_item_dto import MonitorListItemDto
 class ListMonitorsResponseDto(UniversalBaseModel):
     total: int = pydantic.Field()
     """
-    Total number of monitors for this user.
+    Total number of event monitors for this user.
     """
 
     page: int = pydantic.Field()
@@ -20,7 +20,7 @@ class ListMonitorsResponseDto(UniversalBaseModel):
 
     page_size: int = pydantic.Field()
     """
-    Number of monitors per page.
+    Number of event monitors per page.
     """
 
     total_pages: int = pydantic.Field()
@@ -30,7 +30,7 @@ class ListMonitorsResponseDto(UniversalBaseModel):
 
     monitors: typing.List[MonitorListItemDto] = pydantic.Field()
     """
-    Array of monitor summaries.
+    Array of event monitor summaries.
     """
 
     if IS_PYDANTIC_V2:

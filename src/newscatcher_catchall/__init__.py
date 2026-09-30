@@ -61,6 +61,7 @@ if typing.TYPE_CHECKING:
         EntityType,
         EntityValidationErrorBody,
         Error,
+        EventTags,
         FormatterConfigDto,
         GetPlanLimitsResponseDto,
         GetWebhookResponseDto,
@@ -70,6 +71,7 @@ if typing.TYPE_CHECKING:
         JobStep,
         Limit,
         ListMonitorsResponseDto,
+        ListSourceGroupsResponseDto,
         ListUserJobsResponseDto,
         ListWebhookResourcesResponseDto,
         ListWebhooksResponseDto,
@@ -110,6 +112,7 @@ if typing.TYPE_CHECKING:
         SharingInfoPermission,
         SkippedRow,
         SortOrder,
+        SourceGroupRef,
         StartDate,
         StatusResponseDto,
         SubmitResponseDto,
@@ -140,19 +143,19 @@ if typing.TYPE_CHECKING:
         WebhookType,
     )
     from .errors import BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError, UnprocessableEntityError
-    from . import datasets, entities, jobs, meta, monitors, projects, webhooks
+    from . import datasets, entities, event_monitors, jobs, meta, projects, webhooks
     from ._default_clients import DefaultAioHttpClient, DefaultAsyncHttpxClient
     from .client import AsyncCatchAllApi, CatchAllApi
     from .environment import CatchAllApiEnvironment
-    from .jobs import GetUserJobsRequestMode, SubmitRequestDtoMode
-    from .meta import GetVersionResponse, HealthCheckResponse
-    from .monitors import (
+    from .event_monitors import (
         DisableMonitorResponse,
         EnableMonitorResponse,
         ListMonitorJobsRequestSort,
         ListMonitorJobsResponse,
         ListMonitorJobsResponseSortOrder,
     )
+    from .jobs import GetUserJobsRequestMode, SubmitRequestDtoMode
+    from .meta import GetVersionResponse, HealthCheckResponse
     from .version import __version__
     from .webhooks import (
         CreateWebhookRequestDtoAuth,
@@ -217,8 +220,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DeliveryHistoryResponseDto": ".types",
     "DeliveryMode": ".types",
     "DeliveryStatus": ".types",
-    "DisableMonitorResponse": ".monitors",
-    "EnableMonitorResponse": ".monitors",
+    "DisableMonitorResponse": ".event_monitors",
+    "EnableMonitorResponse": ".event_monitors",
     "EndDate": ".types",
     "EnrichmentSchema": ".types",
     "EnrichmentType": ".types",
@@ -231,6 +234,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "EntityType": ".types",
     "EntityValidationErrorBody": ".types",
     "Error": ".types",
+    "EventTags": ".types",
     "ForbiddenError": ".errors",
     "FormatterConfigDto": ".types",
     "GetPlanLimitsResponseDto": ".types",
@@ -243,10 +247,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "IssueType": ".types",
     "JobStep": ".types",
     "Limit": ".types",
-    "ListMonitorJobsRequestSort": ".monitors",
-    "ListMonitorJobsResponse": ".monitors",
-    "ListMonitorJobsResponseSortOrder": ".monitors",
+    "ListMonitorJobsRequestSort": ".event_monitors",
+    "ListMonitorJobsResponse": ".event_monitors",
+    "ListMonitorJobsResponseSortOrder": ".event_monitors",
     "ListMonitorsResponseDto": ".types",
+    "ListSourceGroupsResponseDto": ".types",
     "ListUserJobsResponseDto": ".types",
     "ListWebhookResourcesResponseDto": ".types",
     "ListWebhooksResponseDto": ".types",
@@ -288,6 +293,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SharingInfoPermission": ".types",
     "SkippedRow": ".types",
     "SortOrder": ".types",
+    "SourceGroupRef": ".types",
     "StartDate": ".types",
     "StatusResponseDto": ".types",
     "SubmitRequestDtoMode": ".jobs",
@@ -326,9 +332,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "__version__": ".version",
     "datasets": ".datasets",
     "entities": ".entities",
+    "event_monitors": ".event_monitors",
     "jobs": ".jobs",
     "meta": ".meta",
-    "monitors": ".monitors",
     "projects": ".projects",
     "webhooks": ".webhooks",
 }
@@ -422,6 +428,7 @@ __all__ = [
     "EntityType",
     "EntityValidationErrorBody",
     "Error",
+    "EventTags",
     "ForbiddenError",
     "FormatterConfigDto",
     "GetPlanLimitsResponseDto",
@@ -438,6 +445,7 @@ __all__ = [
     "ListMonitorJobsResponse",
     "ListMonitorJobsResponseSortOrder",
     "ListMonitorsResponseDto",
+    "ListSourceGroupsResponseDto",
     "ListUserJobsResponseDto",
     "ListWebhookResourcesResponseDto",
     "ListWebhooksResponseDto",
@@ -479,6 +487,7 @@ __all__ = [
     "SharingInfoPermission",
     "SkippedRow",
     "SortOrder",
+    "SourceGroupRef",
     "StartDate",
     "StatusResponseDto",
     "SubmitRequestDtoMode",
@@ -517,9 +526,9 @@ __all__ = [
     "__version__",
     "datasets",
     "entities",
+    "event_monitors",
     "jobs",
     "meta",
-    "monitors",
     "projects",
     "webhooks",
 ]

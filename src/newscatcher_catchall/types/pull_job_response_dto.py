@@ -9,6 +9,7 @@ from .pull_job_response_dto_date_range import PullJobResponseDtoDateRange
 from .pull_job_response_dto_mode import PullJobResponseDtoMode
 from .record import Record
 from .sharing_info import SharingInfo
+from .source_group_ref import SourceGroupRef
 
 
 class PullJobResponseDto(UniversalBaseModel):
@@ -98,6 +99,12 @@ class PullJobResponseDto(UniversalBaseModel):
     connected_datasets: typing.Optional[typing.List[ConnectedDataset]] = pydantic.Field(default=None)
     """
     Datasets used to narrow retrieval scope, each with `id` and `name`.
+    """
+
+    source_groups: typing.Optional[typing.List[SourceGroupRef]] = pydantic.Field(default=None)
+    """
+    Source groups attached to this job, each with `slug`, `name`, and `description`.
+    `null` when the job was not scoped to any source group.
     """
 
     is_all_news_query: typing.Optional[bool] = pydantic.Field(default=None)

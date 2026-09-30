@@ -9,7 +9,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class UpdateMonitorResponseDto(UniversalBaseModel):
     monitor_id: str = pydantic.Field()
     """
-    Monitor identifier.
+    Event monitor identifier.
     """
 
     status: str = pydantic.Field()
