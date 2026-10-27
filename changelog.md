@@ -1,3 +1,13 @@
+## [4.1.0] - 2026-10-22
+### Added
+- **`RequestOptions.retry_remote_protocol_errors`** — new optional `bool` field that opts a request into retrying on `httpx.RemoteProtocolError` (server disconnect / incomplete response); defaults to `False` and is bounded by `max_retries`.
+
+### Changed
+- **`RemoteProtocolError` retry behavior** — the HTTP client no longer retries `httpx.RemoteProtocolError` automatically; it now raises immediately unless `retry_remote_protocol_errors: True` is set in `RequestOptions`, since the server may have already applied the request.
+- **Header merging** — duplicate headers with different casing (e.g. `PLAID-SECRET` and `plaid-secret`) are now deduplicated case-insensitively, with the last value winning; this prevents sending two headers where only one was intended.
+- **`x-api-key` header redaction** — the `x-api-key` header is now redacted alongside `Authorization` in any debug or log output produced by the HTTP client.
+- **Path parameter dot-segment rejection** — `encode_path_param()` and `quote_path_param()` now raise `ValueError` when a value is `.` or `..`, preventing silent URL path rewriting by HTTP clients.
+
 ## [4.0.0] - 2026-09-30
 ### Breaking Changes
 - **`MonitorsClient` / `AsyncMonitorsClient`** — renamed to `EventMonitorsClient` / `AsyncEventMonitorsClient`; update all imports and type annotations accordingly.

@@ -6,7 +6,7 @@ license-files = ["LICENSE"]
 
 [tool.poetry]
 name = "newscatcher-catchall-sdk"
-version = "4.0.0"
+version = "4.1.0"
 description = ""
 readme = "README.md"
 authors = []
